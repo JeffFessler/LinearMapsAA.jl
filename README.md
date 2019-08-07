@@ -11,20 +11,20 @@ package.
 
 The extra `AA` in the name has two meanings.
 - Objects of type `LinearMapAA` are subtypes of `AbstractArray{T,2}`, i.e.,
-conform to the requirements of an `AbstractMatrix`
+[conform to the requirements of an `AbstractMatrix`](https://docs.julialang.org/en/latest/manual/interfaces/#man-interface-array-1)
 
-- The package was developed in Ann Arbor, Michigan.
+- The package was developed in Ann Arbor, Michigan 
 
-Any
-[`AbstractArray`](https://docs.julialang.org/en/latest/manual/interfaces/#man-interface-array-1)
+Any `AbstractArray`
 must support a `getindex` operation,
 and the creators of the nice `LinearMaps.jl` package
-[do not wish to add getindex to it](https://github.com/Jutho/LinearMaps.jl/issues/38)
+[do not wish to add getindex there](https://github.com/Jutho/LinearMaps.jl/issues/38)
 so I have done it here.
 
 Another feature supported by `LinearMapsAA`
 is that a user can include a `NamedTuple` of properties
-with it and retrieve those later.
+with it, and then retrieve those later
+using the `A.key` syntax like one would do with a struct (composite type).  
 The nice folks over at `LinearMaps.jl`
 [helped get me started](https://github.com/Jutho/LinearMaps.jl/issues/53)
 with this feature.
@@ -32,6 +32,7 @@ with this feature.
 
 ## Examples
 
+```
 N = 6
 A = LinearMap(cumsum, y -> reverse(cumsum(reverse(y))), N)
 B = LinearMapAA(A) # version with no properties
@@ -39,6 +40,7 @@ B = LinearMapAA(A, (name="cumsum",))) # version with a NamedTuple of properties
 
 Matrix(B), Matrix(A) # both the same 6 x 6 lower triangular matrix
 B.name # returns "cumsum" here
+```
 
 ## Caution
 
