@@ -1,0 +1,8 @@
+name = "LinearMapsAA"
+uuid = "599c1a8e-b958-11e9-0d14-b1e6b2ecea07"
+authors = ["fessler <fessler@umich.edu>"]
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+LinearMaps = "7a12625a-238d-50fd-b39a-03d52299707e"
