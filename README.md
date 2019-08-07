@@ -13,7 +13,7 @@ The extra `AA` in the name has two meanings.
 - Objects of type `LinearMapAA` are subtypes of `AbstractArray{T,2}`, i.e.,
 [conform to the requirements of an `AbstractMatrix`](https://docs.julialang.org/en/latest/manual/interfaces/#man-interface-array-1)
 
-- The package was developed in Ann Arbor, Michigan 
+- The package was developed in Ann Arbor, Michigan :)
 
 Any `AbstractArray`
 must support a `getindex` operation,
