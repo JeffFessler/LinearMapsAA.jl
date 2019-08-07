@@ -6,7 +6,7 @@ https://github.com/JeffFessler/LinearMapsAA.jl
 
 
 This package is an overlay for the
-`LinearMaps.jl`
+[`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
 package.
 
 The extra `AA` in the name has two meanings.
@@ -15,7 +15,9 @@ conform to the requirements of an `AbstractMatrix`
 
 - The package was developed in Ann Arbor, Michigan.
 
-Any `AbstractArray` must support a `getindex` operation,
+Any
+[`AbstractArray`](https://docs.julialang.org/en/latest/manual/interfaces/#man-interface-array-1)
+must support a `getindex` operation,
 and the creators of the nice `LinearMaps.jl` package
 [do not wish to add getindex to it](https://github.com/Jutho/LinearMaps.jl/issues/38)
 so I have done it here.
@@ -40,7 +42,7 @@ B.name # returns "cumsum" here
 
 ## Caution
 
-An `AbstractArray` also must support a `setindex` operation
+An `AbstractArray` also must support a `setindex!` operation
 and this package provides that capability,
 but it probably will execute painfully slowly
 in most cases.
