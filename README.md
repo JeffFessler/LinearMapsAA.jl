@@ -1,7 +1,7 @@
 # LinearMapsAA.jl
 
-[![Build Status](https://travis-ci.org/JeffFessler/LinearMapsAA.jl.svg?branch=master)](https://travis-ci.org/JeffFessler/LinearMapsAA.jl) 
-[![codecov.io](http://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master)](http://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master) 
+[![Build Status](https://travis-ci.org/JeffFessler/LinearMapsAA.jl.svg?branch=master)](https://travis-ci.org/JeffFessler/LinearMapsAA.jl)
+[![codecov.io](http://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master)](http://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master)
 https://github.com/JeffFessler/LinearMapsAA.jl
 
 
@@ -48,15 +48,22 @@ to carry those properties with the object itself.
 
 ```
 N = 6
-A = LinearMap(cumsum, y -> reverse(cumsum(reverse(y))), N)
-B = LinearMapAA(A) # version with no properties
-B = LinearMapAA(A, (name="cumsum",))) # version with a NamedTuple of properties 
+L = LinearMap(cumsum, y -> reverse(cumsum(reverse(y))), N)
+A = LinearMapAA(L) # version with no properties
+A = LinearMapAA(L, (name="cumsum",))) # version with a NamedTuple of properties
 
-Matrix(B), Matrix(A) # both the same 6 x 6 lower triangular matrix
-B.name # returns "cumsum" here
+Matrix(L), Matrix(A) # both the same 6 x 6 lower triangular matrix
+A.name # returns "cumsum" here
 ```
 
-todo: wavelet example
+Here is a more interesting example for computational imaging.
+```
+using FFTW
+N = 8
+A = LinearMapAA(fft, y -> N*ifft(y), (N, N), (name="fft",)) # 1D FFT
+@show A[:,2]
+```
+todo: fails due to complex
 
 ## Caution
 
