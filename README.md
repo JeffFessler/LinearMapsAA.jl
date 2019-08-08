@@ -7,27 +7,41 @@ https://github.com/JeffFessler/LinearMapsAA.jl
 
 This package is an overlay for the
 [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
-package.
+package
+that allows one to represent linear operations
+(like the FFT)
+as a object that appears to the user like a matrix
+but internally uses fast computations
+for operations, especially multiplication.
 
-The extra `AA` in the name has two meanings.
+The extra `AA` in the package name has two meanings.
+
 - Objects of type `LinearMapAA` are subtypes of `AbstractArray{T,2}`, i.e.,
 [conform to the requirements of an `AbstractMatrix`](https://docs.julialang.org/en/latest/manual/interfaces/#man-interface-array-1)
 
 - The package was developed in Ann Arbor, Michigan :)
 
 Any `AbstractArray`
-must support a `getindex` operation,
-and the creators of the nice `LinearMaps.jl` package
+must support a `getindex` operation.
+The maintainers of the `LinearMaps.jl` package
 [do not wish to add getindex there](https://github.com/Jutho/LinearMaps.jl/issues/38)
-so I have done it here.
+so this package adds that feature
+(without committing "type piracy").
 
-Another feature supported by `LinearMapsAA`
+A bonus feature supported by `LinearMapsAA`
 is that a user can include a `NamedTuple` of properties
 with it, and then retrieve those later
 using the `A.key` syntax like one would do with a struct (composite type).  
 The nice folks over at `LinearMaps.jl`
 [helped get me started](https://github.com/Jutho/LinearMaps.jl/issues/53)
 with this feature.
+Often linear operators are associated
+with some properties,
+e.g.,
+a wavelet transform arises
+from some mother wavelet,
+and it can be convenient
+to carry those properties with the object itself.
 
 
 ## Examples
@@ -42,17 +56,22 @@ Matrix(B), Matrix(A) # both the same 6 x 6 lower triangular matrix
 B.name # returns "cumsum" here
 ```
 
+todo: wavelet example
+
 ## Caution
 
 An `AbstractArray` also must support a `setindex!` operation
 and this package provides that capability,
-but it probably will execute painfully slowly
-in most cases.
+mainly for completeness
+and as a proof of principle.
+A single `setindex!` call may be fast,
+but subsequent multiplies by the resulting object
+may execute painfully slowly in most cases.
 Modifying a single "element" of a `LinearMapAA`
-is probably OK,
+may be OK,
 but modifying a whole column or row
 will probably be extremely slow
-and is not recommended,
+so is not recommended,
 except for testing with very small cases.
 
 todo:
@@ -78,6 +97,7 @@ without "separate" installation.
 Being a subtype of `AbstractArray` can be useful
 for other purposes,
 such as using the nice
+kron.jl
 so some users
 
 For detailed installation instructions, see:
