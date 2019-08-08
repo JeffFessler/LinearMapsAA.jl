@@ -9,16 +9,19 @@ import LinearAlgebra: issymmetric, ishermitian, isposdef
 import LinearAlgebra: mul!, lmul!, rmul!
 import SparseArrays: sparse
 
+
 """
 `struct LinearMapAA{T, M <: LinearMap, P <: NamedTuple} <: AbstractMatrix{T}`
 """
-struct LinearMapAA{T, M <: LinearMap, P <: NamedTuple} <: AbstractMatrix{T}
+mutable struct LinearMapAA{T, M <: LinearMap, P <: NamedTuple} <: AbstractMatrix{T}
 	_lmap::M
 	_prop::P
 	function LinearMapAA{T}(L::M, p::P) where {T, M <: LinearMap, P <: NamedTuple}
 		new{T,M,P}(L, p)
 	end
 end
+
+include("setindex.jl")
 
 
 # constructors
@@ -51,6 +54,20 @@ constructor
 """
 LinearMapAA(f::Function, fc::Function, M::Int, N::Int) =
 	LinearMapAA(f, fc, M, N, (none=nothing,))
+
+"""
+`A = LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple)`
+constructor
+"""
+LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple) =
+	LinearMapAA(LinearMap(f, fc, D[1], D[2]), prop)
+
+"""
+`A = LinearMapAA(f::Function, fc::Function, D::Dims{2})`
+constructor
+"""
+LinearMapAA(f::Function, fc::Function, D::Dims{2}) =
+	LinearMapAA(f, fc, D[1], D[2], (none=nothing,))
 
 """
 `A = LinearMapAA(L::AbstractMatrix, prop::NamedTuple)`
@@ -197,9 +214,6 @@ Base.getindex(A::LinearMapAA, ur::UnitRange, ::Colon) = A'[:,ur]'
 Base.getindex(A::LinearMapAA, ::Colon, ::Colon) = Matrix(A._lmap)
 
 
-# todo: setindex!
-
-
 # test
 using Test: @test, @test_throws
 
@@ -315,6 +329,9 @@ function LinearMapAA(test::Symbol)
 	@test LinearMapAA_test_getindex(C)
 	@test LinearMapAA_test_vmul(C)
 
+	@test LinearMapAA_test_setindex(C)
+
+	# todo: cat
 	# C2 = [C C]
 
 	D = C * C'
