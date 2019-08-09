@@ -127,8 +127,11 @@ end
 # multiply with vectors
 
 mul!(y::AbstractVector, A::LinearMapAA, x::AbstractVector) = mul!(y, A._lmap, x)
+
+#= these seem pointless; see multiplication with scalars below
 lmul!(s::Number, A::LinearMapAA) = lmul!(s, A._lmap)
 rmul!(A::LinearMapAA, s::Number) = rmul!(A._lmap, s)
+=#
 
 #=
 function A_mul_B!(y::AbstractVector, A::LinearMapAA, x::AbstractVector)
@@ -149,10 +152,13 @@ end
 
 
 # multiply objects
-
 Base.:(*)(A::LinearMapAA, B::LinearMapAA) = LinearMapAA(A._lmap * B._lmap, (prod=nothing,))
 Base.:(*)(A::LinearMapAA, B::AbstractMatrix) = LinearMapAA(A._lmap * LinearMap(B), A._prop)
 Base.:(*)(A::AbstractMatrix, B::LinearMapAA) = LinearMapAA(LinearMap(A) * B._lmap, B._prop)
+
+# multiply with scalars
+Base.:(*)(s::Number, A::LinearMapAA) = LinearMapAA(s*I * A._lmap, A._prop)
+Base.:(*)(A::LinearMapAA, s::Number) = LinearMapAA(A._lmap * (s*I), A._prop)
 
 
 # A.?
@@ -162,7 +168,7 @@ Base.getproperty(A::LinearMapAA, s::Symbol) =
 	haskey(A._prop, s) ? getfield(A._prop, s) :
 		throw("unknown key $s")
 
-Base.propertynames(A::LinearMapAA) = fieldnames(A._prop)
+Base.propertynames(A::LinearMapAA) = propertynames(A._prop)
 
 
 # indexing
@@ -273,6 +279,13 @@ function LinearMapAA_test_vmul(A::LinearMapAA)
 	@test isapprox(B' * u, x)
 
 	s = 5.1
+	C = s * A
+	@test isapprox(Matrix(C), s * B)
+	C = A * s
+	@test isapprox(Matrix(C), B * s)
+
+#=
+	s = 5.1
 	C = copy(A)
 	lmul!(s, C)
 	@test isapprox(s * B * v, C * v)
@@ -280,6 +293,7 @@ function LinearMapAA_test_vmul(A::LinearMapAA)
 	C = copy(A)
 	rmul!(C, s)
 	@test isapprox(s * B * v, C * v)
+=#
 
 	true
 end
@@ -293,54 +307,60 @@ function LinearMapAA(test::Symbol)
 	test != :test && throw(ArgumentError("test $test"))
 
 	B = 1:6
-	A = LinearMap(x -> B*x, y -> B'*y, 6, 1)
+	L = LinearMap(x -> B*x, y -> B'*y, 6, 1)
 
 	N = 6; M = N+1
 	forw = x -> [cumsum(x); 0] # non-square to stress test
 	back = y -> reverse(cumsum(reverse(y[1:N])))
-	A = LinearMap(forw, back, M, N)
+	L = LinearMap(forw, back, M, N)
 
 	prop = (name="cumsum", extra=1)
-	C = LinearMapAA(A, prop)
+	A = LinearMapAA(L, prop)
 
-	@test C == LinearMapAA(forw, back, M, N, prop)
+	@test A._lmap == LinearMapAA(L)._lmap
+	@test A == LinearMapAA(forw, back, M, N, prop)
+	@test A == LinearMapAA(forw, back, (M, N), prop)
+	@test A._lmap == LinearMapAA(forw, back, (M, N))._lmap
 	@test LinearMapAA(forw, back, M, N) isa LinearMapAA
+	@test propertynames(A) == (:name, :extra)
 
-	@test issymmetric(C) == false
-	@test ishermitian(C) == false
-	@test isposdef(C) == false
-	@test issymmetric(C' * C) == true
+	@test issymmetric(A) == false
+	@test ishermitian(A) == false
+	@test ishermitian(im * A) == false
+	@test isposdef(A) == false
+	@test issymmetric(A' * A) == true
 
-	Am = Matrix(A)
-	@test Matrix(LinearMapAA(Am, prop)) == Am
-	@test Matrix(LinearMapAA(Am)) == Am
-	@test Matrix(sparse(C)) == Am
+	Lm = Matrix(L)
+	@test Matrix(LinearMapAA(Lm, prop)) == Lm
+	@test Matrix(LinearMapAA(Lm)) == Lm
+	@test Matrix(sparse(A)) == Lm
 
-	@test eltype(C) == eltype(A)
-	@test ndims(C) == 2
-	@test size(C) == size(A)
+	@test eltype(A) == eltype(L)
+	@test Base.eltype(A) == eltype(L)
+	@test ndims(A) == 2
+	@test size(A) == size(L)
 
-	@test C._prop == prop
-	@test C.name == prop.name
+	@test A._prop == prop
+	@test A.name == prop.name
 
-	@test_throws String C.bug
+	@test_throws String A.bug
 
-	@test Matrix(C)' == Matrix(C')
-	@test LinearMapAA_test_getindex(C)
-	@test LinearMapAA_test_vmul(C)
+	@test Matrix(A)' == Matrix(A')
+	@test LinearMapAA_test_getindex(A)
+	@test LinearMapAA_test_vmul(A)
 
-	@test LinearMapAA_test_setindex(C)
+	@test LinearMapAA_test_setindex(A)
 
 	# todo: cat
-	# C2 = [C C]
+	# A2 = [A A]
 
-	D = C * C'
-	@test Matrix(D) == Am * Am'
+	D = A * A'
+	@test Matrix(D) == Lm * Lm'
 	@test issymmetric(D) == true
-	E = C * Am'
-	@test Matrix(E) == Am * Am'
-	F = Am' * C
-	@test Matrix(F) == Am' * Am
+	E = A * Lm'
+	@test Matrix(E) == Lm * Lm'
+	F = Lm' * A
+	@test Matrix(F) == Lm' * Lm
 	@test LinearMapAA_test_getindex(F)
 
 	true

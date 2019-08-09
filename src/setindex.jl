@@ -78,6 +78,10 @@ function LinearMapAA_test_setindex(A::LinearMapAA)
 
     @test all(size(A) .>= (4,4)) # required by tests
 
+	B = copy(A)
+	Base.setindex!(B, 0, 2, 3) # for codecov
+	Base.setindex!(B, 0, 5) # for codecov
+
 	# A[i,j]
 	B = copy(A)
 	(i,j) = (2,3)
