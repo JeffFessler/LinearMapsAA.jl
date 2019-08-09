@@ -90,17 +90,17 @@ function LinearMapAA_test_setindex(A::LinearMapAA)
 	B = copy(A)
 	(i,j) = (2,3)
 	v = 2 + A[i,j]^2 # this value must differ from A[i,j]
-	@which B[i,j] = v
-	@which setindex!(B, v, i, j)
+	B[i,j] = v
 	Am = Matrix(A)
 	Bm = Matrix(B)
 	Am[i,j] = v
+# todo: under development
 display(Am)
 display(Bm)
 display(Bm - Am)
 	@test isapprox(Am, Bm)
 
-@show "todo"
+@show "here"
 	# A[i]
 	B = copy(A)
 	i = 5
