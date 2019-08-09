@@ -4,6 +4,7 @@
 [![codecov.io](http://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master)](http://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master)
 https://github.com/JeffFessler/LinearMapsAA.jl
 
+UNDER CONSTRUCTION!
 
 This package is an overlay for the
 [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
