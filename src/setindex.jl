@@ -12,6 +12,8 @@ Use of this function is strongly discouraged, other than for testing.
 =#
 
 using Test: @test
+using LinearMaps #: LinearMaps.FunctionMap
+
 
 """
 `A[i,j] = v`
@@ -24,6 +26,8 @@ Using this basic math, we can perform `B*x` using `A*x` and `A[i,j]`.
 This method works because LinearMapAA is a *mutable* struct.
 """
 function Base.setindex!(A::LinearMapAA, v::Number, i::Int, j::Int)
+	# todo: handle WrappedMap differently
+@show i,j
 	L = A._lmap
 	if true
 		forw = (x) ->
@@ -52,9 +56,9 @@ function Base.setindex!(A::LinearMapAA, v::Number, i::Int, j::Int)
 =#
 
 	if has_adj
-		return LinearMapAA(f, fc, size(L))
+		A._lmap = LinearMap(forw, back, size(L)...)
 	else
-		return LinearMapAA(f, size(L))
+		A._lmap = LinearMap(forw, size(L)...)
 	end
 end
 
@@ -78,20 +82,25 @@ function LinearMapAA_test_setindex(A::LinearMapAA)
 
     @test all(size(A) .>= (4,4)) # required by tests
 
-	B = copy(A)
-	Base.setindex!(B, 0, 2, 3) # for codecov
-	Base.setindex!(B, 0, 5) # for codecov
+#	@show B = A
+#	Base.setindex!(B, 0, 2, 3) # for codecov
+#	Base.setindex!(B, 0, 5) # for codecov
 
 	# A[i,j]
 	B = copy(A)
 	(i,j) = (2,3)
-	v = 1 + A[i,j]^2 # this value must differ from A[i,j]
-	B[i,j] = v
+	v = 2 + A[i,j]^2 # this value must differ from A[i,j]
+	@which B[i,j] = v
+	@which setindex!(B, v, i, j)
 	Am = Matrix(A)
 	Bm = Matrix(B)
 	Am[i,j] = v
+display(Am)
+display(Bm)
+display(Bm - Am)
 	@test isapprox(Am, Bm)
 
+@show "todo"
 	# A[i]
 	B = copy(A)
 	i = 5
