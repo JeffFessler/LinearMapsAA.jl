@@ -4,7 +4,7 @@ lm-aa
 =#
 
 using LinearMaps: LinearMap
-using LinearAlgebra: UniformScaling
+using LinearAlgebra: UniformScaling, I
 import LinearAlgebra: issymmetric, ishermitian, isposdef
 import LinearAlgebra: mul!, lmul!, rmul!
 import SparseArrays: sparse
