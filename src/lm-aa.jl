@@ -30,7 +30,7 @@ mutable struct LinearMapAA{T} # <: AbstractMatrix{T}
 =#
 end
 
-include("setindex.jl") # todo
+include("setindex.jl")
 
 
 # constructors
@@ -184,9 +184,16 @@ end
 
 
 # multiply objects
-Base.:(*)(A::LinearMapAA, B::LinearMapAA) = LinearMapAA(A._lmap * B._lmap, (prod=nothing,))
-Base.:(*)(A::LinearMapAA, B::AbstractMatrix) = LinearMapAA(A._lmap * LinearMap(B), A._prop)
-Base.:(*)(A::AbstractMatrix, B::LinearMapAA) = LinearMapAA(LinearMap(A) * B._lmap, B._prop)
+Base.:(*)(A::LinearMapAA, B::LinearMapAA) =
+	LinearMapAA(A._lmap * B._lmap, (prod=nothing,))
+Base.:(*)(A::LinearMapAA, B::AbstractMatrix) =
+	LinearMapAA(A._lmap * LinearMap(B), A._prop)
+Base.:(*)(A::AbstractMatrix, B::LinearMapAA) =
+	LinearMapAA(LinearMap(A) * B._lmap, B._prop)
+
+# multiply with I
+Base.:(*)(A::LinearMapAA, B::UniformScaling) = A
+Base.:(*)(B::UniformScaling, A::LinearMapAA) = A
 
 # multiply with vector
 Base.:(*)(A::LinearMapAA, v::AbstractVector{<:Number}) = A._lmap * v
@@ -423,8 +430,11 @@ function LinearMapAA(test::Symbol)
 	@test LinearMapAA_test_getindex(A)
 	@test LinearMapAA_test_vmul(A)
 
-#	@test LinearMapAA_test_setindex(A) # todo
+	@test LinearMapAA_test_setindex(A) # todo
 
+	# multiply
+	@test A * I === A
+	@test I * A === A
 	D = A * A'
 	@test Matrix(D) == Lm * Lm'
 	@test issymmetric(D) == true
