@@ -12,17 +12,25 @@ import SparseArrays: sparse
 
 """
 `struct LinearMapAA{T, M <: LinearMap, P <: NamedTuple} <: AbstractMatrix{T}`
+`struct LinearMapAA <: AbstractMatrix`
 """
-mutable struct LinearMapAA{T, M <: LinearMap, P <: NamedTuple} <: AbstractMatrix{T}
+mutable struct LinearMapAA{T} # <: AbstractMatrix{T}
+#{T, M <: LinearMap, P <: NamedTuple}
 #	_lmap::M
-	_lmap::LinearMap
-	_prop::P
+#	_lmap::LinearMap
+	_lmap::Any
+#	_prop::P
+	_prop::NamedTuple
+#=
 	function LinearMapAA{T}(L::M, p::P) where {T, M <: LinearMap, P <: NamedTuple}
-		new{T,M,P}(L, p)
+	function LinearMapAA(L::LinearMap, p::NamedTuple) # where {T, M <: LinearMap, P <: NamedTuple}
+	#	new{T,M,P}(L, p)
+		new(L, p)
 	end
+=#
 end
 
-include("setindex.jl")
+include("setindex.jl") # todo
 
 
 # constructors
@@ -88,8 +96,25 @@ LinearMapAA(L::AbstractMatrix) =
 # copy
 Base.copy(A::LinearMapAA) = LinearMapAA(A._lmap, A._prop)
 
+# Matrix
+Base.Matrix(A::LinearMapAA) = Matrix(A._lmap)
+
+# ndims
+Base.ndims(A::LinearMapAA) = ndims(A._lmap)
+
+# display
+Base.display(A::LinearMapAA) =
+	begin
+		println("LinearMapAA: $(size(A,1))×$(size(A,2)) $(A._prop)")
+		tmp = "$(A._lmap)"[1:60]
+		println(" $tmp ..")
+	#	display(A._lmap)
+	#	display(A._prop)
+	end
+
 # size
 Base.size(A::LinearMapAA) = size(A._lmap)
+Base.size(A::LinearMapAA, d::Int) = size(A._lmap, d)
 
 # adjoint
 Base.adjoint(A::LinearMapAA) = LinearMapAA(A._lmap', A._prop)
@@ -102,7 +127,7 @@ Base.eltype(A::LinearMapAA) = eltype(A._lmap)
 
 # LinearMap algebraic properties
 issymmetric(A::LinearMapAA) = issymmetric(A._lmap)
-ishermitian(A::LinearMapAA{<:Real}) = issymmetric(A._lmap)
+#ishermitian(A::LinearMapAA{<:Real}) = issymmetric(A._lmap)
 ishermitian(A::LinearMapAA) = ishermitian(A._lmap)
 isposdef(A::LinearMapAA) = isposdef(A._lmap)
 
@@ -114,17 +139,20 @@ Base.:(==)(A::LinearMapAA, B::LinearMapAA) =
 sparse(A::LinearMapAA) = sparse(A._lmap)
 
 # cat
-# todo: requires updated LinearMap
-
+# todo: think about how to include AbstractMatrix here
+# without type piracy of Base.hcat
+#function Base.hcat(As::Union{LinearMapAA,UniformScaling,AbstractMatrix}...)
 function Base.hcat(As::Union{LinearMapAA,UniformScaling}...)
-	tmp = hcat([A._lmap for A in As]...)
-	LinearMapAA(hcat([A._lmap for A in As]...), (hcat=nothing,))
+	tmp = hcat([A isa LinearMapAA ? A._lmap : A for A in As]...)
+	LinearMapAA(tmp, (hcat=nothing,))
 end
 function Base.vcat(As::Union{LinearMapAA,UniformScaling}...)
-	LinearMapAA(vcat([A._lmap for A in As]...), (vcat=nothing,))
+	tmp = vcat([A isa LinearMapAA ? A._lmap : A for A in As]...)
+	LinearMapAA(tmp, (vcat=nothing,))
 end
 function Base.hvcat(rows::NTuple{nr,Int}, As::Union{LinearMapAA,UniformScaling}...) where nr
-	LinearMapAA(rows, hvcat([A._lmap for A in As]...), (hvcat=nothing,))
+	tmp = hvcat(rows, [A isa LinearMapAA ? A._lmap : A for A in As]...)
+	LinearMapAA(tmp, (hvcat=nothing,))
 end
 
 
@@ -160,6 +188,9 @@ Base.:(*)(A::LinearMapAA, B::LinearMapAA) = LinearMapAA(A._lmap * B._lmap, (prod
 Base.:(*)(A::LinearMapAA, B::AbstractMatrix) = LinearMapAA(A._lmap * LinearMap(B), A._prop)
 Base.:(*)(A::AbstractMatrix, B::LinearMapAA) = LinearMapAA(LinearMap(A) * B._lmap, B._prop)
 
+# multiply with vector
+Base.:(*)(A::LinearMapAA, v::AbstractVector{<:Number}) = A._lmap * v
+
 # multiply with scalars
 Base.:(*)(s::Number, A::LinearMapAA) = LinearMapAA(s*I * A._lmap, A._prop)
 Base.:(*)(A::LinearMapAA, s::Number) = LinearMapAA(A._lmap * (s*I), A._prop)
@@ -177,18 +208,18 @@ Base.propertynames(A::LinearMapAA) = propertynames(A._prop)
 
 # indexing
 
-# A[end]
+# [end]
 function Base.lastindex(A::LinearMapAA)
 	return prod(size(A._lmap))
 end
 
-# A[?,end] and A[end,?]
-function Base.lastindex(A::LinearMapAA, d::Integer)
+# [?,end] and [end,?]
+function Base.lastindex(A::LinearMapAA, d::Int)
 	return size(A._lmap, d)
 end
 
 # A[i,j]
-function Base.getindex(A::LinearMapAA, i::Integer, j::Integer)
+function Base.getindex(A::LinearMapAA, i::Int, j::Int)
 	T = eltype(A)
 	e = zeros(T, size(A._lmap,2)); e[j] = one(T)
 	tmp = A._lmap * e
@@ -197,31 +228,56 @@ end
 
 # A[:,j]
 # it is crucial to provide this function rather than to inherit from
-# Base.getindex(A::AbstractArray, ::Colon, ::Integer)
+# Base.getindex(A::AbstractArray, ::Colon, ::Int)
 # because Base.getindex does this by iterating (I think).
-function Base.getindex(A::LinearMapAA, ::Colon, j::Integer)
+function Base.getindex(A::LinearMapAA, ::Colon, j::Int)
 	T = eltype(A)
 	e = zeros(T, size(A,2)); e[j] = one(T)
 	return A * e
 end
 
+# A[ii,j]
+Base.getindex(A::LinearMapAA, l::AbstractVector{<:Integer}, j::Int) = A[:,j][l]
+
+# A[i,jj]
+Base.getindex(A::LinearMapAA, i::Int, r::AbstractVector{<:Integer}) = A[i,:][r]
+
+# A[:,jj]
+# this one is also important for efficiency
+Base.getindex(A::LinearMapAA, ::Colon, jj::AbstractVector{Bool}) =
+	A[:,findall(jj)]
+Base.getindex(A::LinearMapAA, ::Colon, jj::AbstractVector{<:Integer}) =
+	hcat([A[:,j] for j in jj]...)
+
+# A[ii,:]
+Base.getindex(A::LinearMapAA, ii::AbstractVector{<:Integer}, ::Colon) = A'[:,ii]'
+
+# A[ii,jj]
+Base.getindex(A::LinearMapAA,
+	l::AbstractVector{<:Integer}, r::AbstractVector{<:Integer}) = A[:,r][l,:]
+
+# A[k]
+function Base.getindex(A::LinearMapAA, k::Int)
+	c = CartesianIndices(size(A._lmap))[k] # is there a more elegant way?
+	return A[c[1], c[2]]
+end
+
+# A[kk]
+Base.getindex(A::LinearMapAA, kk::AbstractVector{Bool}) = A[kk]
+Base.getindex(A::LinearMapAA, kk::AbstractVector{<:Integer}) =
+	[A[k] for k in kk]
+
 # A[i,:]
-function Base.getindex(A::LinearMapAA, i::Integer, ::Colon)
+function Base.getindex(A::LinearMapAA, i::Int, ::Colon)
 	# in Julia: A[i,:] = A'[:,i] for real matrix A else need conjugate
 	return eltype(A) <: Complex ? conj.(A'[:,i]) : transpose(A)[:,i]
 end
 
-# A[:,j:k]
-# this one is also important for efficiency
-function Base.getindex(A::LinearMapAA, ::Colon, ur::UnitRange)
-	return hcat([A[:,j] for j in ur]...)
-end
-
-# A[i:k,:]
-Base.getindex(A::LinearMapAA, ur::UnitRange, ::Colon) = A'[:,ur]'
-
 # A[:,:] = Matrix(A)
 Base.getindex(A::LinearMapAA, ::Colon, ::Colon) = Matrix(A._lmap)
+
+# A[:]
+Base.getindex(A::LinearMapAA, ::Colon) = A[:,:][:]
 
 
 # test
@@ -234,28 +290,38 @@ tests for `getindex`
 """
 function LinearMapAA_test_getindex(A::LinearMapAA)
 	B = Matrix(A)
-
 	@test all(size(A) .>= (4,4)) # required by tests
+
+	tf1 = [false; trues(size(A,1)-1)]
+	tf2 = [false; trues(size(A,2)-2); false]
+	ii1 = (3, 2:4, [2,4], :, tf1)
+	ii2 = (2, 3:4, [1,4], :, tf2)
+	for i2 in ii2
+		for i1 in ii1
+		#	@show i1,i2
+			@test B[i1,i2] == A[i1,i2]
+		end
+	end
+	for i1 in ii2
+		for i2 in ii1
+			@test B'[i1,i2] == A'[i1,i2]
+		end
+	end
+
+	# "end"
+	@test B[3,end-1] == A[3,end-1]
+	@test B[end-2,3] == A[end-2,3]
+	@test B'[3,end-1] == A'[3,end-1]
+
+	# [?]
 	@test B[1] == A[1]
 	@test B[7] == A[7]
-	@test B[:,5] == A[:,5]
-	@test B[3,:] == A[3,:]
-	@test B[1,3] == A[1,3]
-	@test B[:,1:3] == A[:,1:3]
-	@test B[1:3,:] == A[1:3,:]
-	@test B[1:3,2:4] == A[1:3,2:4]
-	@test B == A[:,:]
 	@test B'[3] == A'[3]
-	@test B'[:,4] == A'[:,4]
-	@test B'[2,:] == A'[2,:]
 	@test B[end] == A[end] # lastindex
-	@test B[3,end-1] == A[3,end-1]
 
-	# The following rely on the fact that LinearMapAA <:i AbstractMatrix.
-	# These indexing modes inherit from general Base.getindex abilities.
+	# Some tests could rely on the fact that LinearMapAA <:i AbstractMatrix,
+	# by inheriting from general Base.getindex, but all are provided here.
 	@test B[[1, 3, 4]] == A[[1, 3, 4]]
-	@test B[:, [1, 3, 4]] == A[:, [1, 3, 4]]
-	@test B[[1, 3, 4], :] == A[[1, 3, 4], :]
 	@test B[4:7] == A[4:7]
 
 	true
@@ -335,14 +401,18 @@ function LinearMapAA(test::Symbol)
 	@test issymmetric(A' * A) == true
 
 	Lm = Matrix(L)
-	@test Matrix(LinearMapAA(Lm, prop)) == Lm
-	@test Matrix(LinearMapAA(Lm)) == Lm
+	@test Matrix(LinearMapAA(L, prop)) == Lm
+	@test Matrix(LinearMapAA(L)) == Lm
 	@test Matrix(sparse(A)) == Lm
 
 	@test eltype(A) == eltype(L)
 	@test Base.eltype(A) == eltype(L)
 	@test ndims(A) == 2
 	@test size(A) == size(L)
+
+	B = copy(A)
+	@test B == A
+	@test !(B === A)
 
 	@test A._prop == prop
 	@test A.name == prop.name
@@ -355,9 +425,6 @@ function LinearMapAA(test::Symbol)
 
 #	@test LinearMapAA_test_setindex(A) # todo
 
-	# todo: cat
-	# A2 = [A A]
-
 	D = A * A'
 	@test Matrix(D) == Lm * Lm'
 	@test issymmetric(D) == true
@@ -367,16 +434,9 @@ function LinearMapAA(test::Symbol)
 	@test Matrix(F) == Lm' * Lm
 	@test LinearMapAA_test_getindex(F)
 
+	@test Matrix([A I A]) == [Lm I Lm]
+	@test Matrix([A; I; A]) == [Lm; I; Lm]
+	@test Matrix([A I A; 2A I 3A]) == [Lm I Lm; 2Lm I 3Lm]
+
 	true
 end
-
-#= todo: failing
-	N = 4; M = N+1
-	forw = x -> [cumsum(x); 0] # non-square to stress test
-	back = y -> reverse(cumsum(reverse(y[1:N])))
-	L = LinearMap(forw, back, M, N)
-	A = LinearMapAA(L, (test=true,))
-	B = copy(A)
-	B[1,2] = 5
-	B
-=#
