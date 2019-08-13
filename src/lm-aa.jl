@@ -11,14 +11,16 @@ import SparseArrays: sparse
 
 
 """
+`mutable struct LinearMapAA{T} <: AbstractMatrix{T}`
+
+old way may not properly allow `setindex!` to work as desired
+because it may change the type of the lmap and of the prop:
 `struct LinearMapAA{T, M <: LinearMap, P <: NamedTuple} <: AbstractMatrix{T}`
-`struct LinearMapAA <: AbstractMatrix`
 """
-mutable struct LinearMapAA{T} # <: AbstractMatrix{T}
+mutable struct LinearMapAA{T} <: AbstractMatrix{T}
 #{T, M <: LinearMap, P <: NamedTuple}
 #	_lmap::M
-#	_lmap::LinearMap
-	_lmap::Any
+	_lmap::LinearMap
 #	_prop::P
 	_prop::NamedTuple
 #=
@@ -430,7 +432,7 @@ function LinearMapAA(test::Symbol)
 	@test LinearMapAA_test_getindex(A)
 	@test LinearMapAA_test_vmul(A)
 
-	@test LinearMapAA_test_setindex(A) # todo
+	@test LinearMapAA_test_setindex(A)
 
 	# multiply
 	@test A * I === A
