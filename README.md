@@ -43,6 +43,8 @@ a wavelet transform arises
 from some mother wavelet,
 and it can be convenient
 to carry those properties with the object itself.
+The properties are lost when one combines
+two `LinearMapAA` objects by adding, multiplying, concatenating, etc.
 
 
 ## Examples
@@ -108,4 +110,4 @@ For detailed installation instructions, see:
 
 This package is registered in the
 [`General`](https://github.com/JuliaRegistries/General) registry,
-so you can install at the REPL with `] add MIRT`.
+so you can install at the REPL with `] add LinearMapAA`.

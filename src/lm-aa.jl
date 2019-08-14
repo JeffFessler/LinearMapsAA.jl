@@ -167,6 +167,17 @@ end
 =#
 
 
+# add or subtract objects
+Base.:(+)(A::LinearMapAA, B::LinearMapAA) =
+	LinearMapAA(A._lmap + B._lmap, (sum=nothing,))
+Base.:(+)(A::LinearMapAA, B::AbstractMatrix) =
+	LinearMapAA(A._lmap + LinearMap(B), A._prop)
+Base.:(+)(A::AbstractMatrix, B::LinearMapAA) =
+	LinearMapAA(LinearMap(A) + B._lmap, B._prop)
+Base.:(-)(A::LinearMapAA, B::LinearMapAA) = A + (-1)*B
+Base.:(-)(A::LinearMapAA, B::AbstractMatrix) = A + (-1)*B
+Base.:(-)(A::AbstractMatrix, B::LinearMapAA) = A + (-1)*B
+
 # multiply objects
 Base.:(*)(A::LinearMapAA, B::LinearMapAA) =
 	LinearMapAA(A._lmap * B._lmap, (prod=nothing,))
@@ -432,20 +443,31 @@ function LinearMapAA(test::Symbol)
 	@test LinearMapAA_test_setindex(Af)
 =#
 
+	# add / subtract
+	@test 2A + 6A isa LinearMapAA
+	@test 7A - 2A isa LinearMapAA
+	@test Matrix(2A + 6A) == 8 * Matrix(A)
+	@test Matrix(7A - 2A) == 5 * Matrix(A)
+	@test Matrix(7A - 2*ones(size(A))) == 7 * Matrix(A) - 2*ones(size(A))
+
 	# multiply
 	@test Matrix(A * 6I) == 6 * Matrix(A)
 	@test Matrix(7I * A) == 7 * Matrix(A)
 #	@test I * A === A
 #	@test A * I === A
 	D = A * A'
+	@test D isa LinearMapAA
 	@test Matrix(D) == Lm * Lm'
 	@test issymmetric(D) == true
 	E = A * Lm'
+	@test E isa LinearMapAA
 	@test Matrix(E) == Lm * Lm'
 	F = Lm' * A
+	@test F isa LinearMapAA
 	@test Matrix(F) == Lm' * Lm
 	@test LinearMapAA_test_getindex(F)
 
+	@test [A I A] isa LinearMapAA
 	@test Matrix([A I A]) == [Lm I Lm]
 	@test Matrix([A; I; A]) == [Lm; I; Lm]
 	@test Matrix([A I A; 2A I 3A]) == [Lm I Lm; 2Lm I 3Lm]
