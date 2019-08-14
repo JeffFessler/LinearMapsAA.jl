@@ -63,7 +63,7 @@ constructor
 """
 LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ;
 	T::DataType = Float32) =
-	LinearMapAA(LinearMap(f, fc, D[1], D[2]), prop)
+	LinearMapAA(LinearMap{T}(f, fc, D[1], D[2]), prop)
 LinearMapAA(f::Function, fc::Function, D::Dims{2}, T::DataType = Float32) =
 	LinearMapAA(f, fc, D, (none=nothing,) ; T=T)
 
@@ -71,9 +71,10 @@ LinearMapAA(f::Function, fc::Function, D::Dims{2}, T::DataType = Float32) =
 `A = LinearMapAA(f::Function, D::Dims{2} [, prop::NamedTuple)]`
 constructor
 """
-LinearMapAA(f::Function, D::Dims{2}, prop::NamedTuple) =
-	LinearMapAA(LinearMap(f, D[1], D[2]), prop)
-LinearMapAA(f::Function, D::Dims{2}) = LinearMapAA(f, D, (none=nothing,))
+LinearMapAA(f::Function, D::Dims{2}, prop::NamedTuple ; T::DataType = Float32) =
+	LinearMapAA(LinearMap{T}(f, D[1], D[2]), prop)
+LinearMapAA(f::Function, D::Dims{2} ; T::DataType = Float32) =
+	LinearMapAA(f, D, (none=nothing,), T=T)
 
 
 # copy
@@ -83,7 +84,7 @@ Base.copy(A::LinearMapAA) = LinearMapAA(A._lmap, A._prop)
 Base.Matrix(A::LinearMapAA) = Matrix(A._lmap)
 
 # ndims
-Base.ndims(A::LinearMapAA) = ndims(A._lmap)
+# Base.ndims(A::LinearMapAA) = ndims(A._lmap) # 2 for AbstractMatrix
 
 # display
 Base.display(A::LinearMapAA) =
@@ -376,9 +377,12 @@ function LinearMapAA(test::Symbol)
 	N = 6; M = N+1
 	forw = x -> [cumsum(x); 0] # non-square to stress test
 	back = y -> reverse(cumsum(reverse(y[1:N])))
-	L = LinearMap(forw, back, M, N)
 
 	prop = (name="cumsum", extra=1)
+	@test LinearMapAA(forw, (M, N)) isa LinearMapAA
+	@test LinearMapAA(forw, (M, N), prop, T=Float64) isa LinearMapAA
+
+	L = LinearMap{Float32}(forw, back, M, N)
 	A = LinearMapAA(L, prop)
 
 	display(A)
@@ -406,7 +410,6 @@ function LinearMapAA(test::Symbol)
 	@test eltype(A) == eltype(L)
 	@test Base.eltype(A) == eltype(L) # codecov
 	@test ndims(A) == 2
-	@test Base.ndims(A) == 2 # codecov
 	@test size(A) == size(L)
 
 	B = copy(A)

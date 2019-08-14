@@ -70,55 +70,6 @@ function Base.setindex!(A::LinearMapAA, X::AbstractMatrix,
 end
 
 
-#=
-"""
-`A[i,j] = s`
-
-Mathematically, if B = copy(A) and then we say `B[i,j] = s`, for scalar `s`,
-then `B = A + (s - A[i,j]) e_i e_j'`
-where `e_i` and `e_j` are the appropriate unit vectors.
-Using this basic math, we can perform `B*x` using `A*x` and `A[i,j]`.
-
-This method works because LinearMapAA is a *mutable* struct.
-"""
-function Base.setindex!(A::LinearMapAA, s::Number, i::Int, j::Int)
-	# todo: handle WrappedMap differently
-	L = A._lmap
-	Aij = A[i,j] # must extract this outside of forw() to avoid recursion!
-	if true
-		forw = (x) ->
-			begin
-				tmp = L * x 
-				tmp[i] += (s - Aij) * x[j]
-				return tmp
-			end
-	end
-
-	has_adj = !(typeof(L) <: LinearMaps.FunctionMap) || (L.fc !== nothing)
-	if has_adj
-		back = (y) ->
-			begin
-				tmp = L' * y 
-				tmp[j] += conj(s - Aij) * y[i]
-				return tmp
-			end
-	end
-
-#=
-	# for future reference, some of this could be implemented
-	A.issymmetric = false # could check if i==j
-	A.ishermitian = false # could check if i==j and v=v'
-	A.posdef = false # could check if i==j and v > A[i,j]
-=#
-
-	if has_adj
-		A._lmap = LinearMap(forw, back, size(L)...)
-	else
-		A._lmap = LinearMap(forw, size(L)...)
-	end
-end
-=#
-
 # [i,j] = s
 Base.setindex!(A::LinearMapAA, s::Number, i::Int, j::Int) =
 	setindex!(A, fill(s,1,1), [i], [j])
@@ -259,10 +210,6 @@ end
 function LinearMapAA_test_setindex(A::LinearMapAA)
 
     @test all(size(A) .>= (4,4)) # required by tests
-
-#	todo: cut
-#	Base.setindex!(B, 0, 2, 3) # for codecov
-#	Base.setindex!(B, 0, 5) # for codecov
 
 	tf1 = [false; trues(size(A,1)-1)]
 	tf2 = [false; trues(size(A,2)-2); false]
