@@ -57,30 +57,15 @@ LinearMapAA(L::AbstractMatrix, prop::NamedTuple) =
 	LinearMapAA(LinearMap(L), prop)
 LinearMapAA(L::AbstractMatrix) = LinearMapAA(L, (none=nothing,))
 
-#=
 """
-`A = LinearMapAA(f::Function, fc::Function, M::Int, N::Int, prop::NamedTuple)`
+`A = LinearMapAA(f::Function, fc::Function, D::Dims{2} [, prop::NamedTuple)] ; T::DataType`
 constructor
 """
-LinearMapAA(f::Function, fc::Function, M::Int, N::Int, prop::NamedTuple) =
-	LinearMapAA(LinearMap(f, fc, M, N), prop)
-
-"""
-`A = LinearMapAA(f::Function, fc::Function, M::Int, N::Int)`
-constructor
-"""
-LinearMapAA(f::Function, fc::Function, M::Int, N::Int) =
-	LinearMapAA(f, fc, M, N, (none=nothing,))
-=#
-
-"""
-`A = LinearMapAA(f::Function, fc::Function, D::Dims{2} [, prop::NamedTuple)]`
-constructor
-"""
-LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple) =
+LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ;
+	T::DataType = Float32) =
 	LinearMapAA(LinearMap(f, fc, D[1], D[2]), prop)
-LinearMapAA(f::Function, fc::Function, D::Dims{2}) =
-	LinearMapAA(f, fc, D, (none=nothing,))
+LinearMapAA(f::Function, fc::Function, D::Dims{2}, T::DataType = Float32) =
+	LinearMapAA(f, fc, D, (none=nothing,) ; T=T)
 
 """
 `A = LinearMapAA(f::Function, D::Dims{2} [, prop::NamedTuple)]`
@@ -189,10 +174,9 @@ Base.:(*)(A::LinearMapAA, B::AbstractMatrix) =
 Base.:(*)(A::AbstractMatrix, B::LinearMapAA) =
 	LinearMapAA(LinearMap(A) * B._lmap, B._prop)
 
-# multiply with I
-# todo: s*I
-Base.:(*)(A::LinearMapAA, B::UniformScaling) = A
-Base.:(*)(B::UniformScaling, A::LinearMapAA) = A
+# multiply with I or s*I
+Base.:(*)(A::LinearMapAA, B::UniformScaling) = LinearMapAA(A._lmap * B, A._prop)
+Base.:(*)(B::UniformScaling, A::LinearMapAA) = LinearMapAA(B * A._lmap, A._prop)
 
 # multiply with vector
 Base.:(*)(A::LinearMapAA, v::AbstractVector{<:Number}) = A._lmap * v
@@ -440,14 +424,16 @@ function LinearMapAA(test::Symbol)
 
 	@test LinearMapAA_test_setindex(A)
 
-#=	todo: some test requires tranpose
+#=	todo: some test requires transpose
 	Af = LinearMapAA(forw, (M, N))
 	@test LinearMapAA_test_setindex(Af)
 =#
 
 	# multiply
-	@test A * I === A
-	@test I * A === A
+	@test Matrix(A * 6I) == 6 * Matrix(A)
+	@test Matrix(7I * A) == 7 * Matrix(A)
+#	@test I * A === A
+#	@test A * I === A
 	D = A * A'
 	@test Matrix(D) == Lm * Lm'
 	@test issymmetric(D) == true
