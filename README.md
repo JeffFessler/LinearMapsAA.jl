@@ -58,13 +58,13 @@ A.name # returns "cumsum" here
 ```
 
 Here is a more interesting example for computational imaging.
+For more details see [example/fft.jl]
 ```
 using FFTW
 N = 8
-A = LinearMapAA(fft, y -> N*ifft(y), (N, N), (name="fft",)) # 1D FFT
+A = LinearMapAA(fft, y -> N*ifft(y), (N, N), (name="fft",), T=ComplexF32)
 @show A[:,2]
 ```
-todo: fails due to complex
 
 ## Caution
 
@@ -72,18 +72,13 @@ An `AbstractArray` also must support a `setindex!` operation
 and this package provides that capability,
 mainly for completeness
 and as a proof of principle.
-A single `setindex!` call may be fast,
-but subsequent multiplies by the resulting object
-may execute painfully slowly in most cases.
-Modifying a single "element" of a `LinearMapAA`
-may be OK,
-but modifying a whole column or row
-will probably be extremely slow
-so is not recommended,
-except for testing with very small cases.
-
-todo:
-test in-place gaussian elimination?
+A single `setindex!` call is reasonably fast,
+but multiple calls add layers of complexity
+that are likely to quickly slow things down.
+In particular, trying to do something like the Gram-Schmidt procedure
+"in place" with an `AbstractArray` would be insane.
+In fact, `LinearAlgebra.qr!` only works with `StridedMatrix`
+not a general `AbstractMatrix`.
 
 ## Credits
 
@@ -105,13 +100,12 @@ without "separate" installation.
 Being a subtype of `AbstractArray` can be useful
 for other purposes,
 such as using the nice
-kron.jl
-so some users
+[Kronecker.jl](https://github.com/MichielStock/Kronecker.jl)
+package.
 
 For detailed installation instructions, see:
 [doc/start.md](https://github.com/JeffFessler/MIRT.jl/blob/master/doc/start.md)
 
-todo:
 This package is registered in the
 [`General`](https://github.com/JuliaRegistries/General) registry,
 so you can install at the REPL with `] add MIRT`.
