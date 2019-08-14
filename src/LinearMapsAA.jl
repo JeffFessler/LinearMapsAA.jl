@@ -8,6 +8,8 @@ module LinearMapsAA
 
 export LinearMapAA
 
+# Indexer = AbstractVector{Int}
+
 include("lm-aa.jl")
 
 end # module

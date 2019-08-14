@@ -14,7 +14,7 @@ Use of this function is strongly discouraged, other than for testing.
 using Test: @test
 using LinearMaps #: LinearMaps.FunctionMap
 
-Indexer = AbstractVector{<:Integer}
+Indexer = AbstractVector{Int}
 
 """
 `A[i,j] = X`
@@ -123,11 +123,20 @@ end
 Base.setindex!(A::LinearMapAA, s::Number, i::Int, j::Int) =
 	setindex!(A, fill(s,1,1), [i], [j])
 
+# [ii,jj] = X
+Base.setindex!(A::LinearMapAA, X::AbstractMatrix,
+	ii::AbstractVector{Bool}, jj::AbstractVector{Bool}) =
+	setindex!(A, X, findall(ii), findall(jj))
+
 # [:,jj] = X
+Base.setindex!(A::LinearMapAA, X::AbstractMatrix, ::Colon, jj::AbstractVector{Bool}) =
+	setindex!(A, X, :, findall(jj))
 Base.setindex!(A::LinearMapAA, X::AbstractMatrix, ::Colon, jj::Indexer) =
 	setindex!(A, X, 1:size(A,1), jj)
 
 # [ii,:] = X
+Base.setindex!(A::LinearMapAA, X::AbstractMatrix, ii::AbstractVector{Bool}, ::Colon) =
+	setindex!(A, X, findall(ii), :)
 Base.setindex!(A::LinearMapAA, X::AbstractMatrix, ii::Indexer, ::Colon) =
 	setindex!(A, X, ii, 1:size(A,2))
 
@@ -163,6 +172,8 @@ Base.setindex!(A::LinearMapAA, s::Number, ::Colon, j::Int) =
 	setindex!(A, s, 1:size(A,1), [j])
 
 # [ii,:] = s
+Base.setindex!(A::LinearMapAA, s::Number, ii::AbstractVector{Bool}, ::Colon) =
+	setindex!(A, s, findall(ii), :)
 Base.setindex!(A::LinearMapAA, s::Number, ii::Indexer, ::Colon) =
 	setindex!(A, s, ii, 1:size(A,2))
 
@@ -183,6 +194,8 @@ Base.setindex!(A::LinearMapAA, s::Number, i::Int, jj::Indexer) =
 	setindex!(A, fill(s, 1, length(jj)), [i], jj)
 
 # [:,jj] = s
+Base.setindex!(A::LinearMapAA, s::Number, ::Colon, jj::AbstractVector{Bool}) =
+	setindex!(A, s, :, findall(jj))
 Base.setindex!(A::LinearMapAA, s::Number, ::Colon, jj::Indexer) =
 	setindex!(A, s, 1:size(A,1), jj)
 
@@ -300,11 +313,20 @@ function LinearMapAA_test_setindex(A::LinearMapAA)
 
 	# insanity below here
 
-	# A[:]
+	# A[:] = s
 	B = copy(A)
 	B[:] = 5
 	Am = Matrix(A)
 	Am[:] .= 5
+	Bm = Matrix(B)
+	@test Bm == Am
+
+	# A[:] = v
+	B = copy(A)
+	v = 1:length(A)
+	B[:] = v
+	Am = Matrix(A)
+	Am[:] .= v
 	Bm = Matrix(B)
 	@test Bm == Am
 
