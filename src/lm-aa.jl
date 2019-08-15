@@ -40,11 +40,14 @@ include("setindex.jl")
 # constructors
 
 """
-`A = LinearMapAA{L::LinearMap [, prop::NamedTuple])`
+`A = LinearMapAA(L::LinearMap [, prop::NamedTuple ; T = eltype(L)])`
 constructor
+
+`prop` cannot include the field `_lmap` or `_prop`
 """
-function LinearMapAA(L::LinearMap, prop::NamedTuple)
-	T = eltype(L)
+function LinearMapAA(L::LinearMap, prop::NamedTuple ; T = eltype(L))
+	:_lmap in propertynames(prop) && throw("cannot use _lmap")
+	:_prop in propertynames(prop) && throw("cannot use _prop")
 	return LinearMapAA{T}(L, prop)
 end
 LinearMapAA(L::LinearMap) = LinearMapAA(L, (none=nothing,))
@@ -123,9 +126,8 @@ Base.:(==)(A::LinearMapAA, B::LinearMapAA) =
 sparse(A::LinearMapAA) = sparse(A._lmap)
 
 # cat
-# todo: think about how to include AbstractMatrix here
-# without type piracy of Base.hcat
-#function Base.hcat(As::Union{LinearMapAA,UniformScaling,AbstractMatrix}...)
+# todo: how to include AbstractMatrix here without type piracy of Base.hcat ?
+# function Base.hcat(As::Union{LinearMapAA,UniformScaling,AbstractMatrix}...)
 function Base.hcat(As::Union{LinearMapAA,UniformScaling}...)
 	tmp = hcat([A isa LinearMapAA ? A._lmap : A for A in As]...)
 	LinearMapAA(tmp, (hcat=nothing,))
@@ -252,7 +254,14 @@ Base.getindex(A::LinearMapAA, ::Colon, jj::Indexer) =
 	hcat([A[:,j] for j in jj]...)
 
 # A[ii,:]
-Base.getindex(A::LinearMapAA, ii::Indexer, ::Colon) = A'[:,ii]'
+# trick: cannot use A' for a FunctionMap with no fc
+function Base.getindex(A::LinearMapAA, ii::Indexer, ::Colon)
+	if (:fc in propertynames(A._lmap)) && isnothing(A._lmap.fc)
+		return hcat([A[ii,j] for j in 1:size(A,2)]...)
+	else
+		return A'[:,ii]'
+	end
+end
 
 # A[ii,jj]
 Base.getindex(A::LinearMapAA, ii::Indexer, jj::Indexer) = A[:,jj][ii,:]
@@ -268,10 +277,10 @@ Base.getindex(A::LinearMapAA, kk::AbstractVector{Bool}) = A[findall(kk)]
 Base.getindex(A::LinearMapAA, kk::Indexer) = [A[k] for k in kk]
 
 # A[i,:]
-function Base.getindex(A::LinearMapAA, i::Int, ::Colon)
+# trick: one row slice returns a 1D ("column") vector
+Base.getindex(A::LinearMapAA, i::Int, ::Colon) = A[[i],:][:]
 	# in Julia: A[i,:] = A'[:,i] for real matrix A else need conjugate
-	return eltype(A) <: Complex ? conj.(A'[:,i]) : transpose(A)[:,i]
-end
+#	return eltype(A) <: Complex ? conj.(A'[:,i]) : transpose(A)[:,i]
 
 # A[:,:] = Matrix(A)
 Base.getindex(A::LinearMapAA, ::Colon, ::Colon) = Matrix(A._lmap)
@@ -302,21 +311,30 @@ function LinearMapAA_test_getindex(A::LinearMapAA)
 			@test B[i1,i2] == A[i1,i2]
 		end
 	end
-	for i1 in ii2
-		for i2 in ii1
-			@test B'[i1,i2] == A'[i1,i2]
+
+	L = A._lmap
+	test_adj = !(:fc in propertynames(L)) || !isnothing(L.fc)
+	if test_adj
+		for i1 in ii2
+			for i2 in ii1
+				@test B'[i1,i2] == A'[i1,i2]
+			end
 		end
 	end
 
 	# "end"
 	@test B[3,end-1] == A[3,end-1]
 	@test B[end-2,3] == A[end-2,3]
-	@test B'[3,end-1] == A'[3,end-1]
+	if test_adj
+		@test B'[3,end-1] == A'[3,end-1]
+	end
 
 	# [?]
 	@test B[1] == A[1]
 	@test B[7] == A[7]
-	@test B'[3] == A'[3]
+	if test_adj
+		@test B'[3] == A'[3]
+	end
 	@test B[end] == A[end] # lastindex
 
 	kk = [k in [3,5] for k = 1:length(A)] # Bool
@@ -438,11 +456,6 @@ function LinearMapAA(test::Symbol)
 
 	@test LinearMapAA_test_setindex(A)
 
-#=	todo: some test requires transpose
-	Af = LinearMapAA(forw, (M, N))
-	@test LinearMapAA_test_setindex(Af)
-=#
-
 	# add / subtract
 	@test 2A + 6A isa LinearMapAA
 	@test 7A - 2A isa LinearMapAA
@@ -471,6 +484,13 @@ function LinearMapAA(test::Symbol)
 	@test Matrix([A I A]) == [Lm I Lm]
 	@test Matrix([A; I; A]) == [Lm; I; Lm]
 	@test Matrix([A I A; 2A I 3A]) == [Lm I Lm; 2Lm I 3Lm]
+
+	# non-adjoint version
+	Af = LinearMapAA(forw, (M, N))
+	@test LinearMapAA_test_getindex(Af)
+#=	todo: some test requires transpose
+	@test LinearMapAA_test_setindex(Af)
+=#
 
 	true
 end
