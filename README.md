@@ -4,32 +4,31 @@
 [![codecov.io](http://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master)](http://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master)
 https://github.com/JeffFessler/LinearMapsAA.jl
 
-UNDER CONSTRUCTION!
-
 This package is an overlay for the
 [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
 package
 that allows one to represent linear operations
 (like the FFT)
 as a object that appears to the user like a matrix
-but internally uses fast computations
+but internally uses user-defined fast computations
 for operations, especially multiplication.
 
-The extra `AA` in the package name has two meanings.
+The extra `AA` in the package name here has two meanings.
 
 - Objects of type `LinearMapAA` are subtypes of `AbstractArray{T,2}`, i.e.,
 [conform to the requirements of an `AbstractMatrix`](https://docs.julialang.org/en/latest/manual/interfaces/#man-interface-array-1)
+type.
 
 - The package was developed in Ann Arbor, Michigan :)
 
 Any `AbstractArray`
 must support a `getindex` operation.
 The maintainers of the `LinearMaps.jl` package
-[do not wish to add getindex there](https://github.com/Jutho/LinearMaps.jl/issues/38)
+[have not wished to add getindex there](https://github.com/Jutho/LinearMaps.jl/issues/38),
 so this package adds that feature
 (without committing "type piracy").
 
-A bonus feature supported by `LinearMapsAA`
+A bonus feature provided by `LinearMapsAA`
 is that a user can include a `NamedTuple` of properties
 with it, and then retrieve those later
 using the `A.key` syntax like one would do with a struct (composite type).  
@@ -43,8 +42,9 @@ a wavelet transform arises
 from some mother wavelet,
 and it can be convenient
 to carry those properties with the object itself.
-The properties are lost when one combines
-two `LinearMapAA` objects by adding, multiplying, concatenating, etc.
+Currently
+the properties are lost when one combines
+two or more `LinearMapAA` objects by adding, multiplying, concatenating, etc.
 
 
 ## Examples
@@ -89,10 +89,11 @@ This software was developed at the
 by
 [Jeff Fessler](http://web.eecs.umich.edu/~fessler)
 and his
-[group](http://web.eecs.umich.edu/~fessler/group).
+[group](http://web.eecs.umich.edu/~fessler/group),
+with substantial inspiration drawn
+from the `LinearMaps` package.
 
 
-todo:
 This package is included in the
 Michigan Image Reconstruction Toolbox (MIRT.jl)
 and is exported there
@@ -104,6 +105,12 @@ for other purposes,
 such as using the nice
 [Kronecker.jl](https://github.com/MichielStock/Kronecker.jl)
 package.
+
+This package provides similar functionality
+as the `Fatrix` / `fatrix` object in the
+[Matlab version of MIRT](https://github.com/JeffFessler/mirt).
+
+## Getting started
 
 For detailed installation instructions, see:
 [doc/start.md](https://github.com/JeffFessler/MIRT.jl/blob/master/doc/start.md)
