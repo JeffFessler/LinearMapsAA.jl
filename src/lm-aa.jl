@@ -488,9 +488,7 @@ function LinearMapAA(test::Symbol)
 	# non-adjoint version
 	Af = LinearMapAA(forw, (M, N))
 	@test LinearMapAA_test_getindex(Af)
-#=	todo: some test requires transpose
 	@test LinearMapAA_test_setindex(Af)
-=#
 
 	true
 end
