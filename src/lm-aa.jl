@@ -279,8 +279,6 @@ Base.getindex(A::LinearMapAA, kk::Indexer) = [A[k] for k in kk]
 # A[i,:]
 # trick: one row slice returns a 1D ("column") vector
 Base.getindex(A::LinearMapAA, i::Int, ::Colon) = A[[i],:][:]
-	# in Julia: A[i,:] = A'[:,i] for real matrix A else need conjugate
-#	return eltype(A) <: Complex ? conj.(A'[:,i]) : transpose(A)[:,i]
 
 # A[:,:] = Matrix(A)
 Base.getindex(A::LinearMapAA, ::Colon, ::Colon) = Matrix(A._lmap)
@@ -313,7 +311,7 @@ function LinearMapAA_test_getindex(A::LinearMapAA)
 	end
 
 	L = A._lmap
-	test_adj = !(:fc in propertynames(L)) || !isnothing(L.fc)
+	test_adj = !((:fc in propertynames(L)) && isnothing(L.fc))
 	if test_adj
 		for i1 in ii2
 			for i2 in ii1
@@ -451,6 +449,7 @@ function LinearMapAA(test::Symbol)
 	@test_throws String A.bug
 
 	@test Matrix(A)' == Matrix(A')
+	@test Matrix(A)' == Matrix(transpose(A))
 	@test LinearMapAA_test_getindex(A)
 	@test LinearMapAA_test_vmul(A)
 
@@ -462,6 +461,7 @@ function LinearMapAA(test::Symbol)
 	@test Matrix(2A + 6A) == 8 * Matrix(A)
 	@test Matrix(7A - 2A) == 5 * Matrix(A)
 	@test Matrix(7A - 2*ones(size(A))) == 7 * Matrix(A) - 2*ones(size(A))
+	@test Matrix(3*ones(size(A)) - 5A) == 3*ones(size(A)) - 5 * Matrix(A)
 
 	# multiply
 	@test Matrix(A * 6I) == 6 * Matrix(A)
