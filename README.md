@@ -60,13 +60,14 @@ A.name # returns "cumsum" here
 ```
 
 Here is a more interesting example for computational imaging.
-For more details see [example/fft.jl]
 ```
 using FFTW
 N = 8
 A = LinearMapAA(fft, y -> N*ifft(y), (N, N), (name="fft",), T=ComplexF32)
 @show A[:,2]
 ```
+For more details see
+[example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/master/example/fft.jl)
 
 ## Caution
 
@@ -76,10 +77,10 @@ mainly for completeness
 and as a proof of principle.
 A single `setindex!` call is reasonably fast,
 but multiple calls add layers of complexity
-that are likely to quickly slow things down.
+that are likely to slow things down.
 In particular, trying to do something like the Gram-Schmidt procedure
 "in place" with an `AbstractArray` would be insane.
-In fact, `LinearAlgebra.qr!` only works with `StridedMatrix`
+In fact, `LinearAlgebra.qr!` works only with a `StridedMatrix`
 not a general `AbstractMatrix`.
 
 ## Credits
@@ -100,7 +101,7 @@ and is exported there
 so that MIRT users can use it
 without "separate" installation.
 
-Being a subtype of `AbstractArray` can be useful
+Being a sub-type of `AbstractArray` can be useful
 for other purposes,
 such as using the nice
 [Kronecker.jl](https://github.com/MichielStock/Kronecker.jl)
@@ -117,4 +118,4 @@ For detailed installation instructions, see:
 
 This package is registered in the
 [`General`](https://github.com/JuliaRegistries/General) registry,
-so you can install at the REPL with `] add LinearMapAA`.
+so you can install it at the REPL with `] add LinearMapAA`.
