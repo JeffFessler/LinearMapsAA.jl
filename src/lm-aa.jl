@@ -125,21 +125,42 @@ Base.:(==)(A::LinearMapAA, B::LinearMapAA) =
 # convert to sparse
 sparse(A::LinearMapAA) = sparse(A._lmap)
 
-# cat
-# todo: how to include AbstractMatrix here without type piracy of Base.hcat ?
-# function Base.hcat(As::Union{LinearMapAA,UniformScaling,AbstractMatrix}...)
-function Base.hcat(As::Union{LinearMapAA,UniformScaling}...)
-	tmp = hcat([A isa LinearMapAA ? A._lmap : A for A in As]...)
-	LinearMapAA(tmp, (hcat=nothing,))
+# cat (hcat, vcat, hvcat) are tricky for avoiding type piracy
+# hard to handle multiple AbstractMatrix especially
+LMcat = Union{LinearMapAA,LinearMap,UniformScaling,AbstractMatrix}
+# convert to something suitable for LinearMap.*cat
+function lm_promote(A::LMcat)
+	A isa LinearMapAA ? A._lmap :
+	A isa AbstractMatrix ? LinearMap(A) : # wrap to avoid type piracy
+	A isa UniformScaling ? A : # leave unchanged - ok for LinearMaps.*cat
+	# A isa LinearMap ?
+	A # otherwise it is this
 end
-function Base.vcat(As::Union{LinearMapAA,UniformScaling}...)
-	tmp = vcat([A isa LinearMapAA ? A._lmap : A for A in As]...)
-	LinearMapAA(tmp, (vcat=nothing,))
-end
+
+# tmp = hcat([A isa LinearMapAA ? A._lmap : A for A in As]...)
+
+lm_hcat(As::LMcat...) = LinearMapAA(hcat(lm_promote.(As)...), (hcat=nothing,))
+lm_vcat(As::LMcat...) = LinearMapAA(vcat(lm_promote.(As)...), (vcat=nothing,))
+lm_hvcat(rows::NTuple{nr,Int}, As::LMcat...) where {nr} =
+	LinearMapAA(hvcat(rows, lm_promote.(As)...), (hvcat=nothing,))
+
+# a single leading LinearMapAA followed by others is clear
+Base.hcat(A1::LinearMapAA, As::LMcat...) = lm_hcat(A1, As...)
+Base.vcat(A1::LinearMapAA, As::LMcat...) = lm_vcat(A1, As...)
+Base.hvcat(rows::NTuple{nr,Int}, A1::LinearMapAA, As::LMcat...) where {nr} =
+	lm_hvcat(rows, A1, As...)
+# or in 2nd position
+Base.hcat(A1::LMcat, A2::LinearMapAA, As::LMcat...) = lm_hcat(A1, A2, As...)
+Base.vcat(A1::LMcat, A2::LinearMapAA, As::LMcat...) = lm_vcat(A1, A2, As...)
+Base.hvcat(rows::NTuple{nr,Int}, A1::LMcat, A2::LinearMapAA, As::LMcat...) where {nr} =
+	lm_hvcat(rows, A1, As...)
+
+#=
 function Base.hvcat(rows::NTuple{nr,Int}, As::Union{LinearMapAA,UniformScaling}...) where nr
 	tmp = hvcat(rows, [A isa LinearMapAA ? A._lmap : A for A in As]...)
 	LinearMapAA(tmp, (hvcat=nothing,))
 end
+=#
 
 
 # multiply with vectors
@@ -489,6 +510,24 @@ function LinearMapAA(test::Symbol)
 	Af = LinearMapAA(forw, (M, N))
 	@test LinearMapAA_test_getindex(Af)
 	@test LinearMapAA_test_setindex(Af)
+
+	# hcat vcat tests
+	M1 = reshape(1:35, N+1, N-1)
+	H1 = [M1 A]
+	@test H1 isa LinearMapAA
+	@test Matrix(H1) == [M1 Matrix(A)]
+	H2 = [A M1]
+	@test H2 isa LinearMapAA
+	@test Matrix(H2) == [Matrix(A) H2]
+
+	M2 = reshape(1:(3*N), 3, N)
+	V1 = [M2; A]
+	@test V1 isa LinearMapAA
+	@test Matrix(V1) == [M2; Matrix(A)]
+	V2 = [A; M2]
+	@test V2 isa LinearMapAA
+	@test Matrix(V2) == [Matrix(A); M2]
+@show 99
 
 	true
 end
