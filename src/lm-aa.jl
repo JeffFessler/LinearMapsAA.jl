@@ -155,7 +155,7 @@ Base.hvcat(rows::NTuple{nr,Int}, A1::LinearMapAA, As::LMcat...) where {nr} =
 Base.hcat(A1::LMcat, A2::LinearMapAA, As::LMcat...) = lm_hcat(A1, A2, As...)
 Base.vcat(A1::LMcat, A2::LinearMapAA, As::LMcat...) = lm_vcat(A1, A2, As...)
 Base.hvcat(rows::NTuple{nr,Int}, A1::LMcat, A2::LinearMapAA, As::LMcat...) where {nr} =
-	lm_hvcat(rows, A1, As...)
+	lm_hvcat(rows, A1, A2, As...)
 
 
 # multiply with vectors
@@ -526,16 +526,19 @@ function LinearMapAA(test::Symbol)
 	AIAr = [A I A; 2A I 3A]
 	IAAh = [I A A]
 	IAAv = [I; A; A]
+	IAAr = [I A 2A; 3A 4I 5A]
 	@test AIAh isa LinearMapAA
 	@test AIAv isa LinearMapAA
 	@test AIAr isa LinearMapAA
 	@test IAAh isa LinearMapAA
 	@test IAAv isa LinearMapAA
+	@test IAAr isa LinearMapAA
 	@test Matrix(AIAh) == [Lm I Lm]
 	@test Matrix(AIAv) == [Lm; I; Lm]
 	@test Matrix(AIAr) == [Lm I Lm; 2Lm I 3Lm]
 	@test Matrix(IAAh) == [I Lm Lm]
 	@test Matrix(IAAv) == [I; Lm; Lm]
+	@test Matrix(IAAr) == [I Lm 2Lm; 3Lm 4I 5Lm]
 
 	true
 end
