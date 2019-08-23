@@ -490,7 +490,7 @@ test hcat vcat hvcat
 """
 function LinearMapAA_test_cat(A::LinearMapAA)
 #	L = LinearMap(x -> A*x, y -> A'*y, size(A,1), size(A,2))
-	@show M = Matrix(A)
+	M = Matrix(A)
 
 #=
 	# cannot get cat with AbstractMatrix to work
@@ -567,6 +567,9 @@ function LinearMapAA(test::Symbol)
 
 	L = LinearMap{Float32}(forw, back, M, N)
 	A = LinearMapAA(L, prop)
+	Lm = Matrix(L)
+
+	@test lm_name((Lm, A, I, L, "")) == "MAIL?"
 
 	display(A)
 
@@ -585,7 +588,6 @@ function LinearMapAA(test::Symbol)
 	@test isposdef(A) == false
 	@test issymmetric(A' * A) == true
 
-	Lm = Matrix(L)
 	@test Matrix(LinearMapAA(L, prop)) == Lm
 	@test Matrix(LinearMapAA(L)) == Lm
 	@test Matrix(sparse(A)) == Lm
