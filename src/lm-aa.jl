@@ -3,6 +3,8 @@ lm-aa
 2019-08-07 Jeff Fessler, University of Michigan
 =#
 
+export lmaa_hcat, lmaa_vcat, lmaa_hvcat
+
 using LinearMaps: LinearMap
 using LinearAlgebra: UniformScaling, I
 import LinearAlgebra: issymmetric, ishermitian, isposdef
@@ -127,36 +129,59 @@ sparse(A::LinearMapAA) = sparse(A._lmap)
 
 # cat (hcat, vcat, hvcat) are tricky for avoiding type piracy
 # It is especially hard to handle AbstractMatrix,
-# so I simply force the user to wrap it in LinearMap(AA) first.
-LMcat = Union{LinearMapAA, LinearMap, UniformScaling} # settle for this
-#LMcat = Union{LinearMapAA,LinearMap,UniformScaling,AbstractMatrix} # nope
+# so typically force the user to wrap it in LinearMap(AA) first.
+#LMcat{T} = Union{LinearMapAA{T}, LinearMap{T}, UniformScaling{T},AbstractMatrix{T}}
+LMcat{T} = Union{LinearMapAA{T}, LinearMap{T}, UniformScaling{T}} # settle
+#LMelse{T} = Union{LinearMap{T},UniformScaling{T},AbstractMatrix{T}} # non AA
 
 # convert to something suitable for LinearMap.*cat
 function lm_promote(A::LMcat)
 	A isa LinearMapAA ? A._lmap :
-#	A isa AbstractMatrix ? LinearMap(A) : # user must wrap
+	A isa AbstractMatrix ? LinearMap(A) :
 	A isa UniformScaling ? A : # leave unchanged - ok for LinearMaps.*cat
 	# A isa LinearMap ?
 	A # otherwise it is this
 end
 
+# single-letter codes for cat objects, e.g., [A I A] becomes "AIA"
+function lm_code(A)
+	A isa LinearMapAA ? "A" :
+	A isa AbstractMatrix ? "M" :
+	A isa UniformScaling ? "I" :
+	A isa LinearMap ? "L" :
+	"?"
+end
+
+# concatenate the single-letter codes, e.g., [A I A] becomes "AIA"
+lm_name = As -> *(lm_code.(As)...)
+
 # these rely on LinearMap.*cat methods
-lm_hcat(As::LMcat...) = LinearMapAA(hcat(lm_promote.(As)...), (hcat=nothing,))
-lm_vcat(As::LMcat...) = LinearMapAA(vcat(lm_promote.(As)...), (vcat=nothing,))
-lm_hvcat(rows::NTuple{nr,Int}, As::LMcat...) where {nr} =
-	LinearMapAA(hvcat(rows, lm_promote.(As)...), (hvcat=nothing,))
+"`B = lmaa_hcat(A1, A2, ...)` `hcat` of multiple objects"
+lmaa_hcat(As::LMcat...) =
+	LinearMapAA(hcat(lm_promote.(As)...), (hcat=lm_name(As),))
+"`B = lmaa_vcat(A1, A2, ...)` `vcat` of multiple objects"
+lmaa_vcat(As::LMcat...) =
+	LinearMapAA(vcat(lm_promote.(As)...), (vcat=lm_name(As),))
+"`B = lmaa_hvcat(rows, A1, A2, ...)` `hvcat` of multiple objects"
+lmaa_hvcat(rows::NTuple{nr,Int} where {nr}, As::LMcat...) =
+	LinearMapAA(hvcat(rows, lm_promote.(As)...), (hvcat=lm_name(As),))
 
 # a single leading LinearMapAA followed by others is clear
-Base.hcat(A1::LinearMapAA, As::LMcat...) = lm_hcat(A1, As...)
-Base.vcat(A1::LinearMapAA, As::LMcat...) = lm_vcat(A1, As...)
-Base.hvcat(rows::NTuple{nr,Int}, A1::LinearMapAA, As::LMcat...) where {nr} =
-	lm_hvcat(rows, A1, As...)
-# or in 2nd position
-Base.hcat(A1::LMcat, A2::LinearMapAA, As::LMcat...) = lm_hcat(A1, A2, As...)
-Base.vcat(A1::LMcat, A2::LinearMapAA, As::LMcat...) = lm_vcat(A1, A2, As...)
-Base.hvcat(rows::NTuple{nr,Int}, A1::LMcat, A2::LinearMapAA, As::LMcat...) where {nr} =
-	lm_hvcat(rows, A1, A2, As...)
-
+Base.hcat(A1::LinearMapAA, As::LMcat...) =
+	lmaa_hcat(A1, As...)
+Base.vcat(A1::LinearMapAA, As::LMcat...) =
+	lmaa_vcat(A1, As...)
+Base.hvcat(rows::NTuple{nr,Int} where {nr}, A1::LinearMapAA, As::LMcat...) =
+	lmaa_hvcat(rows, A1, As...)
+# or in 2nd position, beyond that, user can use lmaa_*
+#Base.hcat(A1::LMelse, A2::LinearMapAA, As::LMcat...) = # fails!?
+Base.hcat(A1::UniformScaling, A2::LinearMapAA, As::LMcat...) =
+	lmaa_hcat(A1, A2, As...)
+Base.vcat(A1::UniformScaling, A2::LinearMapAA, As::LMcat...) =
+	lmaa_vcat(A1, A2, As...)
+Base.hvcat(rows::NTuple{nr,Int} where nr,
+		A1::UniformScaling, A2::LinearMapAA, As::LMcat...) =
+	lmaa_hvcat(rows, A1, A2, As...)
 
 # multiply with vectors
 
@@ -403,6 +428,121 @@ function LinearMapAA_test_vmul(A::LinearMapAA)
 	true
 end
 
+#=
+	this approach using eval() works only in the global scope!
+
+	N = 6
+	forw = x -> [cumsum(x); 0] # non-square to stress test
+	back = y -> reverse(cumsum(reverse(y[1:N])))
+	prop = (name="cumsum", extra=1)
+	A = LinearMapAA(forw, back, (N+1, N), prop)
+
+	list1 = [
+		:([A I]), :([I A]), :([2*A 3*A]),
+		:([A; I]), :([I; A]), :([2*A; 3*A]),
+		:([A A I]), :([A I A]), :([2*A 3*A 4*A]),
+		:([A; A; I]), :([A; I; A]), :([2*A; 3*A; 4*A]),
+		:([I A I]), :([I A A]),
+		:([I; A; I]), :([I; A; A]),
+	#	:([I I A]), :([I; I; A]), # unsupported
+		:([A A; A A]), :([A I; 2A 3I]), :([I A; 2I 3A]),
+	#	:([I A; A I]), :([A I; I A]), # weird sizes
+		:([A I A; 2A 3I 4A]), :([I A I; 2I 3A 4I]),
+	#	:([A I A; I A A]), :([I A 2A; 3A 4I 5A]), # weird
+	#	:([I I A; I A I]), # unsupported
+		:([A A I; 2A 3A 4I]),
+		:([A I I; 2A 3I 4I]),
+	]
+
+	M = Matrix(A)
+	list2 = [
+		:([M I]), :([I M]), :([2*M 3*M]),
+		:([M; I]), :([I; M]), :([2*M; 3*M]),
+		:([M M I]), :([M I M]), :([2*M 3*M 4*M]),
+		:([M; M; I]), :([M; I; M]), :([2*M; 3*M; 4*M]),
+		:([I M I]), :([I M M]),
+		:([I; M; I]), :([I; M; M]),
+	#	:([I I M]), :([I; I; M]), # unsupported
+		:([M M; M M]), :([M I; 2M 3I]), :([I M; 2I 3M]),
+	#	:([I M; M I]), :([M I; I M]), # weird sizes
+		:([M I M; 2M 3I 4M]), :([I M I; 2I 3M 4I]),
+	#	:([M I M; I M M]), :([I M 2M; 3M 4I 5M]), # weird
+	#	:([I I M; I M I]), # unsupported
+		:([M M I; 2M 3M 4I]),
+		:([M I I; 2M 3I 4I]),
+	]
+
+	length(list1) != length(list2) && throw("bug")
+
+	for ii in 1:length(list1)
+		e1 = list1[ii]
+		b1 = eval(e1)
+		e2 = list2[ii]
+		b2 = eval(e2)
+		@test b1 isa LinearMapAA
+	end
+=#
+
+
+"""
+`LinearMapAA_test_cat(A::LinearMapAA)`
+test hcat vcat hvcat
+"""
+function LinearMapAA_test_cat(A::LinearMapAA)
+#	L = LinearMap(x -> A*x, y -> A'*y, size(A,1), size(A,2))
+	@show M = Matrix(A)
+
+#=
+	# cannot get cat with AbstractMatrix to work
+	M1 = reshape(1:35, N+1, N-1)
+	H2 = [A M1]
+	@test H2 isa LinearMapAA
+	@test Matrix(H2) == [Matrix(A) H2]
+	H1 = [M1 A]
+	@test H1 isa LinearMapAA
+	@test Matrix(H1) == [M1 Matrix(A)]
+
+	M2 = reshape(1:(3*N), 3, N)
+	V1 = [M2; A]
+	@test V1 isa LinearMapAA
+	@test Matrix(V1) == [M2; Matrix(A)]
+	V2 = [A; M2]
+	@test V2 isa LinearMapAA
+	@test Matrix(V2) == [Matrix(A); M2]
+=#
+
+	fun0 = A -> [
+		[A I], [I A], [2A 3A],
+		[A; I], [I; A], [2A; 3A],
+		[A A I], [A I A], [2A 3A 4A],
+		[A; A; I], [A; I; A], [2A; 3A; 4A],
+		[I A I], [I A A],
+		[I; A; I], [I; A; A],
+	#	[I I A], [I; I; A], # unsupported
+		[A A; A A], [A I; 2A 3I], [I A; 2I 3A],
+	#	[I A; A I], [A I; I A], # weird sizes
+		[A I A; 2A 3I 4A], [I A I; 2I 3A 4I],
+	#	[A I A; I A A], [I A 2A; 3A 4I 5A], # weird
+	#	[I I A; I A I], # unsupported
+		[A A I; 2A 3A 4I],
+		[A I I; 2A 3I 4I],
+	]
+
+	list1 = fun0(A)
+	list2 = fun0(M)
+
+	for ii in 1:length(list1)
+		b1 = list1[ii]
+		b2 = list2[ii]
+		@test b1 isa LinearMapAA
+		@test b2 isa AbstractMatrix
+		@test Matrix(b1) == b2
+		@test Matrix(b1') == Matrix(b1)'
+	end
+
+	true
+end
+
 
 """
 `LinearMapAA(:test)`
@@ -469,6 +609,7 @@ function LinearMapAA(test::Symbol)
 	@test LinearMapAA_test_getindex(A)
 	@test LinearMapAA_test_vmul(A)
 
+	@test LinearMapAA_test_cat(A)
 	@test LinearMapAA_test_setindex(A)
 
 	# add / subtract
@@ -501,44 +642,32 @@ function LinearMapAA(test::Symbol)
 	@test LinearMapAA_test_getindex(Af)
 	@test LinearMapAA_test_setindex(Af)
 
-	# hcat vcat tests
-#=
-	# cannot get cat with AbstractMatrix to work
-	M1 = reshape(1:35, N+1, N-1)
-	H2 = [A M1]
-	@test H2 isa LinearMapAA
-	@test Matrix(H2) == [Matrix(A) H2]
-	H1 = [M1 A]
-	@test H1 isa LinearMapAA
-	@test Matrix(H1) == [M1 Matrix(A)]
 
-	M2 = reshape(1:(3*N), 3, N)
-	V1 = [M2; A]
-	@test V1 isa LinearMapAA
-	@test Matrix(V1) == [M2; Matrix(A)]
-	V2 = [A; M2]
-	@test V2 isa LinearMapAA
-	@test Matrix(V2) == [Matrix(A); M2]
+#= todo: cut
+	a = ones(3,2)
+	b = zeros(3,4)
+
+	A = LinearMapAA(x -> a*x, y -> a'*y, (3, 2))
+	B = LinearMapAA(x -> b*x, y -> b'*y, (3, 4))
+
+	Al = [a b I]
+	C = [A B I] # now returns a new LinearMap :)
+	@test typeof(C) <: LinearMapAA
+#	display(C)
+#	@show C
+	@test Matrix(C) == Matrix(Al)
+	@test size(C) == (3,2+4+3)
+	@test C * ones(size(C,2)) == 3. * ones(3)
+	@test C' * ones(size(C,1)) == [3.0, 3.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+	@test Matrix(C)' == Matrix(C')
 =#
-
-	AIAh = [A I A]
-	AIAv = [A; I; A]
-	AIAr = [A I A; 2A I 3A]
-	IAAh = [I A A]
-	IAAv = [I; A; A]
-	IAAr = [I A 2A; 3A 4I 5A]
-	@test AIAh isa LinearMapAA
-	@test AIAv isa LinearMapAA
-	@test AIAr isa LinearMapAA
-	@test IAAh isa LinearMapAA
-	@test IAAv isa LinearMapAA
-	@test IAAr isa LinearMapAA
-	@test Matrix(AIAh) == [Lm I Lm]
-	@test Matrix(AIAv) == [Lm; I; Lm]
-	@test Matrix(AIAr) == [Lm I Lm; 2Lm I 3Lm]
-	@test Matrix(IAAh) == [I Lm Lm]
-	@test Matrix(IAAv) == [I; Lm; Lm]
-	@test Matrix(IAAr) == [I Lm 2Lm; 3Lm 4I 5Lm]
 
 	true
 end
+
+#= mwe for LinearMaps bug
+A = LinearMap(ones(3,2))
+B = [I A; A I]
+Matrix(B) # works fine
+Matrix(B') # fails with error DimensionMismatch("mul!")
+=#
