@@ -144,6 +144,7 @@ function lm_promote(A::LMcat)
 end
 
 # single-letter codes for cat objects, e.g., [A I A] becomes "AIA"
+#= not so useful
 function lm_code(A)
 	isa(A, LinearMapAA) ? "A" :
 	isa(A, AbstractMatrix) ? "M" :
@@ -151,9 +152,11 @@ function lm_code(A)
 	isa(A, LinearMap) ? "L" :
 	"?"
 end
+=#
 
 # concatenate the single-letter codes, e.g., [A I A] becomes "AIA"
-lm_name = As -> *(lm_code.(As)...)
+# lm_name = As -> *(lm_code.(As)...)
+lm_name = As -> nothing
 
 # these rely on LinearMap.*cat methods
 "`B = lmaa_hcat(A1, A2, ...)` `hcat` of multiple objects"
@@ -569,7 +572,7 @@ function LinearMapAA(test::Symbol)
 	A = LinearMapAA(L, prop)
 	Lm = Matrix(L)
 
-	@test lm_name((Lm, A, I, L, "")) == "MAIL?"
+#	@test lm_name((Lm, A, I, L, "")) == "MAIL?"
 
 	display(A)
 
