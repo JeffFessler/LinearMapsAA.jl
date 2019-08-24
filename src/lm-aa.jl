@@ -145,10 +145,10 @@ end
 
 # single-letter codes for cat objects, e.g., [A I A] becomes "AIA"
 function lm_code(A)
-	A isa LinearMapAA ? "A" :
-	A isa AbstractMatrix ? "M" :
-	A isa UniformScaling ? "I" :
-	A isa LinearMap ? "L" :
+	isa(A, LinearMapAA) ? "A" :
+	isa(A, AbstractMatrix) ? "M" :
+	isa(A, UniformScaling) ? "I" :
+	isa(A, LinearMap) ? "L" :
 	"?"
 end
 
