@@ -92,7 +92,7 @@ like `[I I A]`, though one can accomplish that one using
 The following features are provided
 by a `LinearMapAA` object
 due to its `getindex` support:
-- Columns or rows: `A[:,5]`, `A[end,:]`etc. return a 1D vector
+- Columns or rows slicing: `A[:,5]`, `A[end,:]`etc. return a 1D vector
 - Elements: `A[4,5]` (returns a scalar)
 - Portions: `A[4:6,5:8]` (returns a dense matrix)
 - Linear indexing: `A[2:9]` (returns a 1D vector)
@@ -110,6 +110,7 @@ Examples:
 - `A[2,3] = 7`
 - `A[:,4] = ones(size(A,1))`
 - `A[end] = 0`
+
 A single `setindex!` call is reasonably fast,
 but multiple calls add layers of complexity
 that are likely to slow things down.
@@ -130,7 +131,7 @@ akin to a matrix,
 except when for operations like `svd` and `pinv`
 that are unsuitable for large-scale problems.
 However, one can try
-`Arpack.svds(A)`](https://julialinearalgebra.github.io/Arpack.jl/latest/index.html#Arpack.svds)
+[`Arpack.svds(A)`](https://julialinearalgebra.github.io/Arpack.jl/latest/index.html#Arpack.svds)
 to compute a few SVD components.
 
 This package provides similar functionality
