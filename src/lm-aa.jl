@@ -233,15 +233,16 @@ Base.:(*)(A::AbstractMatrix, B::LinearMapAA) =
 	LinearMapAA(LinearMap(A) * B._lmap, B._prop)
 
 # multiply with I or s*I (identity or scaled identity)
-Base.:(*)(A::LinearMapAA, B::UniformScaling{Bool}) = B.λ ? A : A * B.λ
-Base.:(*)(A::LinearMapAA, B::UniformScaling) = B.λ == 1 ? A : A * B.λ
-Base.:(*)(B::UniformScaling, A::LinearMapAA) = A * B
+Base.:(*)(A::LinearMapAA, B::UniformScaling{Bool}) = B.λ ? A : (A * B.λ)
+Base.:(*)(A::LinearMapAA, B::UniformScaling) = (B.λ == 1) ? A : (A * B.λ)
+Base.:(*)(B::UniformScaling{Bool}, A::LinearMapAA) = B.λ ? A : (B.λ * A)
+Base.:(*)(B::UniformScaling, A::LinearMapAA) = (B.λ == 1) ? A : (B.λ * A)
 
 # multiply with vector
 Base.:(*)(A::LinearMapAA, v::AbstractVector{<:Number}) = A._lmap * v
 
 # multiply with scalars
-Base.:(*)(s::Number, A::LinearMapAA) = LinearMapAA(s*I * A._lmap, A._prop)
+Base.:(*)(s::Number, A::LinearMapAA) = LinearMapAA((s*I) * A._lmap, A._prop)
 Base.:(*)(A::LinearMapAA, s::Number) = LinearMapAA(A._lmap * (s*I), A._prop)
 
 # kronecker
