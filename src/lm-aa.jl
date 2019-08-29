@@ -232,9 +232,10 @@ Base.:(*)(A::LinearMapAA, B::AbstractMatrix) =
 Base.:(*)(A::AbstractMatrix, B::LinearMapAA) =
 	LinearMapAA(LinearMap(A) * B._lmap, B._prop)
 
-# multiply with I or s*I
-Base.:(*)(A::LinearMapAA, B::UniformScaling) = LinearMapAA(A._lmap * B, A._prop)
-Base.:(*)(B::UniformScaling, A::LinearMapAA) = LinearMapAA(B * A._lmap, A._prop)
+# multiply with I or s*I (identity or scaled identity)
+Base.:(*)(A::LinearMapAA, B::UniformScaling{Bool}) = B.λ ? A : A * B.λ
+Base.:(*)(A::LinearMapAA, B::UniformScaling) = B.λ == 1 ? A : A * B.λ
+Base.:(*)(B::UniformScaling, A::LinearMapAA) = A * B
 
 # multiply with vector
 Base.:(*)(A::LinearMapAA, v::AbstractVector{<:Number}) = A._lmap * v
@@ -243,6 +244,16 @@ Base.:(*)(A::LinearMapAA, v::AbstractVector{<:Number}) = A._lmap * v
 Base.:(*)(s::Number, A::LinearMapAA) = LinearMapAA(s*I * A._lmap, A._prop)
 Base.:(*)(A::LinearMapAA, s::Number) = LinearMapAA(A._lmap * (s*I), A._prop)
 
+# kronecker
+#=
+todo after LM is updated
+Base.kron(A::LinearMapAA, M::AbstractMatrix) =
+	LinearMapAA(kron(A._lmap, M), A._prop)
+Base.kron(M::AbstractMatrix, A::LinearMapAA) =
+	LinearMapAA(kron(A._lmap, M), A._prop)
+Base.kron(A::LinearMapAA, B::LinearMapAA) =
+	LinearMapAA(kron(A._lmap, B._lmap), (kron=nothing,))
+=#
 
 # A.?
 Base.getproperty(A::LinearMapAA, s::Symbol) =
@@ -625,11 +636,15 @@ function LinearMapAA(test::Symbol)
 	@test Matrix(7A - 2*ones(size(A))) == 7 * Matrix(A) - 2*ones(size(A))
 	@test Matrix(3*ones(size(A)) - 5A) == 3*ones(size(A)) - 5 * Matrix(A)
 
-	# multiply
+	# multiply with identity
 	@test Matrix(A * 6I) == 6 * Matrix(A)
 	@test Matrix(7I * A) == 7 * Matrix(A)
-#	@test I * A === A
-#	@test A * I === A
+	@test 1.0I * A === A
+	@test A * 1.0I === A
+	@test I * A === A
+	@test A * I === A
+
+	# multiply
 	D = A * A'
 	@test D isa LinearMapAA
 	@test Matrix(D) == Lm * Lm'
@@ -647,6 +662,18 @@ function LinearMapAA(test::Symbol)
 	@test LinearMapAA_test_getindex(Af)
 	@test LinearMapAA_test_setindex(Af)
 
+	# kron
+#= todo
+	M1 = rand(ComplexF64, 3, 3)
+	M2 = rand(ComplexF64, 2, 2)
+	M3 = kron(M1, M2)
+	A1 = LinearMap(M1)
+	A2 = LinearMap(M2)
+	AK = kron(A1, A2)
+	@test AK isa LinearMapAA
+	@test Matrix(AK) == M3
+	@test Matrix(AK)' == Matrix(AK')
+=#
 
 #= todo: cut
 	a = ones(3,2)
