@@ -641,6 +641,7 @@ function LinearMapAA(test::Symbol)
 	@test Matrix(A * 6I) == 6 * Matrix(A)
 	@test Matrix(7I * A) == 7 * Matrix(A)
 	@test Matrix((false*I) * A) == zeros(size(A))
+	@test Matrix(A * (false*I)) == zeros(size(A))
 	@test 1.0I * A === A
 	@test A * 1.0I === A
 	@test I * A === A
