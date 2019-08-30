@@ -134,6 +134,11 @@ However, one can try
 [`Arpack.svds(A)`](https://julialinearalgebra.github.io/Arpack.jl/latest/index.html#Arpack.svds)
 to compute a few SVD components.
 
+[`LazyArrays.jl`](https://github.com/JuliaArrays/LazyArrays.jl)
+also has some related features,
+but only for arrays, not linear operators defined by functions,
+so `LinearMaps` is more comprehensive.
+
 This package provides similar functionality
 as the `Fatrix` / `fatrix` object in the
 [Matlab version of MIRT](https://github.com/JeffFessler/mirt).
