@@ -135,8 +135,11 @@ However, one can try
 to compute a few SVD components.
 
 [`LazyArrays.jl`](https://github.com/JuliaArrays/LazyArrays.jl)
-also has some related features,
-but only for arrays, not linear operators defined by functions,
+and
+[`BlockArrays.jl`](https://github.com/JuliaArrays/BlockArrays.jl)
+also have some related features,
+but only for arrays,
+not linear operators defined by functions,
 so `LinearMaps` is more comprehensive.
 
 This package provides similar functionality
