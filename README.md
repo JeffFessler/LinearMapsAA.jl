@@ -149,6 +149,8 @@ Currently the `odim` and `idim` features of those objects
 are not available here,
 but I hope to add such support.
 
+[`FunctionOperators.jl`](https://github.com/hakkelt/FunctionOperators.jl)
+supports `inDims` and `outDims` features.
 
 ## Credits
 
