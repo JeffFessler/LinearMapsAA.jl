@@ -137,7 +137,7 @@ LMcat{T} = Union{LinearMapAA{T}, LinearMap{T}, UniformScaling{T}} # settle
 # convert to something suitable for LinearMap.*cat
 function lm_promote(A::LMcat)
 	A isa LinearMapAA ? A._lmap :
-	A isa AbstractMatrix ? LinearMap(A) :
+#	A isa AbstractMatrix ? LinearMap(A) :
 	A isa UniformScaling ? A : # leave unchanged - ok for LinearMaps.*cat
 	# A isa LinearMap ?
 	A # otherwise it is this
