@@ -136,11 +136,13 @@ LMcat{T} = Union{LinearMapAA{T}, LinearMap{T}, UniformScaling{T}} # settle
 
 # convert to something suitable for LinearMap.*cat
 function lm_promote(A::LMcat)
+#	@show typeof(A)
 	A isa LinearMapAA ? A._lmap :
-#	A isa AbstractMatrix ? LinearMap(A) :
 	A isa UniformScaling ? A : # leave unchanged - ok for LinearMaps.*cat
-	# A isa LinearMap ?
 	A # otherwise it is this
+#	throw("bug") # should only be only of LMcat types
+#	A isa AbstractMatrix ? LinearMap(A) :
+#	A isa LinearMap ?
 end
 
 # single-letter codes for cat objects, e.g., [A I A] becomes "AIA"
@@ -504,8 +506,9 @@ end
 test hcat vcat hvcat
 """
 function LinearMapAA_test_cat(A::LinearMapAA)
-#	L = LinearMap(x -> A*x, y -> A'*y, size(A,1), size(A,2))
+	Lm = LinearMap{eltype(A)}(x -> A*x, y -> A'*y, size(A,1), size(A,2))
 	M = Matrix(A)
+#	B0 = [M Lm] # fails! todo: bug in LinearMaps ??
 
 #=
 	# cannot get cat with AbstractMatrix to work
@@ -541,10 +544,16 @@ function LinearMapAA_test_cat(A::LinearMapAA)
 	#	[I I A; I A I], # unsupported
 		[A A I; 2A 3A 4I],
 		[A I I; 2A 3I 4I],
+	#	[A Lm], # need one LinearMap test for codecov (see below)
 	]
 
 	list1 = fun0(A)
 	list2 = fun0(M)
+
+	if true # need one LinearMap test for codecov
+		push!(list1, [A Lm])
+		push!(list2, [M M]) # trick because [M Lm] fails
+	end
 
 	for ii in 1:length(list1)
 		b1 = list1[ii]
