@@ -11,6 +11,9 @@ for the adjoint.
 =#
 
 using FFTW
+using LinearMapsAA: LinearMapAA
+using LinearMaps: LinearMap
+using LinearAlgebra: mul!
 using Test: @test
 
 N = 8
@@ -39,16 +42,19 @@ if true
 end
 
 if true # essentially identical
+	println("adjoint:")
 	@btime x = ($L)' * $y
 	@btime x = ($A)' * $y
 end
 
 if true # essentially identical
+	println("forward:")
 	@btime y = $L * $x
 	@btime y = $A * $x
 end
 
 if true # essentially identical
+	println("mul!:")
 	@btime mul!($y, $L, $x)
 	@btime mul!($y, $A, $x)
 end

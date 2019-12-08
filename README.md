@@ -165,7 +165,8 @@ from the `LinearMaps` package.
 
 
 This package is included in the
-Michigan Image Reconstruction Toolbox (MIRT.jl)
+Michigan Image Reconstruction Toolbox
+[`MIRT.jl`](https://github.com/JeffFessler/MIRT.jl)
 and is exported there
 so that MIRT users can use it
 without "separate" installation.
@@ -179,7 +180,8 @@ package.
 
 ## Compatability
 
-Tested with Julia 1.1 and 1.2
+* Version 0.2.0 tested with Julia 1.1 and 1.2
+* Version 0.3.0 requires Julia 1.3
 
 
 ## Getting started
