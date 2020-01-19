@@ -96,15 +96,17 @@ Base.Matrix(A::LinearMapAA) = Matrix(A._lmap)
     show(io::IO, ::MIME"text/plain", A::LinearMapAA)
 pretty printing for `display`
 """
-Base.show(io::IO, A::LinearMapAA) =
+Base.show(io::IO, A::LinearMapAA) = # short version
+		print(io, "LinearMapAA: $(size(A,1))×$(size(A,2))")
+
+Base.show(io::IO, ::MIME"text/plain", A::LinearMapAA) = # multi-line version
 	begin
-		print(io, "LinearMapAA: $(size(A,1))×$(size(A,2)) $(A._prop)")
-		tmp = "$(A._lmap)"[1:77]
-		print(io, " $tmp ..")
-	#	display(A._lmap)
-	#	display(A._prop)
+		show(io, A)
+		print(io, "\n$(A._prop)")
+		print(io, "\n$(A._lmap)\n")
+	#	tmp = "$(A._lmap)"[1:77]
+	#	print(io, " $tmp ..")
 	end
-Base.show(io::IO, ::MIME"text/plain", A::LinearMapAA) = show(io, A)
 
 # size
 Base.size(A::LinearMapAA) = size(A._lmap)
