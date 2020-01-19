@@ -91,17 +91,20 @@ Base.Matrix(A::LinearMapAA) = Matrix(A._lmap)
 # ndims
 # Base.ndims(A::LinearMapAA) = ndims(A._lmap) # 2 for AbstractMatrix
 
-# display
-Base.display(A::LinearMapAA) =
+"""
+    show(io::IO, A::LinearMapAA)
+    show(io::IO, ::MIME"text/plain", A::LinearMapAA)
+pretty printing for `display`
+"""
+Base.show(io::IO, A::LinearMapAA) =
 	begin
-		println("LinearMapAA: $(size(A,1))×$(size(A,2)) $(A._prop)")
+		print(io, "LinearMapAA: $(size(A,1))×$(size(A,2)) $(A._prop)")
 		tmp = "$(A._lmap)"[1:77]
-		println(" $tmp ..")
+		print(io, " $tmp ..")
 	#	display(A._lmap)
 	#	display(A._prop)
 	end
-
-Base.Multimedia.display(m::MIME, A::LinearMapAA) = display(A)
+Base.show(io::IO, ::MIME"text/plain", A::LinearMapAA) = show(io, A)
 
 # size
 Base.size(A::LinearMapAA) = size(A._lmap)
@@ -597,8 +600,7 @@ function LinearMapAA(test::Symbol)
 
 #	@test lm_name((Lm, A, I, L, "")) == "MAIL?"
 
-	display(A)
-	display("text/plain", A)
+	show(stdout, "text/plain", A)
 
 	@test A._lmap == LinearMapAA(L)._lmap
 #	@test A == LinearMapAA(forw, back, M, N, prop)
