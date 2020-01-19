@@ -77,6 +77,7 @@ of appropriate sizes,
 then the following each make new `LinearMapAA` objects:
 - Multiplication: `A * B`
 - Linear combination: `A + B`, `A - B`, `3A - 7B`,
+- Kronecker products: `kron(A, B)`
 
 Conversion to other data types
 (may require lots of memory if `A` is big):

@@ -254,16 +254,19 @@ Base.:(*)(A::LinearMapAA, v::AbstractVector{<:Number}) = A._lmap * v
 Base.:(*)(s::Number, A::LinearMapAA) = LinearMapAA((s*I) * A._lmap, A._prop)
 Base.:(*)(A::LinearMapAA, s::Number) = LinearMapAA(A._lmap * (s*I), A._prop)
 
-# kronecker
-#=
-todo after LM is updated
+# kron (requires LM 2.6.0)
+"""
+    kron(A::LinearMapAA, M::AbstractMatrix)
+	kron(M::AbstractMatrix, A::LinearMapAA)
+	kron(A::LinearMapAA, B::LinearMapAA)
+Kronecker products
+"""
 Base.kron(A::LinearMapAA, M::AbstractMatrix) =
 	LinearMapAA(kron(A._lmap, M), A._prop)
 Base.kron(M::AbstractMatrix, A::LinearMapAA) =
-	LinearMapAA(kron(A._lmap, M), A._prop)
+	LinearMapAA(kron(M, A._lmap), A._prop)
 Base.kron(A::LinearMapAA, B::LinearMapAA) =
 	LinearMapAA(kron(A._lmap, B._lmap), (kron=nothing,))
-=#
 
 # A.?
 Base.getproperty(A::LinearMapAA, s::Symbol) =
@@ -575,6 +578,24 @@ function LinearMapAA_test_cat(A::LinearMapAA)
 end
 
 
+# kron test
+function LinearMapAA_test_kron( ;
+		M1 = rand(ComplexF64, 3, 3),
+		M2 = rand(ComplexF64, 2, 2),
+	)
+	M3 = kron(M1, M2)
+	A1 = LinearMapAA(M1)
+	A2 = LinearMapAA(M2)
+	for pair in ((A1,A2), (A1,M2), (M1,A2)) # all combinations
+		AAk = kron(pair[1], pair[2])
+		@test AAk isa LinearMapAA
+		@test Matrix(AAk) == M3
+		@test Matrix(AAk)' == Matrix(AAk')
+	end
+	true
+end
+
+
 """
 `LinearMapAA(:test)`
 self test
@@ -682,43 +703,7 @@ function LinearMapAA(test::Symbol)
 	@test LinearMapAA_test_setindex(Af)
 
 	# kron
-#= todo
-	M1 = rand(ComplexF64, 3, 3)
-	M2 = rand(ComplexF64, 2, 2)
-	M3 = kron(M1, M2)
-	A1 = LinearMap(M1)
-	A2 = LinearMap(M2)
-	AK = kron(A1, A2)
-	@test AK isa LinearMapAA
-	@test Matrix(AK) == M3
-	@test Matrix(AK)' == Matrix(AK')
-=#
-
-#= todo: cut
-	a = ones(3,2)
-	b = zeros(3,4)
-
-	A = LinearMapAA(x -> a*x, y -> a'*y, (3, 2))
-	B = LinearMapAA(x -> b*x, y -> b'*y, (3, 4))
-
-	Al = [a b I]
-	C = [A B I] # now returns a new LinearMap :)
-	@test typeof(C) <: LinearMapAA
-#	display(C)
-#	@show C
-	@test Matrix(C) == Matrix(Al)
-	@test size(C) == (3,2+4+3)
-	@test C * ones(size(C,2)) == 3. * ones(3)
-	@test C' * ones(size(C,1)) == [3.0, 3.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
-	@test Matrix(C)' == Matrix(C')
-=#
+	@test LinearMapAA_test_kron()
 
 	true
 end
-
-#= mwe for LinearMaps bug
-A = LinearMap(ones(3,2))
-B = [I A; A I]
-Matrix(B) # works fine
-Matrix(B') # fails with error DimensionMismatch("mul!")
-=#
