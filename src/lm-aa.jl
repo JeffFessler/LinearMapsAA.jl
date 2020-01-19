@@ -598,6 +598,7 @@ function LinearMapAA(test::Symbol)
 #	@test lm_name((Lm, A, I, L, "")) == "MAIL?"
 
 	display(A)
+	display("text/plain", A)
 
 	@test A._lmap == LinearMapAA(L)._lmap
 #	@test A == LinearMapAA(forw, back, M, N, prop)
