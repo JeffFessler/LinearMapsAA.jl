@@ -101,6 +101,8 @@ Base.display(A::LinearMapAA) =
 	#	display(A._prop)
 	end
 
+Base.Multimedia.display(m::MIME, A::LinearMapAA) = display(A)
+
 # size
 Base.size(A::LinearMapAA) = size(A._lmap)
 Base.size(A::LinearMapAA, d::Int) = size(A._lmap, d)
