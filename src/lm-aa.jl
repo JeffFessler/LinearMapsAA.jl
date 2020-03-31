@@ -69,7 +69,7 @@ constructor
 LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ;
 	T::DataType = Float32) =
 	LinearMapAA(LinearMap{T}(f, fc, D[1], D[2]), prop)
-LinearMapAA(f::Function, fc::Function, D::Dims{2}, T::DataType = Float32) =
+LinearMapAA(f::Function, fc::Function, D::Dims{2} ; T::DataType = Float32) =
 	LinearMapAA(f, fc, D, (none=nothing,) ; T=T)
 
 """
@@ -615,7 +615,7 @@ function LinearMapAA(test::Symbol)
 
 	prop = (name="cumsum", extra=1)
 	@test LinearMapAA(forw, (M, N)) isa LinearMapAA
-	@test LinearMapAA(forw, (M, N), prop, T=Float64) isa LinearMapAA
+	@test LinearMapAA(forw, (M, N), prop ; T=Float64) isa LinearMapAA
 
 	L = LinearMap{Float32}(forw, back, M, N)
 	A = LinearMapAA(L, prop)
