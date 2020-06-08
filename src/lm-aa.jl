@@ -15,7 +15,7 @@ import SparseArrays: sparse
 Indexer = AbstractVector{Int}
 
 """
-`mutable struct LinearMapAA{T} <: AbstractMatrix{T}`
+    mutable struct LinearMapAA{T} <: AbstractMatrix{T}
 
 old way may not properly allow `setindex!` to work as desired
 because it may change the type of the lmap and of the prop:
@@ -42,7 +42,7 @@ include("setindex.jl")
 # constructors
 
 """
-`A = LinearMapAA(L::LinearMap [, prop::NamedTuple ; T = eltype(L)])`
+    A = LinearMapAA(L::LinearMap [, prop::NamedTuple ; T = eltype(L)])
 constructor
 
 `prop` cannot include the field `_lmap` or `_prop`
@@ -55,7 +55,7 @@ end
 LinearMapAA(L::LinearMap) = LinearMapAA(L, (none=nothing,))
 
 """
-`A = LinearMapAA(L::AbstractMatrix [, prop::NamedTuple])`
+    A = LinearMapAA(L::AbstractMatrix [, prop::NamedTuple])
 constructor
 """
 LinearMapAA(L::AbstractMatrix, prop::NamedTuple) =
@@ -63,7 +63,7 @@ LinearMapAA(L::AbstractMatrix, prop::NamedTuple) =
 LinearMapAA(L::AbstractMatrix) = LinearMapAA(L, (none=nothing,))
 
 """
-`A = LinearMapAA(f::Function, fc::Function, D::Dims{2} [, prop::NamedTuple)] ; T::DataType`
+    A = LinearMapAA(f::Function, fc::Function, D::Dims{2} [, prop::NamedTuple)] ; T::DataType
 constructor
 """
 LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ;
@@ -73,7 +73,7 @@ LinearMapAA(f::Function, fc::Function, D::Dims{2} ; T::DataType = Float32) =
 	LinearMapAA(f, fc, D, (none=nothing,) ; T=T)
 
 """
-`A = LinearMapAA(f::Function, D::Dims{2} [, prop::NamedTuple)]`
+    A = LinearMapAA(f::Function, D::Dims{2} [, prop::NamedTuple)]
 constructor
 """
 LinearMapAA(f::Function, D::Dims{2}, prop::NamedTuple ; T::DataType = Float32) =
@@ -360,7 +360,7 @@ using Test: @test, @test_throws
 
 
 """
-`LinearMapAA_test_getindex(A::LinearMapAA)`
+    LinearMapAA_test_getindex(A::LinearMapAA)
 tests for `getindex`
 """
 function LinearMapAA_test_getindex(A::LinearMapAA)
@@ -416,7 +416,7 @@ end
 
 
 """
-`LinearMapAA_test_vmul(A::LinearMapAA)`
+    LinearMapAA_test_vmul(A::LinearMapAA)
 tests for multiply with vector and `lmul!` and `rmul!` for scalars too
 """
 function LinearMapAA_test_vmul(A::LinearMapAA)
@@ -512,7 +512,7 @@ end
 
 
 """
-`LinearMapAA_test_cat(A::LinearMapAA)`
+    LinearMapAA_test_cat(A::LinearMapAA)
 test hcat vcat hvcat
 """
 function LinearMapAA_test_cat(A::LinearMapAA)
@@ -599,7 +599,7 @@ end
 
 
 """
-`LinearMapAA(:test)`
+    LinearMapAA(:test)
 self test
 """
 function LinearMapAA(test::Symbol)
