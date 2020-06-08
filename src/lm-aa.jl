@@ -518,7 +518,9 @@ test hcat vcat hvcat
 function LinearMapAA_test_cat(A::LinearMapAA)
 	Lm = LinearMap{eltype(A)}(x -> A*x, y -> A'*y, size(A,1), size(A,2))
 	M = Matrix(A)
-#	B0 = [M Lm] # fails! todo: bug in LinearMaps ??
+
+#	LinearMaps supports *cat of LM and UniformScaling only
+#	B0 = [M Lm] # fails!
 
 #=
 	# cannot get cat with AbstractMatrix to work
