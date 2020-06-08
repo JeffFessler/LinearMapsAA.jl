@@ -1,8 +1,14 @@
 # test/runtests.jl
 
 using LinearMapsAA
-using Test: @test, detect_ambiguities
+using Test: @test, @testset, detect_ambiguities
 
-@test LinearMapAA(:test)
+@testset "LinearMapAA" begin
+	@test LinearMapAA(:test)
+end
+
+@testset "block_diag" begin
+	@test block_diag(:test)
+end
 
 @test length(detect_ambiguities(LinearMapsAA)) == 0

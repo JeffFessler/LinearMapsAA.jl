@@ -11,5 +11,6 @@ export LinearMapAA
 # Indexer = AbstractVector{Int}
 
 include("lm-aa.jl")
+include("block_diag.jl")
 
 end # module
