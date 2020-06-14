@@ -228,6 +228,8 @@ Base.:(+)(A::LinearMapAA, B::LinearMapAA) =
 	LinearMapAA(A._lmap + B._lmap, (sum=nothing,))
 Base.:(+)(A::LinearMapAA, B::AbstractMatrix) =
 	LinearMapAA(A._lmap + LinearMap(B), A._prop)
+Base.:(+)(A::LinearMapAA, B::UniformScaling) = # A + I -> A + I(N)
+	LinearMapAA(A._lmap + B(size(A,2)), (Aprop=A._prop, Iscale=B(size(A,2))[1]))
 Base.:(+)(A::AbstractMatrix, B::LinearMapAA) =
 	LinearMapAA(LinearMap(A) + B._lmap, B._prop)
 Base.:(-)(A::LinearMapAA, B::LinearMapAA) = A + (-1)*B
@@ -627,7 +629,7 @@ function LinearMapAA(test::Symbol)
 
 #	@test lm_name((Lm, A, I, L, "")) == "MAIL?"
 
-	show(stdout, "text/plain", A)
+	show(isinteractive() ? stdout : devnull, "text/plain", A)
 
 	@test A._lmap == LinearMapAA(L)._lmap
 #	@test A == LinearMapAA(forw, back, M, N, prop)
@@ -687,6 +689,9 @@ function LinearMapAA(test::Symbol)
 	@test A * 1.0I === A
 	@test I * A === A
 	@test A * I === A
+
+	# add identity
+	@test Matrix(A'A - 7I) == Matrix(A'A) - 7I
 
 	# multiply
 	D = A * A'
