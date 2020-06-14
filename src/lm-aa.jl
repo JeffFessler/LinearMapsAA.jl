@@ -103,7 +103,8 @@ Base.show(io::IO, ::MIME"text/plain", A::LinearMapAA) = # multi-line version
 	begin
 		show(io, A)
 		print(io, "\n$(A._prop)")
-		print(io, "\n$(A._lmap)\n")
+	#	print(io, "\n$(A._lmap)\n") # todo: hide until "show" fixed for LM
+		print(io, "\n$(typeof(A._lmap)) ...\n")
 	#	tmp = "$(A._lmap)"[1:77]
 	#	print(io, " $tmp ..")
 	end
