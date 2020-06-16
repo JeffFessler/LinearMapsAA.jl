@@ -1,6 +1,7 @@
 #=
 lm-aa
 2019-08-07 Jeff Fessler, University of Michigan
+2020-06-16 add 5-arg mul!
 =#
 
 export lmaa_hcat, lmaa_vcat, lmaa_hvcat
@@ -199,6 +200,10 @@ Base.hvcat(rows::NTuple{nr,Int} where nr,
 # multiply with vectors
 
 mul!(y::AbstractVector, A::LinearMapAA, x::AbstractVector) = mul!(y, A._lmap, x)
+# 5-arg mul! requires julia 1.3 or later
+# mul!(y, A, x, α, β) ≡ y .= A*(α*x) + β*y
+mul!(y::AbstractVector, A::LinearMapAA, x::AbstractVector, α::Number, β::Number) =
+	mul!(y, A._lmap, x, α, β)
 
 #= these seem pointless; see multiplication with scalars below
 lmul!(s::Number, A::LinearMapAA) = lmul!(s, A._lmap)
@@ -424,9 +429,10 @@ tests for multiply with vector and `lmul!` and `rmul!` for scalars too
 """
 function LinearMapAA_test_vmul(A::LinearMapAA)
 	B = Matrix(A)
+	(M,N) = size(A)
 
-	u = rand(size(A,1))
-	v = rand(size(A,2))
+	u = rand(M)
+	v = rand(N)
 
 	y = A * v
 	x = A' * u
@@ -437,6 +443,18 @@ function LinearMapAA_test_vmul(A::LinearMapAA)
 	mul!(x, A', u)
 	@test isapprox(B * v, y)
 	@test isapprox(B' * u, x)
+
+	y1 = randn(M)
+	y2 = copy(y1)
+	mul!(y1, A, v, 2, 3)
+	mul!(y2, B, v, 2, 3)
+	@test isapprox(y1, y2)
+
+	x1 = randn(N)
+	x2 = copy(x1)
+	mul!(x1, A', u, 4, 3)
+	mul!(x2, B', u, 4, 3)
+	@test isapprox(x1, x2)
 
 	s = 5.1
 	C = s * A
@@ -667,6 +685,7 @@ function LinearMapAA(test::Symbol)
 	@test Matrix(A)' == Matrix(A')
 	@test Matrix(A)' == Matrix(transpose(A))
 	@test LinearMapAA_test_getindex(A)
+
 	@test LinearMapAA_test_vmul(A)
 
 	@test LinearMapAA_test_cat(A)
