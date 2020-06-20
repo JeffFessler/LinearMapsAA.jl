@@ -205,22 +205,22 @@ Base.hvcat(rows::NTuple{nr,Int} where nr,
 # mul!(y, A, x, α, β) ≡ y .= A*(α*x) + β*y
 
 mul!(y::AbstractVector, A::LinearMapAA, x::AbstractVector) =
-#	lmaa_mul!(y, A._lmap, x, 1, 0)
-	mul!(y, A._lmap, x)
+	lmaa_mul!(y, A._lmap, x, 1, 0)
+#	mul!(y, A._lmap, x)
 
 mul!(y::AbstractVector, A::LinearMapAA, x::AbstractVector, α::Number, β::Number) =
-#	lmaa_mul!(y, A._lmap, x, α, β)
-	mul!(y, A._lmap, x, α, β)
+	lmaa_mul!(y, A._lmap, x, α, β)
+#	mul!(y, A._lmap, x, α, β)
 
 # treat LinearMaps.CompositeMap as special case for in-place operations
-function lmaa_mul!(y::AbstractVector, A::LinearMaps.CompositeMap,
+function lmaa_mul!(y::AbstractVector, Lm::LinearMaps.CompositeMap,
 	x::AbstractVector, α::Number, β::Number)
-	@info "todo: handle composite"
-	mul!(y, A._lmap, x, α, β)
+	mul!(y, Lm, x, α, β) # todo: composite
 end
 
-lmaa_mul!(y::AbstractVector, A::LinearMap,
-	x::AbstractVector, α::Number, β::Number) = mul!(y, A._lmap, x, α, β)
+# 5-arg mul! for any other type
+lmaa_mul!(y::AbstractVector, Lm::LinearMap,
+	x::AbstractVector, α::Number, β::Number) = mul!(y, Lm, x, α, β)
 
 
 #= these seem pointless; see multiplication with scalars below
@@ -473,14 +473,14 @@ function LinearMapAA_test_vmul(A::LinearMapAA)
 	mul!(x2, B', u, 4, 3)
 	@test isapprox(x1, x2)
 
-	s = 5.1
+	s = 4.2
 	C = s * A
 	@test isapprox(Matrix(C), s * B)
 	C = A * s
 	@test isapprox(Matrix(C), B * s)
 
 #=
-	s = 5.1
+	s = 4.2
 	C = copy(A)
 	lmul!(s, C)
 	@test isapprox(s * B * v, C * v)
@@ -492,6 +492,7 @@ function LinearMapAA_test_vmul(A::LinearMapAA)
 
 	true
 end
+
 
 #=
 	this approach using eval() works only in the global scope!
@@ -717,6 +718,7 @@ function LinearMapAA(test::Symbol)
 
 	@testset "vmul" begin
 		@test LinearMapAA_test_vmul(A)
+		@test LinearMapAA_test_vmul(A*A'*A) # CompositeMap
 	end
 
 	@testset "cat" begin
