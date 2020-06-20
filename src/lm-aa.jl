@@ -9,8 +9,9 @@ export lmaa_hcat, lmaa_vcat, lmaa_hvcat
 using LinearMaps: LinearMap
 using LinearAlgebra: UniformScaling, I
 import LinearAlgebra: issymmetric, ishermitian, isposdef
-import LinearAlgebra: mul!, lmul!, rmul!
+import LinearAlgebra: mul! #, lmul!, rmul!
 import SparseArrays: sparse
+using Test: @test, @testset, @test_throws
 
 
 Indexer = AbstractVector{Int}
@@ -197,13 +198,30 @@ Base.hvcat(rows::NTuple{nr,Int} where nr,
 		A1::UniformScaling, A2::LinearMapAA, As::LMcat...) =
 	lmaa_hvcat(rows, A1, A2, As...)
 
-# multiply with vectors
 
-mul!(y::AbstractVector, A::LinearMapAA, x::AbstractVector) = mul!(y, A._lmap, x)
+# multiply with vectors (in-place)
+# pass to lmaa_mul! to handle composite maps (products) effectively
 # 5-arg mul! requires julia 1.3 or later
 # mul!(y, A, x, α, β) ≡ y .= A*(α*x) + β*y
+
+mul!(y::AbstractVector, A::LinearMapAA, x::AbstractVector) =
+#	lmaa_mul!(y, A._lmap, x, 1, 0)
+	mul!(y, A._lmap, x)
+
 mul!(y::AbstractVector, A::LinearMapAA, x::AbstractVector, α::Number, β::Number) =
+#	lmaa_mul!(y, A._lmap, x, α, β)
 	mul!(y, A._lmap, x, α, β)
+
+# treat LinearMaps.CompositeMap as special case for in-place operations
+function lmaa_mul!(y::AbstractVector, A::LinearMaps.CompositeMap,
+	x::AbstractVector, α::Number, β::Number)
+	@info "todo: handle composite"
+	mul!(y, A._lmap, x, α, β)
+end
+
+lmaa_mul!(y::AbstractVector, A::LinearMap,
+	x::AbstractVector, α::Number, β::Number) = mul!(y, A._lmap, x, α, β)
+
 
 #= these seem pointless; see multiplication with scalars below
 lmul!(s::Number, A::LinearMapAA) = lmul!(s, A._lmap)
@@ -364,7 +382,6 @@ Base.getindex(A::LinearMapAA, ::Colon) = A[:,:][:]
 
 
 # test
-using Test: @test, @test_throws
 
 
 """
@@ -684,46 +701,73 @@ function LinearMapAA(test::Symbol)
 
 	@test Matrix(A)' == Matrix(A')
 	@test Matrix(A)' == Matrix(transpose(A))
-	@test LinearMapAA_test_getindex(A)
 
-	@test LinearMapAA_test_vmul(A)
+	@testset "wrap" begin # WrappedMap vs FunctionMap
+		M1 = rand(3,2)
 
-	@test LinearMapAA_test_cat(A)
-	@test LinearMapAA_test_setindex(A)
+		A1w = LinearMapAA(M1)
+		A1f = LinearMapAA(x -> M1*x, y -> M1'y, size(M1), T=eltype(M1))
+		@test Matrix(A1w) == M1
+		@test Matrix(A1f) == M1
+	end
+
+	@testset "getindex" begin
+		@test LinearMapAA_test_getindex(A)
+	end
+
+	@testset "vmul" begin
+		@test LinearMapAA_test_vmul(A)
+	end
+
+	@testset "cat" begin
+		@test LinearMapAA_test_cat(A)
+	end
+
+	@testset "setindex" begin
+		@test LinearMapAA_test_setindex(A)
+	end
 
 	# add / subtract
-	@test 2A + 6A isa LinearMapAA
-	@test 7A - 2A isa LinearMapAA
-	@test Matrix(2A + 6A) == 8 * Matrix(A)
-	@test Matrix(7A - 2A) == 5 * Matrix(A)
-	@test Matrix(7A - 2*ones(size(A))) == 7 * Matrix(A) - 2*ones(size(A))
-	@test Matrix(3*ones(size(A)) - 5A) == 3*ones(size(A)) - 5 * Matrix(A)
+	@testset "add" begin
+		@test 2A + 6A isa LinearMapAA
+		@test 7A - 2A isa LinearMapAA
+		@test Matrix(2A + 6A) == 8 * Matrix(A)
+		@test Matrix(7A - 2A) == 5 * Matrix(A)
+		@test Matrix(7A - 2*ones(size(A))) == 7 * Matrix(A) - 2*ones(size(A))
+		@test Matrix(3*ones(size(A)) - 5A) == 3*ones(size(A)) - 5 * Matrix(A)
+	end
 
 	# multiply with identity
-	@test Matrix(A * 6I) == 6 * Matrix(A)
-	@test Matrix(7I * A) == 7 * Matrix(A)
-	@test Matrix((false*I) * A) == zeros(size(A))
-	@test Matrix(A * (false*I)) == zeros(size(A))
-	@test 1.0I * A === A
-	@test A * 1.0I === A
-	@test I * A === A
-	@test A * I === A
+	@testset "*I" begin
+		@test Matrix(A * 6I) == 6 * Matrix(A)
+		@test Matrix(7I * A) == 7 * Matrix(A)
+		@test Matrix((false*I) * A) == zeros(size(A))
+		@test Matrix(A * (false*I)) == zeros(size(A))
+		@test 1.0I * A === A
+		@test A * 1.0I === A
+		@test I * A === A
+		@test A * I === A
+	end
 
 	# add identity
-	@test Matrix(A'A - 7I) == Matrix(A'A) - 7I
+	@testset "+I" begin
+		@test Matrix(A'A - 7I) == Matrix(A'A) - 7I
+	end
 
 	# multiply
-	D = A * A'
-	@test D isa LinearMapAA
-	@test Matrix(D) == Lm * Lm'
-	@test issymmetric(D) == true
-	E = A * Lm'
-	@test E isa LinearMapAA
-	@test Matrix(E) == Lm * Lm'
-	F = Lm' * A
-	@test F isa LinearMapAA
-	@test Matrix(F) == Lm' * Lm
-	@test LinearMapAA_test_getindex(F)
+	@testset "*" begin
+		D = A * A'
+		@test D isa LinearMapAA
+		@test Matrix(D) == Lm * Lm'
+		@test issymmetric(D) == true
+		E = A * Lm'
+		@test E isa LinearMapAA
+		@test Matrix(E) == Lm * Lm'
+		F = Lm' * A
+		@test F isa LinearMapAA
+		@test Matrix(F) == Lm' * Lm
+		@test LinearMapAA_test_getindex(F)
+	end
 
 	# non-adjoint version
 	Af = LinearMapAA(forw, (M, N))
@@ -731,7 +775,9 @@ function LinearMapAA(test::Symbol)
 	@test LinearMapAA_test_setindex(Af)
 
 	# kron
-	@test LinearMapAA_test_kron()
+	@testset "kron" begin
+		@test LinearMapAA_test_kron()
+	end
 
 	true
 end
