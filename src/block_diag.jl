@@ -29,13 +29,13 @@ self test
 function block_diag(test::Symbol)
 	!(test === :test) && throw("error $test")
 
-	M1 = rand(4,3)
-	M2 = rand(5,6)
+	M1 = rand(3,2)
+	M2 = rand(5,4)
 	M = [M1 zeros(size(M1,1),size(M2,2));
 		zeros(size(M2,1),size(M1,2)) M2]
 
-	A1 = LinearMapAA(M1)
-	A2 = LinearMapAA(x -> M2*x, y -> M2'y, size(M2))
+	A1 = LinearMapAA(M1) # WrappedMap
+	A2 = LinearMapAA(x -> M2*x, y -> M2'y, size(M2), T=eltype(M2)) # FunctionMap
 	B = block_diag(A1, A2)
 
 	@test Matrix(B) == M
@@ -43,5 +43,3 @@ function block_diag(test::Symbol)
 
 	true
 end
-
-block_diag(:test)
