@@ -15,27 +15,32 @@ using Test: @test, @testset, @test_throws
 
 
 Indexer = AbstractVector{Int}
+LMAAkeys = (:_lmap, :_prop, :_idim, :_ldim)
 
-"""
-    mutable struct LinearMapAA{T} <: AbstractMatrix{T}
 
-old way may not properly allow `setindex!` to work as desired
+#=
+Note: this old way may not properly allow `setindex!` to work as desired
 because it may change the type of the lmap and of the prop:
 `struct LinearMapAA{T, M <: LinearMap, P <: NamedTuple} <: AbstractMatrix{T}`
-"""
-mutable struct LinearMapAA{T} <: AbstractMatrix{T}
-#{T, M <: LinearMap, P <: NamedTuple}
-#	_lmap::M
-	_lmap::LinearMap
-#	_prop::P
-	_prop::NamedTuple
-#=
+{T, M <: LinearMap, P <: NamedTuple}
+	_lmap::M
+	_prop::P
 	function LinearMapAA{T}(L::M, p::P) where {T, M <: LinearMap, P <: NamedTuple}
 	function LinearMapAA(L::LinearMap, p::NamedTuple) # where {T, M <: LinearMap, P <: NamedTuple}
 	#	new{T,M,P}(L, p)
 		new(L, p)
 	end
 =#
+
+
+"""
+    mutable struct LinearMapAA{T} <: AbstractMatrix{T}
+"""
+mutable struct LinearMapAA{T} <: AbstractMatrix{T}
+	_lmap::LinearMap # "L"
+	_prop::NamedTuple # user-defined "named properties" accessible via A.name
+	_idim::Dims # "input" dimensions, usually (size(L,2),)
+	_odim::Dims # "output" dimensions, usually (size(L,1),)
 end
 
 include("setindex.jl")
@@ -44,44 +49,62 @@ include("setindex.jl")
 # constructors
 
 """
-    A = LinearMapAA(L::LinearMap [, prop::NamedTuple ; T = eltype(L)])
+    A = LinearMapAA(L::LinearMap [, prop::NamedTuple ; T = eltype(L), idim=, odim=])
 constructor
 
-`prop` cannot include the field `_lmap` or `_prop`
+`prop` cannot include the fields `_lmap`, `_prop`, `_idim`, `_odim`
 """
-function LinearMapAA(L::LinearMap, prop::NamedTuple ; T = eltype(L))
-	:_lmap in propertynames(prop) && throw("cannot use _lmap")
-	:_prop in propertynames(prop) && throw("cannot use _prop")
-	return LinearMapAA{T}(L, prop)
+function LinearMapAA(L::LinearMap, prop::NamedTuple
+	; T::Type = eltype(L),
+	idim::Dims = (size(L,2),),
+	odim::Dims = (size(L,1),),
+)
+
+	(idim != (size(L,2),)) && throw("idim not yet done")
+	(odim != (size(L,1),)) && throw("idim not yet done")
+
+	length(intersect(propertynames(prop), LMAAkeys)) > 0 &&
+		throw("invalid property field among $(propertynames(prop))")
+#	:_lmap in propertynames(prop) && throw("cannot use _lmap")
+#	:_prop in propertynames(prop) && throw("cannot use _prop")
+	return LinearMapAA{T}(L, prop, idim, odim)
 end
-LinearMapAA(L::LinearMap) = LinearMapAA(L, (none=nothing,))
+
+LinearMapAA(L::LinearMap ; kwargs...) =
+	LinearMapAA(L, (none=nothing,) ; kwargs...)
+
 
 """
     A = LinearMapAA(L::AbstractMatrix [, prop::NamedTuple])
 constructor
 """
-LinearMapAA(L::AbstractMatrix, prop::NamedTuple) =
-	LinearMapAA(LinearMap(L), prop)
-LinearMapAA(L::AbstractMatrix) = LinearMapAA(L, (none=nothing,))
+LinearMapAA(L::AbstractMatrix, prop::NamedTuple ; kwargs...) =
+	LinearMapAA(LinearMap(L), prop ; kwargs...)
+LinearMapAA(L::AbstractMatrix ; kwargs...) =
+	LinearMapAA(L, (none=nothing,) ; kwargs...)
 
 """
-    A = LinearMapAA(f::Function, fc::Function, D::Dims{2} [, prop::NamedTuple)] ; T::DataType
+    A = LinearMapAA(f::Function, fc::Function, D::Dims{2} [, prop::NamedTuple)]
+    ; T::DataType = Float32, idim::Dims, odim::Dims)
 constructor
 """
 LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ;
-	T::DataType = Float32) =
-	LinearMapAA(LinearMap{T}(f, fc, D[1], D[2]), prop)
-LinearMapAA(f::Function, fc::Function, D::Dims{2} ; T::DataType = Float32) =
-	LinearMapAA(f, fc, D, (none=nothing,) ; T=T)
+	T::DataType = Float32,
+	kwargs...,
+) =
+	LinearMapAA(LinearMap{T}(f, fc, D[1], D[2]), prop ; kwargs...)
+LinearMapAA(f::Function, fc::Function, D::Dims{2} ; kwargs...) =
+	LinearMapAA(f, fc, D, (none=nothing,) ; kwargs...)
 
 """
-    A = LinearMapAA(f::Function, D::Dims{2} [, prop::NamedTuple)]
+    A = LinearMapAA(f::Function, D::Dims{2} [, prop::NamedTuple])
 constructor
 """
-LinearMapAA(f::Function, D::Dims{2}, prop::NamedTuple ; T::DataType = Float32) =
-	LinearMapAA(LinearMap{T}(f, D[1], D[2]), prop)
-LinearMapAA(f::Function, D::Dims{2} ; T::DataType = Float32) =
-	LinearMapAA(f, D, (none=nothing,), T=T)
+LinearMapAA(f::Function, D::Dims{2}, prop::NamedTuple ;
+	T::DataType = Float32, kwargs...) =
+	LinearMapAA(LinearMap{T}(f, D[1], D[2]), prop ; kwargs...)
+LinearMapAA(f::Function, D::Dims{2} ; kwargs...) =
+	LinearMapAA(f, D, (none=nothing,) ; kwargs...)
 
 
 # copy
@@ -296,7 +319,7 @@ Base.kron(A::LinearMapAA, B::LinearMapAA) =
 
 # A.?
 Base.getproperty(A::LinearMapAA, s::Symbol) =
-	s in (:_lmap, :_prop) ? getfield(A, s) :
+	(s in LMAAkeys) ? getfield(A, s) :
 #	s == :m ? size(A._lmap, 1) :
 	haskey(A._prop, s) ? getfield(A._prop, s) :
 		throw("unknown key $s")
@@ -698,7 +721,11 @@ function LinearMapAA(test::Symbol)
 	@test A._prop == prop
 	@test A.name == prop.name
 
-	@test_throws String A.bug
+	@testset "throw" begin
+		@test_throws String A.bug
+		@test_throws String LinearMapAA(L ; idim=(2,4)) # todo: unsupported
+		@test_throws String LinearMapAA(L, (_prop=0,))
+	end
 
 	@test Matrix(A)' == Matrix(A')
 	@test Matrix(A)' == Matrix(transpose(A))
