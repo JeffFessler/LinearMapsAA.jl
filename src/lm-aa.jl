@@ -85,11 +85,9 @@ LinearMapAA(L, prop::NamedTuple ; kwargs...) =
 
 
 """
-    A = LinearMapAA(L::AbstractMatrix [, prop::NamedTuple] ; ...)
-constructor
+    A = LinearMapAA(L::AbstractMatrix ; ...)
+Constructor
 """
-LinearMapAA(L::AbstractMatrix, prop::NamedTuple ; kwargs...) =
-	LinearMapAA(L ; prop=prop, kwargs...)
 LinearMapAA(L::AbstractMatrix ; kwargs...) =
 	LinearMapAA(LinearMap(L) ; kwargs...)
 
