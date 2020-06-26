@@ -1,5 +1,6 @@
 #=
 lm-aa
+Core type and methods for LinearMapAA objects.
 2019-08-07 Jeff Fessler, University of Michigan
 2020-06-16 add 5-arg mul!
 =#
@@ -15,7 +16,7 @@ using Test: @test, @testset, @test_throws
 
 
 Indexer = AbstractVector{Int}
-LMAAkeys = (:_lmap, :_prop, :_idim, :_ldim)
+LMAAkeys = (:_lmap, :_prop, :_idim, :_odim)
 
 
 #=
@@ -49,66 +50,79 @@ include("setindex.jl")
 # constructors
 
 """
-    A = LinearMapAA(L::LinearMap [, prop::NamedTuple ; T = eltype(L), idim=, odim=])
-constructor
+    A = LinearMapAA(L::LinearMap ; ...)
+
+Constructor
+
+options
+- `prop::NamedTuple = NamedTuple()`
+- `T = eltype(L)`
+- `idim::Dims = (size(L,2),)`
+- `odim::Dims = (size(L,1),)`
 
 `prop` cannot include the fields `_lmap`, `_prop`, `_idim`, `_odim`
 """
-function LinearMapAA(L::LinearMap, prop::NamedTuple
-	; T::Type = eltype(L),
+function LinearMapAA(L::LinearMap ;
+	prop::NamedTuple = NamedTuple(),
+	T::Type = eltype(L),
 	idim::Dims = (size(L,2),),
 	odim::Dims = (size(L,1),),
 )
 
-	(idim != (size(L,2),)) && throw("idim not yet done")
-	(odim != (size(L,1),)) && throw("idim not yet done")
-
+	(idim == (size(L,2),)) || throw("idim not yet done")
+	(odim == (size(L,1),)) || throw("odim not yet done")
+	size(L,2) == prod(idim) || throw("size2=$(size(L,2)) vs idim=$idim")
+	size(L,1) == prod(odim) || throw("size1=$(size(L,1)) vs odim=$odim")
 	length(intersect(propertynames(prop), LMAAkeys)) > 0 &&
 		throw("invalid property field among $(propertynames(prop))")
-#	:_lmap in propertynames(prop) && throw("cannot use _lmap")
-#	:_prop in propertynames(prop) && throw("cannot use _prop")
+
 	return LinearMapAA{T}(L, prop, idim, odim)
 end
 
-LinearMapAA(L::LinearMap ; kwargs...) =
-	LinearMapAA(L, (none=nothing,) ; kwargs...)
+# for backwards compatibility:
+LinearMapAA(L, prop::NamedTuple ; kwargs...) =
+	LinearMapAA(L::LinearMap ; prop=prop, kwargs...)
 
 
 """
-    A = LinearMapAA(L::AbstractMatrix [, prop::NamedTuple])
+    A = LinearMapAA(L::AbstractMatrix [, prop::NamedTuple] ; ...)
 constructor
 """
 LinearMapAA(L::AbstractMatrix, prop::NamedTuple ; kwargs...) =
-	LinearMapAA(LinearMap(L), prop ; kwargs...)
+	LinearMapAA(L ; prop=prop, kwargs...)
 LinearMapAA(L::AbstractMatrix ; kwargs...) =
-	LinearMapAA(L, (none=nothing,) ; kwargs...)
+	LinearMapAA(LinearMap(L) ; kwargs...)
+
 
 """
     A = LinearMapAA(f::Function, fc::Function, D::Dims{2} [, prop::NamedTuple)]
     ; T::DataType = Float32, idim::Dims, odim::Dims)
 constructor
 """
-LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ;
+LinearMapAA(f::Function, fc::Function, D::Dims{2} ;
 	T::DataType = Float32,
 	kwargs...,
 ) =
-	LinearMapAA(LinearMap{T}(f, fc, D[1], D[2]), prop ; kwargs...)
-LinearMapAA(f::Function, fc::Function, D::Dims{2} ; kwargs...) =
-	LinearMapAA(f, fc, D, (none=nothing,) ; kwargs...)
+	LinearMapAA(LinearMap{T}(f, fc, D[1], D[2]) ; kwargs...)
+
+LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ; kwargs...) =
+	LinearMapAA(f, fc, D ; prop=prop, kwargs...)
+
 
 """
-    A = LinearMapAA(f::Function, D::Dims{2} [, prop::NamedTuple])
+    A = LinearMapAA(f::Function, D::Dims{2} [, prop::NamedTuple]; kwargs...)
 constructor
 """
-LinearMapAA(f::Function, D::Dims{2}, prop::NamedTuple ;
-	T::DataType = Float32, kwargs...) =
-	LinearMapAA(LinearMap{T}(f, D[1], D[2]), prop ; kwargs...)
-LinearMapAA(f::Function, D::Dims{2} ; kwargs...) =
-	LinearMapAA(f, D, (none=nothing,) ; kwargs...)
+LinearMapAA(f::Function, D::Dims{2} ; T::DataType = Float32, kwargs...) =
+	LinearMapAA(LinearMap{T}(f, D[1], D[2]) ; kwargs...)
+
+LinearMapAA(f::Function, D::Dims{2}, prop::NamedTuple ; kwargs...) =
+	LinearMapAA(f, D ; prop=prop, kwargs...)
 
 
 # copy
-Base.copy(A::LinearMapAA) = LinearMapAA(A._lmap, A._prop)
+Base.copy(A::LinearMapAA{T}) where {T} =
+	LinearMapAA(A._lmap ; prop=A._prop, T=T, idim=A._idim, odim=A._odim)
 
 # Matrix
 Base.Matrix(A::LinearMapAA) = Matrix(A._lmap)
@@ -116,18 +130,21 @@ Base.Matrix(A::LinearMapAA) = Matrix(A._lmap)
 # ndims
 # Base.ndims(A::LinearMapAA) = ndims(A._lmap) # 2 for AbstractMatrix
 
+
 """
     show(io::IO, A::LinearMapAA)
     show(io::IO, ::MIME"text/plain", A::LinearMapAA)
 pretty printing for `display`
 """
 Base.show(io::IO, A::LinearMapAA) = # short version
-		print(io, "LinearMapAA: $(size(A,1))×$(size(A,2))")
+		print(io, "LinearMapAA: $(size(A,1)) × $(size(A,2))")
 
-Base.show(io::IO, ::MIME"text/plain", A::LinearMapAA) = # multi-line version
+# multi-line version:
+Base.show(io::IO, ::MIME"text/plain", A::LinearMapAA{T}) where {T} =
 	begin
 		show(io, A)
-		print(io, "\n$(A._prop)")
+		(A._prop != NamedTuple()) && print(io, "\n$(A._prop)")
+		print(io, "\nodim=$(A._odim) idim=$(A._idim) T=$T")
 	#	print(io, "\n$(A._lmap)\n") # todo: hide until "show" fixed for LM
 		print(io, "\n$(typeof(A._lmap)) ...\n")
 	#	tmp = "$(A._lmap)"[1:77]
@@ -139,10 +156,12 @@ Base.size(A::LinearMapAA) = size(A._lmap)
 Base.size(A::LinearMapAA, d::Int) = size(A._lmap, d)
 
 # adjoint
-Base.adjoint(A::LinearMapAA) = LinearMapAA(A._lmap', A._prop)
+Base.adjoint(A::LinearMapAA) =
+	LinearMapAA(adjoint(A._lmap), A._prop ; idim=A._odim, odim=A._idim)
 
 # transpose
-Base.transpose(A::LinearMapAA) = LinearMapAA(transpose(A._lmap), A._prop)
+Base.transpose(A::LinearMapAA) =
+	LinearMapAA(transpose(A._lmap), A._prop ; idim=A._odim, odim=A._idim)
 
 # eltype
 Base.eltype(A::LinearMapAA) = eltype(A._lmap)
@@ -155,7 +174,9 @@ isposdef(A::LinearMapAA) = isposdef(A._lmap)
 
 # comparison of LinearMapAA objects, sufficient but not necessary
 Base.:(==)(A::LinearMapAA, B::LinearMapAA) =
-	(eltype(A) == eltype(B) && A._lmap == B._lmap && A._prop == B._prop)
+	eltype(A) == eltype(B) &&
+		A._lmap == B._lmap && A._prop == B._prop &&
+		A._idim == B._idim && A._odim == B._odim
 
 # convert to sparse
 sparse(A::LinearMapAA) = sparse(A._lmap)
@@ -195,6 +216,7 @@ lm_name = As -> nothing
 
 # these rely on LinearMap.*cat methods
 "`B = lmaa_hcat(A1, A2, ...)` `hcat` of multiple objects"
+# todo: check odim ...
 lmaa_hcat(As::LMcat...) =
 	LinearMapAA(hcat(lm_promote.(As)...), (hcat=lm_name(As),))
 "`B = lmaa_vcat(A1, A2, ...)` `vcat` of multiple objects"
@@ -228,17 +250,17 @@ Base.hvcat(rows::NTuple{nr,Int} where nr,
 # mul!(y, A, x, α, β) ≡ y .= A*(α*x) + β*y
 
 mul!(y::AbstractVector, A::LinearMapAA, x::AbstractVector) =
-	lmaa_mul!(y, A._lmap, x, 1, 0)
+	lmaa_mul!(y, A._lmap, x, 1, 0) # todo idim
 #	mul!(y, A._lmap, x)
 
 mul!(y::AbstractVector, A::LinearMapAA, x::AbstractVector, α::Number, β::Number) =
-	lmaa_mul!(y, A._lmap, x, α, β)
+	lmaa_mul!(y, A._lmap, x, α, β) # todo idim
 #	mul!(y, A._lmap, x, α, β)
 
 # treat LinearMaps.CompositeMap as special case for in-place operations
 function lmaa_mul!(y::AbstractVector, Lm::LinearMaps.CompositeMap,
 	x::AbstractVector, α::Number, β::Number)
-	mul!(y, Lm, x, α, β) # todo: composite
+	mul!(y, Lm, x, α, β) # todo: composite, idim
 end
 
 # 5-arg mul! for any other type
@@ -270,24 +292,29 @@ end
 
 
 # add or subtract objects
-Base.:(+)(A::LinearMapAA, B::LinearMapAA) =
-	LinearMapAA(A._lmap + B._lmap, (sum=nothing,))
+function Base.:(+)(A::LinearMapAA, B::LinearMapAA)
+	(A._idim != B._idim) && throw("idim mismatch")
+	(A._odim != B._odim) && throw("odim mismatch")
+	LinearMapAA(A._lmap + B._lmap, (sum=nothing,) ; idim=A._idim, odim=A._odim)
+end
 Base.:(+)(A::LinearMapAA, B::AbstractMatrix) =
 	LinearMapAA(A._lmap + LinearMap(B), A._prop)
 Base.:(+)(A::LinearMapAA, B::UniformScaling) = # A + I -> A + I(N)
 	LinearMapAA(A._lmap + B(size(A,2)), (Aprop=A._prop, Iscale=B(size(A,2))[1]))
 Base.:(+)(A::AbstractMatrix, B::LinearMapAA) =
-	LinearMapAA(LinearMap(A) + B._lmap, B._prop)
+	LinearMapAA(LinearMap(A) + B._lmap, B._prop ; idim=B._idim, odim=B._odim)
 Base.:(-)(A::LinearMapAA, B::LinearMapAA) = A + (-1)*B
 Base.:(-)(A::LinearMapAA, B::AbstractMatrix) = A + (-1)*B
 Base.:(-)(A::AbstractMatrix, B::LinearMapAA) = A + (-1)*B
 
 # multiply objects
-Base.:(*)(A::LinearMapAA, B::LinearMapAA) =
-	LinearMapAA(A._lmap * B._lmap, (prod=nothing,))
-Base.:(*)(A::LinearMapAA, B::AbstractMatrix) =
+function Base.:(*)(A::LinearMapAA, B::LinearMapAA)
+	(A._idim != B._odim) && throw("dim mismatch")
+	LinearMapAA(A._lmap * B._lmap, (prod=nothing,) ; idim=B._idim, odim=A._odim)
+end
+Base.:(*)(A::LinearMapAA, B::AbstractMatrix) = # todo!
 	LinearMapAA(A._lmap * LinearMap(B), A._prop)
-Base.:(*)(A::AbstractMatrix, B::LinearMapAA) =
+Base.:(*)(A::AbstractMatrix, B::LinearMapAA) = # todo!
 	LinearMapAA(LinearMap(A) * B._lmap, B._prop)
 
 # multiply with I or s*I (identity or scaled identity)
@@ -297,7 +324,8 @@ Base.:(*)(B::UniformScaling{Bool}, A::LinearMapAA) = B.λ ? A : (B.λ * A)
 Base.:(*)(B::UniformScaling, A::LinearMapAA) = (B.λ == 1) ? A : (B.λ * A)
 
 # multiply with vector
-Base.:(*)(A::LinearMapAA, v::AbstractVector{<:Number}) = A._lmap * v
+Base.:(*)(A::LinearMapAA, v::AbstractVector{<:Number}) = # todo
+	A._lmap * v
 
 # multiply with scalars
 Base.:(*)(s::Number, A::LinearMapAA) = LinearMapAA((s*I) * A._lmap, A._prop)
