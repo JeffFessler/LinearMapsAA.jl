@@ -35,13 +35,13 @@ because it may change the type of the lmap and of the prop:
 
 
 """
-    mutable struct LinearMapAA{T} <: AbstractMatrix{T}
+    mutable struct LinearMapAA{T,Do,Di} <: AbstractMatrix{T}
 """
-mutable struct LinearMapAA{T} <: AbstractMatrix{T}
+mutable struct LinearMapAA{T,Do,Di} <: AbstractMatrix{T}
 	_lmap::LinearMap # "L"
 	_prop::NamedTuple # user-defined "named properties" accessible via A.name
-	_idim::Dims # "input" dimensions, usually (size(L,2),)
-	_odim::Dims # "output" dimensions, usually (size(L,1),)
+	_idim::Dims{Di} # "input" dimensions, usually (size(L,2),)
+	_odim::Dims{Do} # "output" dimensions, usually (size(L,1),)
 end
 
 include("setindex.jl")
@@ -65,9 +65,9 @@ options
 function LinearMapAA(L::LinearMap ;
 	prop::NamedTuple = NamedTuple(),
 	T::Type = eltype(L),
-	idim::Dims = (size(L,2),),
-	odim::Dims = (size(L,1),),
-)
+	idim::Dims{Di} = (size(L,2),),
+	odim::Dims{Do} = (size(L,1),),
+) where {Di,Do}
 
 	(idim == (size(L,2),)) || throw("idim not yet done")
 	(odim == (size(L,1),)) || throw("odim not yet done")
@@ -76,7 +76,7 @@ function LinearMapAA(L::LinearMap ;
 	length(intersect(propertynames(prop), LMAAkeys)) > 0 &&
 		throw("invalid property field among $(propertynames(prop))")
 
-	return LinearMapAA{T}(L, prop, idim, odim)
+	return LinearMapAA{T,Do,Di}(L, prop, idim, odim)
 end
 
 # for backwards compatibility:
@@ -121,7 +121,7 @@ LinearMapAA(f::Function, D::Dims{2}, prop::NamedTuple ; kwargs...) =
 
 
 # copy
-Base.copy(A::LinearMapAA{T}) where {T} =
+Base.copy(A::LinearMapAA{T,Do,Di}) where {T,Do,Di} =
 	LinearMapAA(A._lmap ; prop=A._prop, T=T, idim=A._idim, odim=A._odim)
 
 # Matrix
@@ -140,7 +140,7 @@ Base.show(io::IO, A::LinearMapAA) = # short version
 		print(io, "LinearMapAA: $(size(A,1)) × $(size(A,2))")
 
 # multi-line version:
-Base.show(io::IO, ::MIME"text/plain", A::LinearMapAA{T}) where {T} =
+Base.show(io::IO, ::MIME"text/plain", A::LinearMapAA{T,Do,Di}) where {T,Do,Di} =
 	begin
 		show(io, A)
 		(A._prop != NamedTuple()) && print(io, "\n$(A._prop)")
@@ -154,6 +154,20 @@ Base.show(io::IO, ::MIME"text/plain", A::LinearMapAA{T}) where {T} =
 # size
 Base.size(A::LinearMapAA) = size(A._lmap)
 Base.size(A::LinearMapAA, d::Int) = size(A._lmap, d)
+
+"""
+    redim(A::LinearMapAA ; idim::Dims=A._idim, odim::Dims=A._odim)
+
+"Reinterpret" the `idim` and `odim` of `A`
+"""
+function redim(A::LinearMapAA{T} ;
+	idim::Dims=A._idim, odim::Dims=A._odim) where {T}
+
+	prod(idim) == prod(A._idim) || throw("incompatible idim")
+	prod(odim) == prod(A._odim) || throw("incompatible odim")
+	return LinearMapAA(A._lmap ; prop=A._prop, T=T, idim=idim, odim=odim)
+end
+
 
 # adjoint
 Base.adjoint(A::LinearMapAA) =
@@ -741,6 +755,7 @@ function LinearMapAA(test::Symbol)
 	@test Base.eltype(A) == eltype(L) # codecov
 	@test ndims(A) == 2
 	@test size(A) == size(L)
+    @test redim(A) isa LinearMapAA
 
 	B = copy(A)
 	@test B == A
