@@ -6,6 +6,7 @@ Multiplication of a LinearMapAX object with other things
 =#
 
 export mul!
+
 # export LinearMapAA_test_vmul # testing
 # export LinearMapAA_test_mul # testing
 
@@ -339,6 +340,9 @@ function LinearMapAA_test_vmul(A::LinearMapAO)
         mul!(x, A', u)
         @test isapprox(Bv, y)
         @test isapprox(Bpu, x)
+
+        A1 = redim(A ; idim = (N,))
+        @test A1 * vec(v) == y
     end
 
     #= nah

@@ -13,7 +13,6 @@ import LinearMaps
 using SparseArrays: blockdiag, sparse
 using Test: @test, @testset
 
-all_ao(As::LinearMapAX...) = all(map(A -> A isa LinearMapAO, As))
 same_idim(As::LinearMapAX...) = all(map(A -> A._idim == As[1]._idim, As))
 same_odim(As::LinearMapAX...) = all(map(A -> A._odim == As[1]._odim, As))
 
@@ -21,10 +20,15 @@ same_odim(As::LinearMapAX...) = all(map(A -> A._odim == As[1]._odim, As))
     B = block_diag(As::LinearMapAX... ; tryop::Bool)
 Make block diagonal `LinearMapAX` object from blocks.
 
-Return a `LinearMapAM` unless `tryop` and all blocks have same `idim` and `odim`
-Default for `tryop` is `true` if all blocks are type `LinearMapAO`
+Return a `LinearMapAM` unless `tryop` and all blocks have same `idim` and `odim`.
+
+Default for `tryop` is `true` if all blocks are type `LinearMapAO`.
 """
-function block_diag(As::LinearMapAX... ; tryop::Bool = all_ao(As...))
+block_diag(As::LinearMapAO... ; tryop::Bool = true) = block_diag(tryop, As...)
+
+block_diag(As::LinearMapAX... ; tryop::Bool = false) = block_diag(tryop, As...)
+
+function block_diag(tryop::Bool, As::LinearMapAX...)
     B = LinearMaps.blockdiag(map(A -> A._lmap, As)...)
     prop = (nblock = length(As),)
     nblock = length(As)
@@ -67,7 +71,6 @@ function block_diag(test::Symbol)
         @test block_diag(A1, Ao) isa LinearMapAM
         Bo = block_diag(Ao, Ao)
         @test Bo isa LinearMapAO
-        @test all_ao(Ao, A1) == false
 
         Md = blockdiag(sparse(M2), sparse(M2))
         X = rand(4,2)
