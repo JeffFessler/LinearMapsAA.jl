@@ -342,7 +342,8 @@ function LinearMapAA_test_vmul(A::LinearMapAO)
         @test isapprox(Bpu, x)
 
         A1 = redim(A ; idim = (N,))
-        @test A1 * vec(v) == y
+        y1 = A1 * vec(v)
+        @test y1 ≈ y
     end
 
     #= nah
