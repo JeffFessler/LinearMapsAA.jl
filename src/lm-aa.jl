@@ -11,6 +11,8 @@ import LinearAlgebra: issymmetric, ishermitian, isposdef
 import SparseArrays: sparse
 using Test: @test, @testset, @test_throws
 
+export redim, undim
+
 
 # copy
 Base.copy(A::LinearMapAX{T,Do,Di}) where {T,Do,Di} =
@@ -62,6 +64,14 @@ function redim(A::LinearMapAX{T} ;
 	prod(odim) == prod(A._odim) || throw("incompatible odim")
 	return LinearMapAA(A._lmap ; prop=A._prop, T=T, idim=idim, odim=odim)
 end
+
+"""
+    undim(A::LinearMapAX)
+
+"Reinterpret" the `idim` and `odim` of `A` to be of AM type
+"""
+undim(A::LinearMapAX{T}) where {T} =
+	LinearMapAA(A._lmap ; prop=A._prop, T=T)
 
 
 # adjoint
