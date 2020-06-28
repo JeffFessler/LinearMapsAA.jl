@@ -233,6 +233,7 @@ function LinearMapAA(test::Symbol)
 		@test LinearMapAA_test_vmul(A*A'*A) # CompositeMap
 		Ao = LinearMapAA(A._lmap ; odim=(1,size(A,1)), idim=(size(A,2),1))
 		@test LinearMapAA_test_vmul(Ao) # AO type
+		@test ndims(Ao) == 2
 	end
 
 	@testset "cat" begin
@@ -254,6 +255,11 @@ function LinearMapAA(test::Symbol)
 		@test_throws String @show A + redim(A ; idim=(3,2)) # mismatch dim
 	end
 
+	# add identity
+	@testset "+I" begin
+		@test Matrix(A'A - 7I) == Matrix(A'A) - 7I
+	end
+
 	# multiply with identity
 	@testset "*I" begin
 		@test Matrix(A * 6I) == 6 * Matrix(A)
@@ -264,11 +270,6 @@ function LinearMapAA(test::Symbol)
 		@test A * 1.0I === A
 		@test I * A === A
 		@test A * I === A
-	end
-
-	# add identity
-	@testset "+I" begin
-		@test Matrix(A'A - 7I) == Matrix(A'A) - 7I
 	end
 
 	# multiply
@@ -284,7 +285,10 @@ function LinearMapAA(test::Symbol)
 		@test F isa LinearMapAX
 		@test Matrix(F) == Lm' * Lm
 		@test LinearMapAA_test_getindex(F)
+
+		@test LinearMapAA_test_mul()
 	end
+
 
 	# non-adjoint version
 	@testset "non-adjoint" begin
