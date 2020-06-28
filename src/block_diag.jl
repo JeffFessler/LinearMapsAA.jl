@@ -30,8 +30,8 @@ block_diag(As::LinearMapAX... ; tryop::Bool = false) = block_diag(tryop, As...)
 
 function block_diag(tryop::Bool, As::LinearMapAX...)
     B = LinearMaps.blockdiag(map(A -> A._lmap, As)...)
-    prop = (nblock = length(As),)
     nblock = length(As)
+    prop = (nblock = nblock,)
     if (tryop && nblock > 1 && same_idim(As...) && same_odim(As...)) # operator version
         return LinearMapAA(B ; prop=prop,
             idim = (As[1]._idim..., nblock),

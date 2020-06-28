@@ -6,6 +6,8 @@ Concatenation support for LinearMapAX
 
 export lmaa_hcat, lmaa_vcat, lmaa_hvcat
 
+export LinearMapAA_test_cat # testing
+
 using LinearAlgebra: UniformScaling, I
 
 
@@ -20,14 +22,14 @@ end
 # cat (hcat, vcat, hvcat) are tricky for avoiding type piracy
 # It is especially hard to handle AbstractMatrix,
 # so typically force the user to wrap it in LinearMap(AX) first.
-#LMcat{T} = Union{LinearMapAX{T}, LinearMap{T}, UniformScaling{T},AbstractMatrix{T}}
-LMcat{T} = Union{LinearMapAX{T}, LinearMap{T}, UniformScaling{T}} # settle
-#LMelse{T} = Union{LinearMap{T},UniformScaling{T},AbstractMatrix{T}} # non AX
+#LMcat{T} = Union{LinearMapAM{T}, LinearMap{T}, UniformScaling{T},AbstractMatrix{T}}
+LMcat{T} = Union{LinearMapAM{T}, LinearMap{T}, UniformScaling{T}} # settle
+#LMelse{T} = Union{LinearMap{T},UniformScaling{T},AbstractMatrix{T}} # non AM
 
 # convert to something suitable for LinearMap.*cat
 function lm_promote(A::LMcat)
 #    @show typeof(A)
-    A isa LinearMapAX ? A._lmap :
+    A isa LinearMapAM ? A._lmap :
     A isa UniformScaling ? A : # leave unchanged - ok for LinearMaps.*cat
     A # otherwise it is this
 #    throw("bug") # should only be only of LMcat types
@@ -38,7 +40,7 @@ end
 # single-letter codes for cat objects, e.g., [A I A] becomes "AIA"
 #= not so useful
 function lm_code(A)
-    isa(A, LinearMapAX) ? "A" :
+    isa(A, LinearMapAM) ? "A" :
     isa(A, AbstractMatrix) ? "M" :
     isa(A, UniformScaling) ? "I" :
     isa(A, LinearMap) ? "L" :
@@ -62,23 +64,73 @@ lmaa_vcat(As::LMcat...) =
 lmaa_hvcat(rows::NTuple{nr,Int} where {nr}, As::LMcat...) =
     LinearMapAA(hvcat(rows, lm_promote.(As)...), (hvcat=lm_name(As),))
 
-# a single leading LinearMapAX followed by others is clear
-Base.hcat(A1::LinearMapAX, As::LMcat...) = # todo
+# a single leading LinearMapAM followed by others is clear
+Base.hcat(A1::LinearMapAM, As::LMcat...) = # todo
     lmaa_hcat(A1, As...)
-Base.vcat(A1::LinearMapAX, As::LMcat...) =
+Base.vcat(A1::LinearMapAM, As::LMcat...) =
     lmaa_vcat(A1, As...)
-Base.hvcat(rows::NTuple{nr,Int} where {nr}, A1::LinearMapAX, As::LMcat...) =
+Base.hvcat(rows::NTuple{nr,Int} where {nr}, A1::LinearMapAM, As::LMcat...) =
     lmaa_hvcat(rows, A1, As...)
 # or in 2nd position, beyond that, user can use lmaa_*
-#Base.hcat(A1::LMelse, A2::LinearMapAX, As::LMcat...) = # fails!?
-Base.hcat(A1::UniformScaling, A2::LinearMapAX, As::LMcat...) =
+#Base.hcat(A1::LMelse, A2::LinearMapAM, As::LMcat...) = # fails!?
+Base.hcat(A1::UniformScaling, A2::LinearMapAM, As::LMcat...) =
     lmaa_hcat(A1, A2, As...)
-Base.vcat(A1::UniformScaling, A2::LinearMapAX, As::LMcat...) =
+Base.vcat(A1::UniformScaling, A2::LinearMapAM, As::LMcat...) =
     lmaa_vcat(A1, A2, As...)
 Base.hvcat(rows::NTuple{nr,Int} where nr,
-        A1::UniformScaling, A2::LinearMapAX, As::LMcat...) =
+        A1::UniformScaling, A2::LinearMapAM, As::LMcat...) =
     lmaa_hvcat(rows, A1, A2, As...)
 
+
+# special handling for AO
+
+function _hcat(tryop::Bool, As::LinearMapAO...)
+    B = LinearMaps.hcat(map(A -> A._lmap, As)...)
+    nblock = length(As)
+    prop = (nblock = nblock,)
+    if (tryop && nblock > 1 && same_idim(As...) && same_odim(As...)) # operator version
+        return LinearMapAA(B ; prop=prop,
+            idim = (As[1]._idim..., nblock),
+            odim = As[1]._odim,
+        )
+    end
+    return LinearMapAA(B ; prop=prop)
+end
+
+function _vcat(tryop::Bool, As::LinearMapAO...)
+    B = LinearMaps.vcat(map(A -> A._lmap, As)...)
+    nblock = length(As)
+    prop = (nblock = nblock,)
+    if (tryop && nblock > 1 && same_idim(As...) && same_odim(As...)) # operator version
+        return LinearMapAA(B ; prop=prop,
+            idim = As[1]._idim,
+            odim = (As[1]._odim..., nblock),
+        )
+    end
+    return LinearMapAA(B ; prop=prop)
+end
+
+"""
+    hcat(As::LinearMapAO... ; tryop::Bool=true)
+`hcat` with (by default) attempt to append `nblock` to `idim` if consistent blocks.
+"""
+Base.hcat(A1::LinearMapAO, As::LinearMapAO... ; tryop::Bool=true) =
+    _hcat(tryop, A1, As...)
+
+"""
+    vcat(As::LinearMapAO... ; tryop::Bool=true)
+`vcat` with (by default) attempt to append `nblock` to `odim` if consistent blocks.
+"""
+Base.vcat(A1::LinearMapAO, As::LinearMapAO... ; tryop::Bool=true) =
+    _vcat(tryop, A1, As...)
+
+"""
+    hvcat(rows, As::LinearMapAO...)
+`hvcat` that discards special `idim` and `odim` information (too hard!) # todo
+"""
+Base.hvcat(rows::NTuple{nr,Int} where nr,
+        A1::LinearMapAO, As::LinearMapAO...) =
+    lmaa_hvcat(rows, undim(A1), undim.(As)...)
 
 
 # test
@@ -140,10 +192,10 @@ Base.hvcat(rows::NTuple{nr,Int} where nr,
 
 
 """
-    LinearMapAA_test_cat(A::LinearMapAX)
+    LinearMapAA_test_cat(A::LinearMapAM)
 test hcat vcat hvcat
 """
-function LinearMapAA_test_cat(A::LinearMapAX)
+function LinearMapAA_test_cat(A::LinearMapAM)
     Lm = LinearMap{eltype(A)}(x -> A*x, y -> A'*y, size(A,1), size(A,2))
     M = Matrix(A)
 
@@ -203,6 +255,29 @@ function LinearMapAA_test_cat(A::LinearMapAX)
         @test b2 isa AbstractMatrix
         @test Matrix(b1) == b2
         @test Matrix(b1') == Matrix(b1)'
+    end
+
+    true
+end
+
+
+"""
+    LinearMapAA_test_cat(A::LinearMapAO)
+test hcat vcat hvcat for AO
+"""
+function LinearMapAA_test_cat(A::LinearMapAO)
+    M = Matrix(A)
+
+    @testset "cat AO" begin
+        H = [A A]
+        V = [A; A]
+        B = [A 2A; 3A 4A]
+        @test H isa LinearMapAO
+        @test V isa LinearMapAO
+        @test B isa LinearMapAM # !!
+        @test Matrix(H) == [M M]
+        @test Matrix(V) == [M; M]
+        @test Matrix(B) == [M 2M; 3M 4M]
     end
 
     true
