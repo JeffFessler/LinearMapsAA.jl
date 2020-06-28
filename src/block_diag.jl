@@ -67,6 +67,7 @@ function block_diag(test::Symbol)
         @test block_diag(A1, Ao) isa LinearMapAM
         Bo = block_diag(Ao, Ao)
         @test Bo isa LinearMapAO
+        @test all_ao(Ao, A1) == false
 
         Md = blockdiag(sparse(M2), sparse(M2))
         X = rand(4,2)
