@@ -238,16 +238,17 @@ function LinearMapAA(test::Symbol)
 		@test LinearMapAA_test_getindex(A)
 	end
 
+	Ao = LinearMapAA(A._lmap ; odim=(1,size(A,1)), idim=(size(A,2),1))
 	@testset "vmul" begin
 		@test LinearMapAA_test_vmul(A)
 		@test LinearMapAA_test_vmul(A*A'*A) # CompositeMap
-		Ao = LinearMapAA(A._lmap ; odim=(1,size(A,1)), idim=(size(A,2),1))
 		@test LinearMapAA_test_vmul(Ao) # AO type
 		@test ndims(Ao) == 2
 	end
 
 	@testset "cat" begin
 		@test LinearMapAA_test_cat(A)
+		@test LinearMapAA_test_cat(Ao)
 	end
 
 	@testset "setindex" begin
