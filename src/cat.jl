@@ -6,7 +6,7 @@ Concatenation support for LinearMapAX
 
 export lmaa_hcat, lmaa_vcat, lmaa_hvcat
 
-export LinearMapAA_test_cat # testing
+# export LinearMapAA_test_cat # testing
 
 using LinearAlgebra: UniformScaling, I
 
@@ -278,6 +278,12 @@ function LinearMapAA_test_cat(A::LinearMapAO)
         @test Matrix(H) == [M M]
         @test Matrix(V) == [M; M]
         @test Matrix(B) == [M 2M; 3M 4M]
+    end
+
+    @testset "cat AO mixed" begin
+        B = redim(A, idim=(1,A._idim...)) # force incompatible dim
+        @test [A B] isa LinearMapAM
+        @test [A; B] isa LinearMapAM
     end
 
     true
