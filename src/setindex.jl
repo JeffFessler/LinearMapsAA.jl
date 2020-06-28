@@ -1,10 +1,10 @@
 #=
 setindex.jl
 
-Provide setindex!() capabilities like A[i,j] = s for LinearMapAA objects.
+Provide setindex!() capabilities like A[i,j] = s for LinearMapAM objects.
 
 The setindex! function here is (necessarily) quite inefficient.
-It is provided solely so that a LinearMapAA conforms to the AbstractMatrix
+It is provided solely so that a LinearMapAM conforms to the AbstractMatrix
 requirement that a setindex! method exists.
 Use of this function is strongly discouraged, other than for testing.
 
@@ -14,7 +14,7 @@ Use of this function is strongly discouraged, other than for testing.
 using Test: @test
 using LinearMaps #: LinearMaps.FunctionMap
 
-Indexer = AbstractVector{Int}
+#Indexer = AbstractVector{Int}
 
 """
 `A[i,j] = X`
@@ -26,9 +26,9 @@ Using this basic math, we can perform `B*x` using `A*x` and `A[i,j]`.
 
 This idea generalizes to `B[ii,jj] = X` where `ii` and `jj` are vectors.
 
-This method works because LinearMapAA is a *mutable* struct.
+This method works because LinearMapAM is a *mutable* struct.
 """
-function Base.setindex!(A::LinearMapAA, X::AbstractMatrix,
+function Base.setindex!(A::LinearMapAM, X::AbstractMatrix,
 		ii::Indexer, jj::Indexer)
 	# todo: handle WrappedMap differently
 	L = A._lmap
@@ -71,97 +71,97 @@ end
 
 
 # [i,j] = s
-Base.setindex!(A::LinearMapAA, s::Number, i::Int, j::Int) =
+Base.setindex!(A::LinearMapAM, s::Number, i::Int, j::Int) =
 	setindex!(A, fill(s,1,1), [i], [j])
 
 # [ii,jj] = X
-Base.setindex!(A::LinearMapAA, X::AbstractMatrix,
+Base.setindex!(A::LinearMapAM, X::AbstractMatrix,
 	ii::AbstractVector{Bool}, jj::AbstractVector{Bool}) =
 	setindex!(A, X, findall(ii), findall(jj))
 
 # [:,jj] = X
-Base.setindex!(A::LinearMapAA, X::AbstractMatrix, ::Colon, jj::AbstractVector{Bool}) =
+Base.setindex!(A::LinearMapAM, X::AbstractMatrix, ::Colon, jj::AbstractVector{Bool}) =
 	setindex!(A, X, :, findall(jj))
-Base.setindex!(A::LinearMapAA, X::AbstractMatrix, ::Colon, jj::Indexer) =
+Base.setindex!(A::LinearMapAM, X::AbstractMatrix, ::Colon, jj::Indexer) =
 	setindex!(A, X, 1:size(A,1), jj)
 
 # [ii,:] = X
-Base.setindex!(A::LinearMapAA, X::AbstractMatrix, ii::AbstractVector{Bool}, ::Colon) =
+Base.setindex!(A::LinearMapAM, X::AbstractMatrix, ii::AbstractVector{Bool}, ::Colon) =
 	setindex!(A, X, findall(ii), :)
-Base.setindex!(A::LinearMapAA, X::AbstractMatrix, ii::Indexer, ::Colon) =
+Base.setindex!(A::LinearMapAM, X::AbstractMatrix, ii::Indexer, ::Colon) =
 	setindex!(A, X, ii, 1:size(A,2))
 
 # [:,j] = v
-Base.setindex!(A::LinearMapAA, v::AbstractVector, ::Colon, j::Int) =
+Base.setindex!(A::LinearMapAM, v::AbstractVector, ::Colon, j::Int) =
 	setindex!(A, reshape(v,:,1), :, [j])
 
 # [ii,j] = v
-Base.setindex!(A::LinearMapAA, v::AbstractVector, ii::Indexer, j::Int) =
+Base.setindex!(A::LinearMapAM, v::AbstractVector, ii::Indexer, j::Int) =
 	setindex!(A, reshape(v,:,1), ii, [j])
 
 # [i,:] = v
-Base.setindex!(A::LinearMapAA, v::AbstractVector, i::Int, ::Colon) =
+Base.setindex!(A::LinearMapAM, v::AbstractVector, i::Int, ::Colon) =
 	setindex!(A, reshape(v,1,:), [i], :)
 
 # [i,jj] = v
-Base.setindex!(A::LinearMapAA, v::AbstractVector, i::Int, jj::Indexer) =
+Base.setindex!(A::LinearMapAM, v::AbstractVector, i::Int, jj::Indexer) =
 	setindex!(A, reshape(v,1,:), [i], jj)
 
 # [ii,jj] = s
-Base.setindex!(A::LinearMapAA, s::Number, ii::AbstractVector{Bool}, jj::Indexer) =
+Base.setindex!(A::LinearMapAM, s::Number, ii::AbstractVector{Bool}, jj::Indexer) =
 	setindex!(A, s, findall(ii), jj)
-Base.setindex!(A::LinearMapAA, s::Number, ii::Indexer, jj::AbstractVector{Bool}) =
+Base.setindex!(A::LinearMapAM, s::Number, ii::Indexer, jj::AbstractVector{Bool}) =
 	setindex!(A, s, ii, findall(jj))
-Base.setindex!(A::LinearMapAA, s::Number,
+Base.setindex!(A::LinearMapAM, s::Number,
 	ii::AbstractVector{Bool}, jj::AbstractVector{Bool}) =
 	setindex!(A, s, findall(ii), findall(jj))
-Base.setindex!(A::LinearMapAA, s::Number, ii::Indexer, jj::Indexer) =
+Base.setindex!(A::LinearMapAM, s::Number, ii::Indexer, jj::Indexer) =
 	setindex!(A, fill(s,length(ii),length(jj)), ii, jj)
 
 # [:,j] = s
-Base.setindex!(A::LinearMapAA, s::Number, ::Colon, j::Int) =
+Base.setindex!(A::LinearMapAM, s::Number, ::Colon, j::Int) =
 	setindex!(A, s, 1:size(A,1), [j])
 
 # [ii,:] = s
-Base.setindex!(A::LinearMapAA, s::Number, ii::AbstractVector{Bool}, ::Colon) =
+Base.setindex!(A::LinearMapAM, s::Number, ii::AbstractVector{Bool}, ::Colon) =
 	setindex!(A, s, findall(ii), :)
-Base.setindex!(A::LinearMapAA, s::Number, ii::Indexer, ::Colon) =
+Base.setindex!(A::LinearMapAM, s::Number, ii::Indexer, ::Colon) =
 	setindex!(A, s, ii, 1:size(A,2))
 
 # [ii,j] = s
-Base.setindex!(A::LinearMapAA, s::Number, ii::AbstractVector{Bool}, j::Int) =
+Base.setindex!(A::LinearMapAM, s::Number, ii::AbstractVector{Bool}, j::Int) =
 	setindex!(A, s, findall(ii), [j])
-Base.setindex!(A::LinearMapAA, s::Number, ii::Indexer, j::Int) =
+Base.setindex!(A::LinearMapAM, s::Number, ii::Indexer, j::Int) =
 	setindex!(A, fill(s, length(ii), 1), ii, [j])
 
 # [i,:] = s
-Base.setindex!(A::LinearMapAA, s::Number, i::Int, ::Colon) =
+Base.setindex!(A::LinearMapAM, s::Number, i::Int, ::Colon) =
 	setindex!(A, fill(s, 1, size(A,2)), [i], :)
 
 # [i,jj] = s
-Base.setindex!(A::LinearMapAA, s::Number, i::Int, jj::AbstractVector{Bool}) =
+Base.setindex!(A::LinearMapAM, s::Number, i::Int, jj::AbstractVector{Bool}) =
 	setindex!(A, s, i, findall(jj))
-Base.setindex!(A::LinearMapAA, s::Number, i::Int, jj::Indexer) =
+Base.setindex!(A::LinearMapAM, s::Number, i::Int, jj::Indexer) =
 	setindex!(A, fill(s, 1, length(jj)), [i], jj)
 
 # [:,jj] = s
-Base.setindex!(A::LinearMapAA, s::Number, ::Colon, jj::AbstractVector{Bool}) =
+Base.setindex!(A::LinearMapAM, s::Number, ::Colon, jj::AbstractVector{Bool}) =
 	setindex!(A, s, :, findall(jj))
-Base.setindex!(A::LinearMapAA, s::Number, ::Colon, jj::Indexer) =
+Base.setindex!(A::LinearMapAM, s::Number, ::Colon, jj::Indexer) =
 	setindex!(A, s, 1:size(A,1), jj)
 
 # [kk]
 #= too much work, so unsupported
-Base.setindex!(A::LinearMapAA, v::AbstractVector,
+Base.setindex!(A::LinearMapAM, v::AbstractVector,
 		kk::Indexer) =
 =#
 
 # [:] = v
-Base.setindex!(A::LinearMapAA, v::AbstractVector, ::Colon) =
+Base.setindex!(A::LinearMapAM, v::AbstractVector, ::Colon) =
 	setindex!(A, reshape(v,size(A)), :, :)
 
 # [:] = s
-Base.setindex!(A::LinearMapAA, s::Number, ::Colon) =
+Base.setindex!(A::LinearMapAM, s::Number, ::Colon) =
 	begin
 		(M,N) = size(A)
 		forw = x -> fill(s, M) * (ones(1,N) * x)[1]
@@ -170,34 +170,34 @@ Base.setindex!(A::LinearMapAA, s::Number, ::Colon) =
 	end
 
 # [:,:] = s
-Base.setindex!(A::LinearMapAA, s::Number, ::Colon, ::Colon) =
+Base.setindex!(A::LinearMapAM, s::Number, ::Colon, ::Colon) =
 	setindex!(A, s, :)
 
 # [:,:] = X
-Base.setindex!(A::LinearMapAA, X::AbstractMatrix, ::Colon, ::Colon) =
+Base.setindex!(A::LinearMapAM, X::AbstractMatrix, ::Colon, ::Colon) =
 	begin
 		A._lmap = LinearMap(X)
 	end
 
 # [k] = s
 """
-`setindex!(A::LinearMapAA, s::Number, k::Int)`
+`setindex!(A::LinearMapAM, s::Number, k::Int)`
 
 Provide the single index version to meet the `AbstractArray` spec:
 https://docs.julialang.org/en/latest/manual/interfaces/#Indexing-1
 """
-Base.setindex!(A::LinearMapAA, s::Number, k::Int) =
+Base.setindex!(A::LinearMapAM, s::Number, k::Int) =
 	setindex!(A, s, Tuple(CartesianIndices(size(A))[k])...) # any better way?
 
 
 #=
 """
-`setindex!(A::LinearMapAA, v::Number, k::Int)`
+`setindex!(A::LinearMapAM, v::Number, k::Int)`
 
 Provide the single index version to meet the `AbstractArray` spec:
 https://docs.julialang.org/en/latest/manual/interfaces/#Indexing-1
 """
-function Base.setindex!(A::LinearMapAA, v::Number, k::Int)
+function Base.setindex!(A::LinearMapAM, v::Number, k::Int)
 	c = CartesianIndices(size(A))[k] # is there a more elegant way?
 	setindex!(A, v::Number, c[1], c[2])
 end
@@ -205,9 +205,9 @@ end
 
 
 """
-`LinearMapAA_test_setindex(A::LinearMapAA)`
+`LinearMapAA_test_setindex(A::LinearMapAM)`
 """
-function LinearMapAA_test_setindex(A::LinearMapAA)
+function LinearMapAA_test_setindex(A::LinearMapAM)
 
     @test all(size(A) .>= (4,4)) # required by tests
 
