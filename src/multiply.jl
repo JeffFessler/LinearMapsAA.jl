@@ -7,6 +7,7 @@ Multiplication of a LinearMapAX object with other things
 
 export mul!
 # export LinearMapAA_test_vmul # testing
+# export LinearMapAA_test_mul # testing
 
 using LinearMaps
 using LinearAlgebra: UniformScaling, I
@@ -85,11 +86,14 @@ lm_mul!(y::AbstractVector, Lm::LinearMap,
     LinearMaps.mul!(y, Lm, x, α, β)
 
 # with array
+#=
+these are unused because AM * array becomes a new AM
 mul!(Y::AbstractArray, A::LinearMapAM, X::AbstractArray, α::Number, β::Number) =
-    lmao_mul!(Y, A._lmap, X, α, β; idim=A._idim, odim=A._odim)
+    lmao_mul!(Y, A._lmap, X, α, β ; idim=A._idim, odim=A._odim)
 
 mul!(Y::AbstractArray, A::LinearMapAM, X::AbstractArray) =
     LinearMapsAA.mul!(Y, A, X, 1, 0)
+=#
 
 
 # LMAO case
@@ -178,10 +182,8 @@ end
 
 # multiply with vector
 
-#Base.:(*)(A::LinearMapAX{T,Do,1}, v::AbstractVector) where {T,Do} =
-
 # O*v
-Base.:(*)(A::LinearMapAO, v::AbstractVector) =
+Base.:(*)(A::LinearMapAO{T,Do,1}, v::AbstractVector) where {T,Do} =
     reshape(A._lmap * v, A._odim)
 # u'*O (no, use general X*O above because unclear what this would mean)
 #Base.:(*)(u::LinearAlgebra.AdjointAbsVec, A::LinearMapAO) =
@@ -400,6 +402,32 @@ function LinearMapAA_test_vmul(A::LinearMapAO)
         @test isapprox(Matrix(C), s * B)
         C = A * s
         @test isapprox(Matrix(C), B * s)
+    end
+
+    true
+end
+
+
+# object multiplication
+function LinearMapAA_test_mul( ;
+    A::LinearMapAO = LinearMapAA(rand(6,4) ; odim=(2,3), idim=(1,4)),
+)
+    (M,N) = size(A)
+
+    @testset "O*O" begin
+        @test A'*A isa LinearMapAO
+    end
+
+    @testset "O*M" begin
+        B = LinearMapAA(rand(N,3)) # AM
+        O = redim(A ; idim=(N,))
+        @test O*B isa LinearMapAO
+    end
+
+    @testset "M*O" begin
+        B = LinearMapAA(rand(3,M)) # AM
+        O = redim(A ; odim=(M,))
+        @test B*O isa LinearMapAO
     end
 
     true
