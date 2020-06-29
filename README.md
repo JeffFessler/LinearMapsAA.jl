@@ -124,14 +124,20 @@ Here is a (simplified) example for 2D MRI,
 where the operator maps a 2D input array
 into a 1D output vector:
 ```
-using FFTW
-using MIRT: embed
-N = [128,64] # image size
-samp = rand(idim) < 0.8 # random sampling pattern
+using FFTW: fft, ifft
+using LinearMapsAA
+function embed(v::AbstractVector{<:Number}, mask::AbstractArray{Bool})
+    array = zeros(eltype(v), size(mask))
+    array[mask] .= v
+    return array
+end
+N = (128,64) # image size
+samp = rand(N...) .< 0.8 # random sampling pattern
 K = sum(samp) # number of k-space samples
-A = LinearMapAA(x -> fft(x)[samp], y -> prod(N)*ifft(embed(y,mask)),
-	(K, prod(N)), (name="fft",), T=ComplexF32 ; idim=N, odim=(K,))
-@show A[:,2]
+A = LinearMapAA(x -> fft(reshape(x,N))[samp], y -> prod(N)*vec(ifft(embed(y,samp))),
+    (K, prod(N)) ; prop = (name="fft",), T=ComplexF32, idim=N, odim=(K,))
+x = rand(N...)
+z = A' * (A * x) # result is a 2D array!
 ```
 For more details see
 [example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/master/example/fft.jl)
