@@ -321,6 +321,10 @@ function LinearMapAA(test::Symbol)
 		A = LinearMapAA(forw, back, (4*3, 2*3) ; idim=(2,3), odim=(4,3))
 		@test A isa LinearMapAO
 		@test Matrix(A') == Matrix(A)'
+
+		A = undim(A) # ensure that undim works
+		@test A isa LinearMapAM
+		@test Matrix(A') == Matrix(A)'
 	end
 
 	true
