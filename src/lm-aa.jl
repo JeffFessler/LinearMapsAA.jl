@@ -159,8 +159,8 @@ function LinearMapAA(test::Symbol)
 	B = reshape(1:6, 6, 1)
 	@test Matrix(LinearMapAA(B)) == B
 
-	N = 6; M = N+1
-	forw = x -> [cumsum(x); 0] # non-square to stress test
+	N = 6; M = N+1 # non-square to stress test
+	forw = x -> [cumsum(x); 0]
 	back = y -> reverse(cumsum(reverse(y[1:N])))
 
 	prop = (name="cumsum", extra=1)
@@ -170,8 +170,6 @@ function LinearMapAA(test::Symbol)
 	L = LinearMap{Float32}(forw, back, M, N)
 	A = LinearMapAA(L, prop)
 	Lm = Matrix(L)
-
-#	@test lm_name((Lm, A, I, L, "")) == "MAIL?"
 
 	show(isinteractive() ? stdout : devnull, "text/plain", A)
 
@@ -312,6 +310,17 @@ function LinearMapAA(test::Symbol)
 	# kron
 	@testset "kron" begin
 		@test LinearMapAA_test_kron()
+	end
+
+	# FunctionMap for multi-dimensional AO
+	@testset "AO FunctionMap" begin
+		forw = x -> [cumsum(x; dims=2); zeros(2,size(x,2))]
+		back = y -> reverse(cumsum(reverse(y[1:(end-2),:]; dims=2); dims=2); dims=2)
+		A = LinearMapAA(forw, (4*3, 2*3) ; idim=(2,3), odim=(4,3))
+		@test A isa LinearMapAO
+		A = LinearMapAA(forw, back, (4*3, 2*3) ; idim=(2,3), odim=(4,3))
+		@test A isa LinearMapAO
+		@test Matrix(A') == Matrix(A)'
 	end
 
 	true

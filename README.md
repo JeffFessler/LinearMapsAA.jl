@@ -134,7 +134,7 @@ end
 N = (128,64) # image size
 samp = rand(N...) .< 0.8 # random sampling pattern
 K = sum(samp) # number of k-space samples
-A = LinearMapAA(x -> fft(reshape(x,N))[samp], y -> prod(N)*vec(ifft(embed(y,samp))),
+A = LinearMapAA(x -> fft(x)[samp], y -> prod(N)*ifft(embed(y,samp)),
     (K, prod(N)) ; prop = (name="fft",), T=ComplexF32, idim=N, odim=(K,))
 x = rand(N...)
 z = A' * (A * x) # result is a 2D array!

@@ -102,16 +102,35 @@ LinearMapAA(L::AbstractMatrix ; kwargs...) =
     LinearMapAA(LinearMap(L) ; kwargs...)
 
 
+_ismutating(f) = first(methods(f)).nargs == 3
+
+
 """
     A = LinearMapAA(f::Function, fc::Function, D::Dims{2} [, prop::NamedTuple)]
     ; T::DataType = Float32, idim::Dims, odim::Dims)
 Constructor
 """
-LinearMapAA(f::Function, fc::Function, D::Dims{2} ;
+function LinearMapAA(f::Function, fc::Function, D::Dims{2} ;
     T::DataType = Float32,
+    idim::Dims = (D[2],),
+    odim::Dims = (D[1],),
     kwargs...,
-) =
-    LinearMapAA(LinearMap{T}(f, fc, D[1], D[2]) ; kwargs...)
+)
+
+    if idim == (D[2],) && odim == (D[1],)
+        fnew = f
+        fcnew = fc
+    else
+        fnew = _ismutating(f) ?
+            (y,x) -> f(reshape(y,odim), reshape(x,idim)) :
+            x -> reshape(f(reshape(x,idim)),odim)
+        fcnew = _ismutating(fc) ?
+            (x,y) -> f(reshape(x,idim), reshape(y,idim)) :
+            y -> reshape(fc(reshape(y,odim)),idim)
+    end
+    LinearMapAA(LinearMap{T}(fnew, fcnew, D[1], D[2]) ;
+        idim=idim, odim=odim, kwargs...)
+end
 
 LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ; kwargs...) =
     LinearMapAA(f, fc, D ; prop=prop, kwargs...)
@@ -121,8 +140,23 @@ LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ; kwargs...)
     A = LinearMapAA(f::Function, D::Dims{2} [, prop::NamedTuple]; kwargs...)
 Constructor
 """
-LinearMapAA(f::Function, D::Dims{2} ; T::DataType = Float32, kwargs...) =
-    LinearMapAA(LinearMap{T}(f, D[1], D[2]) ; kwargs...)
+function LinearMapAA(f::Function, D::Dims{2} ;
+    T::DataType = Float32,
+    idim::Dims = (D[2],),
+    odim::Dims = (D[1],),
+     kwargs...,
+)
+
+    if idim == (D[2],) && odim == (D[1],)
+        fnew = f
+    else
+        fnew = _ismutating(f) ?
+            (y,x) -> f(reshape(y,odim), reshape(x,idim)) :
+            x -> reshape(f(reshape(x,idim)),odim)
+    end
+    LinearMapAA(LinearMap{T}(fnew, D[1], D[2]) ;
+        idim=idim, odim=odim, kwargs...)
+end
 
 LinearMapAA(f::Function, D::Dims{2}, prop::NamedTuple ; kwargs...) =
     LinearMapAA(f, D ; prop=prop, kwargs...)
