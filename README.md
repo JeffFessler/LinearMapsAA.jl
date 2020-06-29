@@ -19,7 +19,7 @@ and then later replace it with a `LinearMapAX` object.
 
 The extra `AA` in the package name here has two meanings.
 
-- `LinearMapAA` is a subtype of `AbstractArray{T,2}`, i.e.,
+- `LinearMapAM` is a subtype of `AbstractArray{T,2}`, i.e.,
 [conforms to the requirements of an `AbstractMatrix`](https://docs.julialang.org/en/latest/manual/interfaces/#man-interface-array-1)
 type.
 
@@ -32,12 +32,85 @@ The maintainers of the `LinearMaps.jl` package
 so this package adds that feature
 (without committing "type piracy").
 
-As of `v0.6.0`,
+As of `v0.6`,
 the package produces objects of two types:
 * `LinearMapAM` (think "Matrix") that is a subtype of `AbstractMatrix`
 * `LinearMapAO` (think "Operator") that is not a subtype of `AbstractMatrix`
 * The general type `LinearMapAX` is a `Union` of both.
+* To convert a `LinearMapAM` to a `LinearMapAO`,
+use `redim` or `LinearMapAO(A)`
+* To convert a `LinearMapAO` to a `LinearMapAM`, use `undim`.
 
+
+
+## Examples
+
+```
+N = 6
+L = LinearMap(cumsum, y -> reverse(cumsum(reverse(y))), N)
+A = LinearMapAA(L) # version with no properties
+A = LinearMapAA(L, (name="cumsum",))) # version with a NamedTuple of properties
+
+Matrix(L), Matrix(A) # both the same 6 x 6 lower triangular matrix
+A.name # returns "cumsum" here
+```
+
+Here is a more interesting example for signal processing.
+```
+using FFTW
+N = 8
+A = LinearMapAA(fft, y -> N*ifft(y), (N, N), (name="fft",), T=ComplexF32)
+@show A[:,2]
+```
+For more details see
+[example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/master/example/fft.jl)
+
+
+## Features shared with `LinearMap` objects
+
+#### Object combinations
+
+A `LinearMapAX` object supports all of the features of a `LinearMap`.
+In particular, if `A` and `B` are both `LinearMapAX` objects
+of appropriate sizes,
+then the following each make new `LinearMapAX` objects:
+- Multiplication: `A * B`
+- Linear combination: `A + B`, `A - B`, `3A - 7B`,
+- Kronecker products: `kron(A, B)`
+
+- Concatenation: `[A B]` `[A; B]` `[I A I]` `[A B; 2A 3I]` etc.
+
+Caution: currently some shorthand concatenations are unsupported,
+like `[I I A]`, though one can accomplish that one using
+`lmaa_hcat(I, I, A)`
+
+
+#### Conversions
+
+Conversion to other data types
+(may require lots of memory if `A` is big):
+- Convert to sparse: `sparse(A)`
+- Convert to dense matrix: `Matrix(A)`
+
+
+#### Avoiding memory allocations
+
+Like `LinearMap` objects,
+both types of `LinearMapAX` objects support `mul!`
+for storing the results in a previously allocated output array,
+to avoid new memory allocations.
+The basic syntax is to replace
+`y = A * x` with
+`mul!(y, A, x)`.
+To make the code look more like the math,
+use the `InplaceOps` package:
+```
+using InplaceOps
+@! y = A * x
+```
+
+
+## Features unique to `LinearMapsAA`
 
 A bonus feature provided by `LinearMapsAA`
 is that a user can include a `NamedTuple` of properties
@@ -56,51 +129,6 @@ to carry those properties with the object itself.
 Currently
 the properties are lost when one combines
 two or more `LinearMapAA` objects by adding, multiplying, concatenating, etc.
-
-
-## Examples
-
-```
-N = 6
-L = LinearMap(cumsum, y -> reverse(cumsum(reverse(y))), N)
-A = LinearMapAA(L) # version with no properties
-A = LinearMapAA(L, (name="cumsum",))) # version with a NamedTuple of properties
-
-Matrix(L), Matrix(A) # both the same 6 x 6 lower triangular matrix
-A.name # returns "cumsum" here
-```
-
-Here is a more interesting example for computational imaging.
-```
-using FFTW
-N = 8
-A = LinearMapAA(fft, y -> N*ifft(y), (N, N), (name="fft",), T=ComplexF32)
-@show A[:,2]
-```
-For more details see
-[example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/master/example/fft.jl)
-
-
-## Features
-
-A `LinearMapAX` object supports all of the features of a `LinearMap`.
-In particular, if `A` and `B` are both `LinearMapAX` objects
-of appropriate sizes,
-then the following each make new `LinearMapAX` objects:
-- Multiplication: `A * B`
-- Linear combination: `A + B`, `A - B`, `3A - 7B`,
-- Kronecker products: `kron(A, B)`
-
-Conversion to other data types
-(may require lots of memory if `A` is big):
-- Convert to sparse: `sparse(A)`
-- Convert to dense matrix: `Matrix(A)`
-
-- Concatenation: `[A B]` `[A; B]` `[I A I]` `[A B; 2A 3I]` etc.
-
-Caution: currently some shorthand concatenations are unsupported,
-like `[I I A]`, though one can accomplish that one using
-`lmaa_hcat(I, I, A)`
 
 The following features are provided
 by a `LinearMapAX` object
@@ -146,22 +174,6 @@ The adjoint of this `LinearMapAO` object
 maps a 1D vector of k-space samples
 into a 2D image array.
 
-
-## Avoiding memory allocations
-
-Like `LinearMap` objects,
-both types of `LinearMapAX` objects support `mul!`
-for storing the results in a previously allocated output array,
-to avoid new memory allocations.
-The basic syntax is to replace
-`y = A * x` with
-`mul!(y, A, x)`.
-To make the code look more like the math,
-use the `InplaceOps` package:
-```
-using InplaceOps
-@! y = A * x
-```
 
 
 ## Caution
