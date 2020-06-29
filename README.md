@@ -11,6 +11,11 @@ that allows one to represent linear operations
 as a object that appears to the user like a matrix
 but internally uses user-defined fast computations
 for operations, especially multiplication.
+With this package,
+you can write and debug code
+(especially for iterative algorithms)
+using a small matrix `A`,
+and then later replace it with a `LinearMapAX` object.
 
 The extra `AA` in the package name here has two meanings.
 
@@ -26,6 +31,13 @@ The maintainers of the `LinearMaps.jl` package
 [have not wished to add getindex there](https://github.com/Jutho/LinearMaps.jl/issues/38),
 so this package adds that feature
 (without committing "type piracy").
+
+As of `v0.6.0`,
+the package produces objects of two types:
+* `LinearMapAM` (think "Matrix") that is a subtype of `AbstractMatrix`
+* `LinearMapAO` (think "Operator") that is not a subtype of `AbstractMatrix`
+* The general type `LinearMapAX` is a `Union` of both.
+
 
 A bonus feature provided by `LinearMapsAA`
 is that a user can include a `NamedTuple` of properties
@@ -71,10 +83,10 @@ For more details see
 
 ## Features
 
-A `LinearMapAA` object supports all of the features of a `LinearMap`.
-In particular, if `A` and `B` are both `LinearMapAA` objects
+A `LinearMapAX` object supports all of the features of a `LinearMap`.
+In particular, if `A` and `B` are both `LinearMapAX` objects
 of appropriate sizes,
-then the following each make new `LinearMapAA` objects:
+then the following each make new `LinearMapAX` objects:
 - Multiplication: `A * B`
 - Linear combination: `A + B`, `A - B`, `3A - 7B`,
 - Kronecker products: `kron(A, B)`
@@ -91,7 +103,7 @@ like `[I I A]`, though one can accomplish that one using
 `lmaa_hcat(I, I, A)`
 
 The following features are provided
-by a `LinearMapAA` object
+by a `LinearMapAX` object
 due to its `getindex` support:
 - Columns or rows slicing: `A[:,5]`, `A[end,:]`etc. return a 1D vector
 - Elements: `A[4,5]` (returns a scalar)
@@ -101,12 +113,58 @@ due to its `getindex` support:
 - Convert to vector: `A[:]` (if memory permits)
 
 
+## Operator support
+
+A `LinearMapAO` object
+represents a linear mapping
+from some input array size
+into some output array size
+specified by the `idim` and `odim` options.
+Here is a (simplified) example for 2D MRI,
+where the operator maps a 2D input array
+into a 1D output vector:
+```
+using FFTW
+using MIRT: embed
+N = [128,64] # image size
+samp = rand(idim) < 0.8 # random sampling pattern
+K = sum(samp) # number of k-space samples
+A = LinearMapAA(x -> fft(x)[samp], y -> prod(N)*ifft(embed(y,mask)),
+	(K, prod(N)), (name="fft",), T=ComplexF32 ; idim=N, odim=(K,))
+@show A[:,2]
+```
+For more details see
+[example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/master/example/fft.jl)
+
+The adjoint of this `LinearMapAO` object
+maps a 1D vector of k-space samples
+into a 2D image array.
+
+
+## Avoiding memory allocations
+
+Like `LinearMap` objects,
+both types of `LinearMapAX` objects support `mul!`
+for storing the results in a previously allocated output array,
+to avoid new memory allocations.
+The basic syntax is to replace
+`y = A * x` with
+`mul!(y, A, x)`.
+To make the code look more like the math,
+use the `InplaceOps` package:
+```
+using InplaceOps
+@! y = A * x
+```
+
+
 ## Caution
 
 An `AbstractArray` also must support a `setindex!` operation
 and this package provides that capability,
 mainly for completeness
-and as a proof of principle.
+and as a proof of principle,
+solely for the `LinearMapAM` type.
 Examples:
 - `A[2,3] = 7`
 - `A[:,4] = ones(size(A,1))`
@@ -120,6 +178,7 @@ In particular, trying to do something like the Gram-Schmidt procedure
 In fact, `LinearAlgebra.qr!` works only with a `StridedMatrix`
 not a general `AbstractMatrix`.
 
+
 ## Related packages
 
 [`LinearOperators.jl`](https://github.com/JuliaSmoothOptimizers/LinearOperators.jl)
@@ -127,7 +186,7 @@ also provides `getindex`-like features,
 but slicing there always returns another operator,
 unlike with a matrix.
 In contrast,
-a `LinearMapAA` object is designed to behave
+a `LinearMapAM` object is designed to behave
 akin to a matrix,
 except when for operations like `svd` and `pinv`
 that are unsuitable for large-scale problems.
@@ -146,9 +205,9 @@ so `LinearMaps` is more comprehensive.
 This package provides similar functionality
 as the `Fatrix` / `fatrix` object in the
 [Matlab version of MIRT](https://github.com/JeffFessler/mirt).
-Currently the `odim` and `idim` features of those objects
-are not available here,
-but I hope to add such support.
+In particular,
+the `odim` and `idim` features of those objects
+are similar to those here.
 
 [`FunctionOperators.jl`](https://github.com/hakkelt/FunctionOperators.jl)
 supports `inDims` and `outDims` features.
