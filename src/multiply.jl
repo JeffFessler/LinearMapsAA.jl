@@ -27,9 +27,11 @@ Base.:(*)(B::UniformScaling, A::LinearMapAX) = (B.λ == 1) ? A : (B.λ * A)
 
 # multiply with scalars
 Base.:(*)(s::Number, A::LinearMapAX) =
-    LinearMapAA((s*I) * A._lmap ; prop=A._prop, idim=A._idim, odim=A._odim)
+    LinearMapAA((s*I) * A._lmap ; prop=A._prop, idim=A._idim, odim=A._odim,
+        operator = isa(A, LinearMapAO))
 Base.:(*)(A::LinearMapAX, s::Number) =
-    LinearMapAA(A._lmap * (s*I) ; prop=A._prop, idim=A._idim, odim=A._odim)
+    LinearMapAA(A._lmap * (s*I) ; prop=A._prop, idim=A._idim, odim=A._odim,
+        operator = isa(A, LinearMapAO))
 
 
 # multiply LMAX objects, if compatible
@@ -43,7 +45,9 @@ function lm_obj_mul(A::LinearMapAX, B::LinearMapAX)
     (A._idim != B._odim) && throw("dim mismatch")
     LinearMapAA(A._lmap * B._lmap ;
         prop = (prod=(A._prop,B._prop),),
-        idim = B._idim, odim = A._odim)
+        idim = B._idim, odim = A._odim,
+        operator = isa(A, LinearMapAO) | isa(B, LinearMapAO),
+    )
 end
 
 

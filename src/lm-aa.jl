@@ -75,12 +75,12 @@ undim(A::LinearMapAX{T}) where {T} =
 
 
 # adjoint
-Base.adjoint(A::LinearMapAX) =
-	LinearMapAA(adjoint(A._lmap), A._prop ; idim=A._odim, odim=A._idim)
+Base.adjoint(A::LinearMapAX) = LinearMapAA(adjoint(A._lmap) ;
+    prop=A._prop, idim=A._odim, odim=A._idim, operator=isa(A,LinearMapAO))
 
 # transpose
-Base.transpose(A::LinearMapAX) =
-	LinearMapAA(transpose(A._lmap), A._prop ; idim=A._odim, odim=A._idim)
+Base.transpose(A::LinearMapAX) = LinearMapAA(transpose(A._lmap) ;
+    prop=A._prop, idim=A._odim, odim=A._idim, operator=isa(A,LinearMapAO))
 
 # eltype
 Base.eltype(A::LinearMapAX) = eltype(A._lmap)
@@ -109,22 +109,26 @@ function Base.:(+)(A::LinearMapAX, B::LinearMapAX)
 	LinearMapAA(A._lmap + B._lmap ;
 		idim=A._idim, odim=A._odim,
 		prop = (sum=nothing,props=(A._prop,B._prop)),
+		operator = isa(A, LinearMapAO) & isa(B, LinearMapAO),
 	)
 end
 
 # Allow LMAA + AM only if Do=Di=1
 function Base.:(+)(A::LinearMapAX, B::AbstractMatrix)
-	(length(A._idim) != 1 || length(A._odim) != 1) && throw("use redim")
-	LinearMapAA(A._lmap + LinearMap(B), A._prop)
+    (length(A._idim) != 1 || length(A._odim) != 1) && throw("use redim")
+    LinearMapAA(A._lmap + LinearMap(B) ; prop=A._prop,
+        operator = isa(A, LinearMapAO),
+    )
 end
 
 # But allow LMAA + I for any Do,Di
 Base.:(+)(A::LinearMapAX, B::UniformScaling) = # A + I -> A + I(N)
-	LinearMapAA(A._lmap + B(size(A,2)) ;
-		prop = (Aprop=A._prop, Iscale=B(size(A,2))[1]),
-		idim = A._idim,
-		odim = A._odim,
-	)
+    LinearMapAA(A._lmap + B(size(A,2)) ;
+        prop = (Aprop=A._prop, Iscale=B(size(A,2))[1]),
+        idim = A._idim,
+        odim = A._odim,
+        operator = isa(A, LinearMapAO),
+    )
 Base.:(+)(A::AbstractMatrix, B::LinearMapAX) = B + A
 
 Base.:(-)(A::LinearMapAX, B::LinearMapAX) = A + (-1)*B
@@ -313,6 +317,18 @@ function LinearMapAA(test::Symbol)
 	@testset "kron" begin
 		@test LinearMapAA_test_kron()
 	end
+
+    @testset "AO for 1D" begin
+        B = LinearMapAO(A)
+        @test B isa LinearMapAO
+        X = rand(N,2)
+        Y = B * X
+        @test Y isa AbstractArray
+        @test Y ≈ Lm * X
+        Z = B' * Y
+        @test Z isa AbstractArray
+        @test Z ≈ Lm' * Y
+    end
 
 	# FunctionMap for multi-dimensional AO
 	@testset "AO FunctionMap" begin

@@ -56,6 +56,17 @@ LinearMapAX{T,Do,Di} =
 
 # constructors
 
+
+"""
+    B = LinearMapAO{T,Do,Di}(A::LinearMapAX)
+Make an AO from an AM, despite `idim` and `odim` being 1D,
+for expert users who want `B*X` to be an `Array`.
+Somewhat an opposite of `undim`.
+"""
+LinearMapAO(A::LinearMapAX{T,Do,Di}) where {T,Do,Di} =
+    LinearMapAO{T,Do,Di}(A._lmap, A._prop, A._idim, A._odim)
+
+
 """
     A = LinearMapAA(L::LinearMap ; ...)
 
@@ -66,14 +77,18 @@ options
 - `T = eltype(L)`
 - `idim::Dims = (size(L,2),)`
 - `odim::Dims = (size(L,1),)`
+- `operator::Bool` by default: `false` if both `idim` & `odim` are 1D.
 
 `prop` cannot include the fields `_lmap`, `_prop`, `_idim`, `_odim`
+
+Output `A` is `LinearMapAO` if `operator` is `true`, else `LinearMapAM`.
 """
 function LinearMapAA(L::LinearMap ;
     prop::NamedTuple = NamedTuple(),
     T::Type = eltype(L),
     idim::Dims{Di} = (size(L,2),),
     odim::Dims{Do} = (size(L,1),),
+    operator::Bool = length(idim) > 1 || length(odim) > 1,
 ) where {Di,Do}
 
     size(L,2) == prod(idim) ||
@@ -83,9 +98,9 @@ function LinearMapAA(L::LinearMap ;
     length(intersect(propertynames(prop), LMAAkeys)) > 0 &&
         throw("invalid property field among $(propertynames(prop))")
 
-    return ((idim == (size(L,2),)) && (odim == (size(L,1),))) ?
-         LinearMapAM{T,Do,Di}(L, prop, idim, odim) :
-         LinearMapAO{T,Do,Di}(L, prop, idim, odim)
+    return operator ?
+         LinearMapAO{T,Do,Di}(L, prop, idim, odim) :
+         LinearMapAM{T,Do,Di}(L, prop, idim, odim)
 end
 
 
@@ -144,7 +159,7 @@ function LinearMapAA(f::Function, D::Dims{2} ;
     T::DataType = Float32,
     idim::Dims = (D[2],),
     odim::Dims = (D[1],),
-     kwargs...,
+    kwargs...,
 )
 
     if idim == (D[2],) && odim == (D[1],)
