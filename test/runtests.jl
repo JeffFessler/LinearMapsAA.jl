@@ -3,12 +3,10 @@
 using LinearMapsAA
 using Test: @test, @testset, detect_ambiguities
 
-@testset "LinearMapAA" begin
-	@test LinearMapAA(:test)
-end
+@test LinearMapAA(:test)
 
 @testset "block_diag" begin
-	@test block_diag(:test)
+    @test block_diag(:test)
 end
 
 @test length(detect_ambiguities(LinearMapsAA)) == 0

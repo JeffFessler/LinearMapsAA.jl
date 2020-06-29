@@ -173,13 +173,15 @@ function LinearMapAA(test::Symbol)
 
 	show(isinteractive() ? stdout : devnull, "text/plain", A)
 
-	@test A._lmap == LinearMapAA(L)._lmap
-#	@test A == LinearMapAA(forw, back, M, N, prop)
-	@test A._prop == LinearMapAA(forw, back, (M, N), prop)._prop
-	@test A._lmap == LinearMapAA(forw, back, (M, N), prop)._lmap
-	@test A == LinearMapAA(forw, back, (M, N), prop)
-	@test A._lmap == LinearMapAA(forw, back, (M, N))._lmap
-	@test LinearMapAA(forw, back, (M, N)) isa LinearMapAX
+    @testset "basics" begin
+        @test A._lmap == LinearMapAA(L)._lmap
+    #   @test A == LinearMapAA(forw, back, M, N, prop)
+        @test A._prop == LinearMapAA(forw, back, (M, N), prop)._prop
+        @test A._lmap == LinearMapAA(forw, back, (M, N), prop)._lmap
+        @test A == LinearMapAA(forw, back, (M, N), prop)
+        @test A._lmap == LinearMapAA(forw, back, (M, N))._lmap
+        @test LinearMapAA(forw, back, (M, N)) isa LinearMapAX
+    end
 
 	@testset "symmetry" begin
 		@test issymmetric(A) == false
