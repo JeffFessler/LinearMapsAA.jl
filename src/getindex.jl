@@ -30,7 +30,7 @@ end
 function Base.getindex(A::LinearMapAX, ::Colon, j::Int)
     T = eltype(A)
     e = zeros(T, size(A,2)); e[j] = one(T)
-    return A * e
+    return A._lmap * e
 end
 
 # A[ii,j]
