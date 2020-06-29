@@ -114,7 +114,7 @@ end
 
 # Allow LMAA + AM only if Do=Di=1
 function Base.:(+)(A::LinearMapAX, B::AbstractMatrix)
-	(length(A._idim) != 1 || length(A._odim) != 1) && throw("use redim") 
+	(length(A._idim) != 1 || length(A._odim) != 1) && throw("use redim")
 	LinearMapAA(A._lmap + LinearMap(B), A._prop)
 end
 

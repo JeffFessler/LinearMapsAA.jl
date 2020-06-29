@@ -23,13 +23,13 @@ end
 # It is especially hard to handle AbstractMatrix,
 # so typically force the user to wrap it in LinearMap(AX) first.
 #LMcat{T} = Union{LinearMapAM{T}, LinearMap{T}, UniformScaling{T},AbstractMatrix{T}}
-LMcat{T} = Union{LinearMapAM{T}, LinearMap{T}, UniformScaling{T}} # settle
+LMcat{T} = Union{LinearMapAX{T}, LinearMap{T}, UniformScaling{T}} # settle
 #LMelse{T} = Union{LinearMap{T},UniformScaling{T},AbstractMatrix{T}} # non AM
 
 # convert to something suitable for LinearMap.*cat
 function lm_promote(A::LMcat)
 #    @show typeof(A)
-    A isa LinearMapAM ? A._lmap :
+    A isa LinearMapAX ? A._lmap :
     A isa UniformScaling ? A : # leave unchanged - ok for LinearMaps.*cat
     A # otherwise it is this
 #    throw("bug") # should only be only of LMcat types
@@ -38,23 +38,19 @@ function lm_promote(A::LMcat)
 end
 
 # single-letter codes for cat objects, e.g., [A I A] becomes "AIA"
-#= not so useful
-function lm_code(A)
-    isa(A, LinearMapAM) ? "A" :
-    isa(A, AbstractMatrix) ? "M" :
-    isa(A, UniformScaling) ? "I" :
-    isa(A, LinearMap) ? "L" :
-    "?"
-end
-=#
+lm_code(::LinearMapAM) = "A"
+lm_code(::LinearMapAO) = "O"
+lm_code(::UniformScaling) = "I"
+lm_code(::LinearMap) = "L"
+#lm_code(::AbstractMatrix) = "M"
+#lm_code(::Any) = "?"
 
 # concatenate the single-letter codes, e.g., [A I A] becomes "AIA"
-# lm_name = As -> *(lm_code.(As)...)
-lm_name = As -> nothing
+lm_name = As -> *(lm_code.(As)...)
+# lm_name = As -> nothing
 
 # these rely on LinearMap.*cat methods
 "`B = lmaa_hcat(A1, A2, ...)` `hcat` of multiple objects"
-# todo: check odim ...
 lmaa_hcat(As::LMcat...) =
     LinearMapAA(hcat(lm_promote.(As)...), (hcat=lm_name(As),))
 "`B = lmaa_vcat(A1, A2, ...)` `vcat` of multiple objects"
@@ -65,24 +61,24 @@ lmaa_hvcat(rows::NTuple{nr,Int} where {nr}, As::LMcat...) =
     LinearMapAA(hvcat(rows, lm_promote.(As)...), (hvcat=lm_name(As),))
 
 # a single leading LinearMapAM followed by others is clear
-Base.hcat(A1::LinearMapAM, As::LMcat...) = # todo
+Base.hcat(A1::LinearMapAX, As::LMcat...) =
     lmaa_hcat(A1, As...)
-Base.vcat(A1::LinearMapAM, As::LMcat...) =
+Base.vcat(A1::LinearMapAX, As::LMcat...) =
     lmaa_vcat(A1, As...)
-Base.hvcat(rows::NTuple{nr,Int} where {nr}, A1::LinearMapAM, As::LMcat...) =
+Base.hvcat(rows::NTuple{nr,Int} where {nr}, A1::LinearMapAX, As::LMcat...) =
     lmaa_hvcat(rows, A1, As...)
 # or in 2nd position, beyond that, user can use lmaa_*
 #Base.hcat(A1::LMelse, A2::LinearMapAM, As::LMcat...) = # fails!?
-Base.hcat(A1::UniformScaling, A2::LinearMapAM, As::LMcat...) =
+Base.hcat(A1::UniformScaling, A2::LinearMapAX, As::LMcat...) =
     lmaa_hcat(A1, A2, As...)
-Base.vcat(A1::UniformScaling, A2::LinearMapAM, As::LMcat...) =
+Base.vcat(A1::UniformScaling, A2::LinearMapAX, As::LMcat...) =
     lmaa_vcat(A1, A2, As...)
 Base.hvcat(rows::NTuple{nr,Int} where nr,
-        A1::UniformScaling, A2::LinearMapAM, As::LMcat...) =
+        A1::UniformScaling, A2::LinearMapAX, As::LMcat...) =
     lmaa_hvcat(rows, A1, A2, As...)
 
 
-# special handling for AO
+# special handling for solely AO collections
 
 function _hcat(tryop::Bool, As::LinearMapAO...)
     B = LinearMaps.hcat(map(A -> A._lmap, As)...)
@@ -126,7 +122,7 @@ Base.vcat(A1::LinearMapAO, As::LinearMapAO... ; tryop::Bool=true) =
 
 """
     hvcat(rows, As::LinearMapAO...)
-`hvcat` that discards special `idim` and `odim` information (too hard!) # todo
+`hvcat` that discards special `idim` and `odim` information (too hard!) # todo?
 """
 Base.hvcat(rows::NTuple{nr,Int} where nr,
         A1::LinearMapAO, As::LinearMapAO...) =
@@ -280,10 +276,19 @@ function LinearMapAA_test_cat(A::LinearMapAO)
         @test Matrix(B) == [M 2M; 3M 4M]
     end
 
+    @testset "cat OI" begin
+        @test [A I] isa LinearMapAM
+        @test [A; I] isa LinearMapAM
+        @test [A A; I I] isa LinearMapAM
+    end
+
     @testset "cat AO mixed" begin
         B = redim(A, idim=(1,A._idim...)) # force incompatible dim
         @test [A B] isa LinearMapAM
         @test [A; B] isa LinearMapAM
+        Z = [A undim(A) I A._lmap] # Matrix(B)]
+        @test Z isa LinearMapAM
+        @test Z.hcat == "OAIL"
     end
 
     true
