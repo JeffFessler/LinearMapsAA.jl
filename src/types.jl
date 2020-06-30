@@ -138,10 +138,10 @@ function LinearMapAA(f::Function, fc::Function, D::Dims{2} ;
     else
         fnew = _ismutating(f) ?
             (y,x) -> f(reshape(y,odim), reshape(x,idim)) :
-            x -> reshape(f(reshape(x,idim)),odim)
+            x -> reshape(f(reshape(x,idim)), odim)
         fcnew = _ismutating(fc) ?
-            (x,y) -> f(reshape(x,idim), reshape(y,odim)) :
-            y -> reshape(fc(reshape(y,odim)),idim)
+            (x,y) -> fc(reshape(x,idim), reshape(y,odim)) :
+            y -> reshape(fc(reshape(y,odim)), idim)
     end
     LinearMapAA(LinearMap{T}(fnew, fcnew, D[1], D[2]) ;
         idim=idim, odim=odim, kwargs...)
@@ -167,7 +167,7 @@ function LinearMapAA(f::Function, D::Dims{2} ;
     else
         fnew = _ismutating(f) ?
             (y,x) -> f(reshape(y,odim), reshape(x,idim)) :
-            x -> reshape(f(reshape(x,idim)),odim)
+            x -> reshape(f(reshape(x,idim)), odim)
     end
     LinearMapAA(LinearMap{T}(fnew, D[1], D[2]) ;
         idim=idim, odim=odim, kwargs...)
