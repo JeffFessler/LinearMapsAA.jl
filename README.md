@@ -170,6 +170,16 @@ The adjoint of this `LinearMapAO` object
 maps a 1D vector of k-space samples
 into a 2D image array.
 
+Caution:
+The `LinearMapAM` type should be quite stable now,
+whereas `LinearMapAO` is new in `v0.6`.
+The conversions `redim` and `undim`
+are probably not thoroughly tested.
+The safe bet is to use all
+`LinearMapAM` objects
+or all
+`LinearMapAO` objects
+rather than trying to mix and match.
 
 
 ## Caution
