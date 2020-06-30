@@ -304,6 +304,20 @@ function LinearMapAA(test::Symbol)
 		@test LinearMapAA_test_mul()
 	end
 
+	# AO FunctionMap complex
+	@testset "AO FM C" begin
+		T = ComplexF16
+		c = T(2im)
+		forw! = (y,x) -> copyto!(y,x) .*= c
+		back! = (x,y) -> copyto!(x,y) .*= conj(c)
+		dims = (2,3)
+		O = LinearMapAA(forw!, back!, (1,1).*prod(dims) ;
+		    T=T, idim=dims, odim=dims)
+		x = rand(T, dims)
+		@test O*x == c*x
+		@test O'*x == conj(c)*x
+		@test Matrix(O') == Matrix(O)'
+	end
 
 	# non-adjoint version
 	@testset "non-adjoint" begin
@@ -331,7 +345,7 @@ function LinearMapAA(test::Symbol)
     end
 
 	# FunctionMap for multi-dimensional AO
-	@testset "AO FunctionMap" begin
+	@testset "AO FM 2D" begin
 		forw = x -> [cumsum(x; dims=2); zeros(2,size(x,2))]
 		back = y -> reverse(cumsum(reverse(y[1:(end-2),:]; dims=2); dims=2); dims=2)
 		A = LinearMapAA(forw, (4*3, 2*3) ; idim=(2,3), odim=(4,3))
