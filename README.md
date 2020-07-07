@@ -1,8 +1,9 @@
 # LinearMapsAA.jl
 
+https://github.com/JeffFessler/LinearMapsAA.jl
+
 [![Build Status](https://travis-ci.org/JeffFessler/LinearMapsAA.jl.svg?branch=master)](https://travis-ci.org/JeffFessler/LinearMapsAA.jl)
 [![codecov.io](http://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master)](http://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master)
-https://github.com/JeffFessler/LinearMapsAA.jl
 
 This package is an overlay for the package
 [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
