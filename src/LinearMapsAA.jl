@@ -18,5 +18,6 @@ include("getindex.jl")
 include("setindex.jl")
 include("block_diag.jl")
 include("lm-aa.jl")
+include("identity.jl")
 
 end # module
