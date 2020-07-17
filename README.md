@@ -171,6 +171,33 @@ The adjoint of this `LinearMapAO` object
 maps a 1D vector of k-space samples
 into a 2D image array.
 
+Multiplying a `M × N` matrix times a `N × K` matrix
+can be thought of as multiplying the matrix
+by each of the `K` columns,
+yielding a `M × K` result.
+Generalizing this to higher dimensional arrays,
+if `A::LinearMapAO`
+has "input dimensions" `idim=(2,3)`
+and "output dimensions" `odim=(4,5,6)`
+and you do `A*X` where `X::AbstractArray` has dimension `(2,3,7,8)`,
+then the output will be an `Array` of dimension `(4,5,6,7,8)`.
+In other words, it works block-wise.
+(If you really want a new `LinearMapAO`, rather than an `Array`,
+then you must first wrap `X` in a `LinearMapAO`.
+This is a deliberate departure from the non-`Matrix` like behavior
+in `LinearMaps` where `A*X` produces a new `LinearMap`.
+
+In the spirit of such generality,
+this package overloads `*` for `LinearAlgebra.I`
+(and for `UniformScaling` objects more generally)
+such that
+`I * X == X`
+even when `X` is an array with more than two dimension.
+(The original `LinearAlgebra.I` can only multiply
+vectors and matrices,
+which sufficies for matrix algebra,
+but not for general linear algebra.)
+
 Caution:
 The `LinearMapAM` type should be quite stable now,
 whereas `LinearMapAO` is new in `v0.6`.
