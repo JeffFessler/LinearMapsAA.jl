@@ -87,14 +87,6 @@ end
 	@test Matrix(A1f) == M1
 end
 
-Ao = LinearMapAA(A._lmap ; odim=(1,size(A,1)), idim=(size(A,2),1))
-@testset "vmul" begin
-	@test LinearMapAA_test_vmul(A)
-	@test LinearMapAA_test_vmul(A*A'*A) # CompositeMap
-	@test LinearMapAA_test_vmul(Ao) # AO type
-	@test ndims(Ao) == 2
-end
-
 # add / subtract
 @testset "add" begin
 	@test 2A + 6A isa LinearMapAX
@@ -111,68 +103,12 @@ end
 	@test Matrix(A'A - 7I) == Matrix(A'A) - 7I
 end
 
-# multiply with identity
-@testset "*I" begin
-	@test Matrix(A * 6I) == 6 * Matrix(A)
-	@test Matrix(7I * A) == 7 * Matrix(A)
-	@test Matrix((false*I) * A) == zeros(size(A))
-	@test Matrix(A * (false*I)) == zeros(size(A))
-	@test 1.0I * A === A
-	@test A * 1.0I === A
-	@test I * A === A
-	@test A * I === A
-end
-
-# multiply
-@testset "*" begin
-	D = A * A'
-	@test D isa LinearMapAX
-	@test Matrix(D) == Lm * Lm'
-	@test issymmetric(D) == true
-	E = A * Lm'
-	@test E isa LinearMapAX
-	@test Matrix(E) == Lm * Lm'
-	F = Lm' * A
-	@test F isa LinearMapAX
-	@test Matrix(F) == Lm' * Lm
-	@test LinearMapAA_test_getindex(F)
-
-	@test LinearMapAA_test_mul()
-end
-
-# AO FunctionMap complex
-@testset "AO FM C" begin
-	T = ComplexF16
-	c = T(2im)
-	forw! = (y,x) -> copyto!(y,x) .*= c
-	back! = (x,y) -> copyto!(x,y) .*= conj(c)
-	dims = (2,3)
-	O = LinearMapAA(forw!, back!, (1,1).*prod(dims) ;
-		T=T, idim=dims, odim=dims)
-	x = rand(T, dims)
-	@test O*x == c*x
-	@test O'*x == conj(c)*x
-	@test Matrix(O') == Matrix(O)'
-end
-
 # non-adjoint version
 @testset "non-adjoint" begin
 	Af = LinearMapAA(forw, (M, N))
 	@test Matrix(Af) == Lm
 	@test LinearMapAA_test_getindex(Af)
 	@test LinearMapAA_test_setindex(Af)
-end
-
-@testset "AO for 1D" begin
-	B = LinearMapAO(A)
-	@test B isa LinearMapAO
-	X = rand(N,2)
-	Y = B * X
-	@test Y isa AbstractArray
-	@test Y ≈ Lm * X
-	Z = B' * Y
-	@test Z isa AbstractArray
-	@test Z ≈ Lm' * Y
 end
 
 # FunctionMap for multi-dimensional AO

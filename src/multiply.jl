@@ -9,9 +9,9 @@ export mul!
 
 using LinearMaps
 using LinearAlgebra: UniformScaling, I
+import LinearAlgebra: Adjoint, Transpose
+import LinearAlgebra: AdjointAbsVec, TransposeAbsVec
 import LinearAlgebra: mul! #, lmul!, rmul!
-#import LinearAlgebra # AdjointAbsVec
-
 
 
 # multiply with I or s*I (identity or scaled identity)
@@ -59,6 +59,19 @@ function Base.:(*)(A::AbstractMatrix, B::LinearMapAM)
     LinearMapAA(LinearMap(A) * B._lmap ; prop=B._prop, idim=B._idim)
 end
 
+# left multiply by transpose or adjoint vector, y'A = (A'*y)'
+Base.:(*)(v::AdjointAbsVec, A::LinearMapAM) = (A' * v')'
+Base.:(*)(v::TransposeAbsVec, A::LinearMapAM) =
+    transpose(transpose(A) * transpose(v))
+
+# if AO has odim=(M,) i.e. Do=1 then
+Base.:(*)(v::AdjointAbsVec, A::LinearMapAO{T,1,1}) where {T} = (A' * v')'
+#Base.:(*)(v::AdjointAbsVec, A::LinearMapAO{T,1,Di}) where {T,Di} = conj(A' * v')
+
+# todo: matrix? left
+#Base.:(*)(A::Adjoint, B::LinearMapAM) = (B' * A')'
+#Base.:(*)(A::Transpose, B::LinearMapAM) = transpose(transpose(B) * transpose(A))
+
 
 # LMAM case is easy!
 
@@ -71,7 +84,8 @@ mul!(y::AbstractVector, A::LinearMapAM, x::AbstractVector) =
     lm_mul!(y, A._lmap, x, 1, 0)
 #    mul!(y, A._lmap, x)
 
-mul!(y::AbstractVector, A::LinearMapAM, x::AbstractVector, α::Number, β::Number) =
+mul!(y::AbstractVector, A::LinearMapAM, x::AbstractVector,
+    α::Number, β::Number) =
     lm_mul!(y, A._lmap, x, α, β)
 #    mul!(y, A._lmap, x, α, β)
 
@@ -96,6 +110,16 @@ mul!(Y::AbstractArray, A::LinearMapAM, X::AbstractArray) =
     LinearMapsAA.mul!(Y, A, X, 1, 0)
 =#
 
+# left mul!
+mul!(x::AdjointAbsVec, y::AdjointAbsVec, A::LinearMapAM,
+    α::Number, β::Number) = mul!(x, y, A._lmap, α, β)
+mul!(x::TransposeAbsVec, y::TransposeAbsVec, A::LinearMapAM,
+    α::Number, β::Number) = mul!(x, y, A._lmap, α, β)
+
+# fallback
+mul!(x, A::LinearMapAX, y) = throw("unsupported")
+mul!(x, y, A::LinearMapAX) = throw("unsupported")
+
 
 # LMAO case
 
@@ -104,7 +128,7 @@ mul!(Y::AbstractArray, A::LinearMapAM, X::AbstractArray) =
 mul!(Y::AbstractArray, A::LinearMapAO, X::AbstractArray) =
     mul!(Y, A, X, 1, 0)
 
-# 3-arg X*O
+# 3-arg X*O left
 mul!(Y::AbstractArray, X::AbstractArray, A::LinearMapAO) =
     mul!(Y, X, A, 1, 0)
 
@@ -112,9 +136,15 @@ mul!(Y::AbstractArray, X::AbstractArray, A::LinearMapAO) =
 mul!(Y::AbstractArray, A::LinearMapAO, X::AbstractArray, α::Number, β::Number) =
     lmao_mul!(Y, A._lmap, X, α, β ; idim=A._idim, odim=A._odim)
 
-# 5-arg X*O (todo: test complex case)
+# 5-arg X*O left (todo: test complex case)
 mul!(Y::AbstractArray, X::AbstractArray, A::LinearMapAO, α::Number, β::Number) =
     lmao_mul!(Y, A._lmap', X, α, β ; idim=A._odim, odim=A._idim) # note!
+
+# left vector y'O
+mul!(x::AdjointAbsVec, y::AdjointAbsVec, A::LinearMapAO{T,1,1},
+    α::Number, β::Number) where {T,Di} = mul!(x, y, A._lmap, α, β)
+mul!(x::TransposeAbsVec, y::TransposeAbsVec, A::LinearMapAO{T,1,1},
+    α::Number, β::Number) where {T,Di} = mul!(x, y, A._lmap, α, β)
 
 
 """
@@ -156,7 +186,9 @@ end
 
 # multiply by array, with allocation
 
+# right
 Base.:(*)(A::LinearMapAO, X::AbstractArray) = lmax_mul(A, X)
+# left
 Base.:(*)(X::AbstractArray, A::LinearMapAO) = lmax_mul(A', X) # note!
 
 #=

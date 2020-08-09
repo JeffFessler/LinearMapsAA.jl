@@ -3,10 +3,10 @@
 using LinearMapsAA
 using Test: @test, @testset, detect_ambiguities
 
-include("multiply.jl")
 
 list = [
 "identity"
+"multiply"
 "kron"
 "cat"
 "getindex"

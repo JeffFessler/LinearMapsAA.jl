@@ -240,7 +240,7 @@ unlike with a matrix.
 In contrast,
 a `LinearMapAM` object is designed to behave
 akin to a matrix,
-except when for operations like `svd` and `pinv`
+except for operations like `svd` and `pinv`
 that are unsuitable for large-scale problems.
 However, one can try
 [`Arpack.svds(A)`](https://julialinearalgebra.github.io/Arpack.jl/latest/index.html#Arpack.svds)
