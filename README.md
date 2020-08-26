@@ -264,37 +264,12 @@ are similar to those here.
 [`FunctionOperators.jl`](https://github.com/hakkelt/FunctionOperators.jl)
 supports `inDims` and `outDims` features.
 
-## Credits
-
-This software was developed at the
-[University of Michigan](https://umich.edu/)
-by
-[Jeff Fessler](http://web.eecs.umich.edu/~fessler)
-and his
-[group](http://web.eecs.umich.edu/~fessler/group),
-with substantial inspiration drawn
-from the `LinearMaps` package.
-
-
-This package is included in the
-Michigan Image Reconstruction Toolbox
-[`MIRT.jl`](https://github.com/JeffFessler/MIRT.jl)
-and is exported there
-so that MIRT users can use it
-without "separate" installation.
-
 Being a sub-type of `AbstractArray` can be useful
 for other purposes,
 such as using the nice
 [Kronecker.jl](https://github.com/MichielStock/Kronecker.jl)
 package.
 
-
-## Compatability
-
-* Version 0.2.0 tested with Julia 1.1 and 1.2
-* Version 0.3.0 requires Julia 1.3
-* Version 0.6.0 assumes Julia 1.4
 
 
 ## Multiplication properties
@@ -341,11 +316,38 @@ for the in-place version `mul!(result, left, right)`:
 | `A` | `O` | `A` |
 
 
-## Getting started
+## Credits
 
-For detailed installation instructions, see:
-[doc/start.md](https://github.com/JeffFessler/MIRT.jl/blob/master/doc/start.md)
+This software was developed at the
+[University of Michigan](https://umich.edu/)
+by
+[Jeff Fessler](http://web.eecs.umich.edu/~fessler)
+and his
+[group](http://web.eecs.umich.edu/~fessler/group),
+with substantial inspiration drawn
+from the `LinearMaps` package.
+
+
+
+## Compatability
+
+* Version 0.2.0 tested with Julia 1.1 and 1.2
+* Version 0.3.0 requires Julia 1.3
+* Version 0.6.0 assumes Julia 1.4
+
+
+## Getting started
 
 This package is registered in the
 [`General`](https://github.com/JuliaRegistries/General) registry,
 so you can install it at the REPL with `] add LinearMapAA`.
+
+Here are
+[detailed installation instructions](https://github.com/JeffFessler/MIRT.jl/blob/master/doc/start.md)
+
+This package is included in the
+Michigan Image Reconstruction Toolbox
+[`MIRT.jl`](https://github.com/JeffFessler/MIRT.jl)
+and is exported there
+so that MIRT users can use it
+without "separate" installation.
