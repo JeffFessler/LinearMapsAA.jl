@@ -297,6 +297,50 @@ package.
 * Version 0.6.0 assumes Julia 1.4
 
 
+## Multiplication properties
+
+It can help developers and users
+to know how multiplication operations should behave.
+
+| Type | Shorthand |
+| :--- | :---: |
+| `LinearMapAO` | `O` |
+| `LinearMapAM` | `M` |
+| `LinearMap` | `L` |
+| `AbstractVector` | `v` |
+| `AbstractMatrix` | `X` |
+| `AbstractArray` | `A` |
+| `LinearAlgebra.I` | `I` |
+
+For `left * right` multiplication the results are as follows.
+
+| Left | Right | Result |
+| :---: | :---: | :---: |
+| `M` | `v` | `v` |
+| `v'` | `M` | `v'` |
+| `M` | `X` | `X` |
+| `X` | `M` | `X` |
+| `M` | `M` | `M` |
+| `M` | `L` | `M` |
+| `L` | `M` | `M` |
+| `O` | `A` | `A` |
+| `A` | `O` | `A` |
+| `O` | `O` | `O` |
+| `I` | `A` | `A` |
+
+The following subset of the above operations also work
+for the in-place version `mul!(result, left, right)`:
+
+| Left | Right | Result |
+| :---: | :---: | :---: |
+| `M` | `v` | `v` |
+| `v'` | `M` | `v'` |
+| `M` | `X` | `X` |
+| `X` | `M` | `X` |
+| `O` | `A` | `A` |
+| `A` | `O` | `A` |
+
+
 ## Getting started
 
 For detailed installation instructions, see:
