@@ -195,7 +195,7 @@ such that
 even when `X` is an array of more than two dimensions.
 (The original `LinearAlgebra.I` can only multiply
 vectors and matrices,
-which sufficies for matrix algebra,
+which suffices for matrix algebra,
 but not for general linear algebra.)
 
 Caution:
