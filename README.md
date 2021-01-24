@@ -2,8 +2,10 @@
 
 https://github.com/JeffFessler/LinearMapsAA.jl
 
-[![Build Status](https://travis-ci.org/JeffFessler/LinearMapsAA.jl.svg?branch=master)](https://travis-ci.org/JeffFessler/LinearMapsAA.jl)
-[![codecov.io](http://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master)](http://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master)
+[![Build Status][action-img]][action-url]
+[![Build Status][pkgeval-img]][pkgeval-url]
+[![Codecov.io][codecov-img]][codecov-url]
+[![Coveralls][coveralls-img]][coveralls-url]
 
 This package is an overlay for the package
 [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
@@ -240,7 +242,7 @@ unlike with a matrix.
 In contrast,
 a `LinearMapAM` object is designed to behave
 akin to a matrix,
-except when for operations like `svd` and `pinv`
+except for operations like `svd` and `pinv`
 that are unsuitable for large-scale problems.
 However, one can try
 [`Arpack.svds(A)`](https://julialinearalgebra.github.io/Arpack.jl/latest/index.html#Arpack.svds)
@@ -352,3 +354,14 @@ Michigan Image Reconstruction Toolbox
 and is exported there
 so that MIRT users can use it
 without "separate" installation.
+
+
+<!-- URLs -->
+[action-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/Unit%20test/badge.svg
+[action-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions
+[pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/I/ImageDraw.svg
+[pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
+[codecov-img]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master
+[codecov-url]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master
+[coveralls-img]: https://coveralls.io/repos/JeffFessler/LinearMapsAA.jl/badge.svg?branch
+[coveralls-url]: https://coveralls.io/github/JeffFessler/LinearMapsAA.jl?branch=master
