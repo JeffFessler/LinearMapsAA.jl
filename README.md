@@ -6,7 +6,7 @@ https://github.com/JeffFessler/LinearMapsAA.jl
 [![build status][build-img]][build-url]
 [![pkgeval status][pkgeval-img]][pkgeval-url]
 [![codecov.io][codecov-img]][codecov-url]
-[![coveralls][coveralls-img]][coveralls-url]
+[![license][license-img]][license-url]
 
 This package is an overlay for the package
 [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
@@ -366,5 +366,10 @@ without "separate" installation.
 [pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LinearMapsAA.html
 [codecov-img]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master
 [codecov-url]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master
+[license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat
+[license-url]: LICENSE
+<!--
+[![coveralls][coveralls-img]][coveralls-url]
 [coveralls-img]: https://coveralls.io/repos/JeffFessler/LinearMapsAA.jl/badge.svg?branch
 [coveralls-url]: https://coveralls.io/github/JeffFessler/LinearMapsAA.jl?branch=master
+-->
