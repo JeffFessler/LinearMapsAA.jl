@@ -2,10 +2,11 @@
 
 https://github.com/JeffFessler/LinearMapsAA.jl
 
-[![Build Status][action-img]][action-url]
-[![Build Status][pkgeval-img]][pkgeval-url]
-[![Codecov.io][codecov-img]][codecov-url]
-[![Coveralls][coveralls-img]][coveralls-url]
+[![action status][action-img]][action-url]
+[![build status][build-img]][build-url]
+[![pkgeval status][pkgeval-img]][pkgeval-url]
+[![codecov.io][codecov-img]][codecov-url]
+[![license][license-img]][license-url]
 
 This package is an overlay for the package
 [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
@@ -359,9 +360,16 @@ without "separate" installation.
 <!-- URLs -->
 [action-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/Unit%20test/badge.svg
 [action-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions
-[pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/I/ImageDraw.svg
-[pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
+[build-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/CI/badge.svg?branch=master
+[build-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions?query=workflow%3ACI+branch%3Amaster
+[pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LinearMapsAA.svg
+[pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LinearMapsAA.html
 [codecov-img]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master
 [codecov-url]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master
+[license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat
+[license-url]: LICENSE
+<!--
+[![coveralls][coveralls-img]][coveralls-url]
 [coveralls-img]: https://coveralls.io/repos/JeffFessler/LinearMapsAA.jl/badge.svg?branch
 [coveralls-url]: https://coveralls.io/github/JeffFessler/LinearMapsAA.jl?branch=master
+-->
