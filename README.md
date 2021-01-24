@@ -3,6 +3,7 @@
 https://github.com/JeffFessler/LinearMapsAA.jl
 
 [![Build Status][action-img]][action-url]
+[![Build Status][build-img]][build-url]
 [![Build Status][pkgeval-img]][pkgeval-url]
 [![Codecov.io][codecov-img]][codecov-url]
 [![Coveralls][coveralls-img]][coveralls-url]
@@ -359,6 +360,8 @@ without "separate" installation.
 <!-- URLs -->
 [action-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/Unit%20test/badge.svg
 [action-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions
+[build-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/CI/badge.svg?branch=master
+[build-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions?query=workflow%3ACI+branch%3Amaster
 [pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/I/ImageDraw.svg
 [pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
 [codecov-img]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master

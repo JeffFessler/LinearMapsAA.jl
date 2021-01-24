@@ -1,4 +1,4 @@
-name: Unit test
+name: CI
 
 on:
   create:
@@ -26,9 +26,9 @@ jobs:
       # fail-fast: true
 
     steps:
-      - uses: actions/checkout@v1.0.0
+      - uses: actions/checkout@v1
       - name: "Set up Julia"
-        uses: julia-actions/setup-julia@v1
+        uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.julia-version }}
 
