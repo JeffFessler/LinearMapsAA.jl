@@ -49,7 +49,7 @@ use `redim` or `LinearMapAO(A)`
 
 ## Examples
 
-```
+```julia
 N = 6
 L = LinearMap(cumsum, y -> reverse(cumsum(reverse(y))), N)
 A = LinearMapAA(L) # version with no properties
@@ -60,7 +60,7 @@ A.name # returns "cumsum" here
 ```
 
 Here is a more interesting example for signal processing.
-```
+```julia
 using FFTW
 N = 8
 A = LinearMapAA(fft, y -> N*ifft(y), (N, N), (name="fft",), T=ComplexF32)
@@ -108,7 +108,7 @@ The basic syntax is to replace
 `mul!(y, A, x)`.
 To make the code look more like the math,
 use the `InplaceOps` package:
-```
+```julia
 using InplaceOps
 @! y = A * x
 ```
@@ -155,7 +155,7 @@ specified by the `idim` and `odim` options.
 Here is a (simplified) example for 2D MRI,
 where the operator maps a 2D input array
 into a 1D output vector:
-```
+```julia
 using FFTW: fft, bfft
 using LinearMapsAA
 embed = (v, samp) -> setindex!(fill(zero(eltype(v)),size(samp)), v, samp)
@@ -166,6 +166,7 @@ A = LinearMapAA(x -> fft(x)[samp], y -> bfft(embed(y,samp)),
     (K, prod(N)) ; prop = (name="fft",), T=ComplexF32, idim=N, odim=(K,))
 x = rand(N...)
 z = A' * (A * x) # result is a 2D array!
+typeof(A) # LinearMapAO{ComplexF32, 1, 2}
 ```
 For more details see
 [example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/master/example/fft.jl)
@@ -189,6 +190,18 @@ In other words, it works block-wise.
 then you must first wrap `X` in a `LinearMapAO`.)
 This behavior deliberately departs from the non-`Matrix` like behavior
 in `LinearMaps` where `A*X` produces a new `LinearMap`.
+
+Here is a corresponding example (not useful; just for illustration).
+```julia
+using LinearMapsAA
+idim = (2,3)
+odim = (4,5,6)
+forward = x -> repeat(reshape(x, (idim[1],1,idim[2])) ; outer=(2,5,2))
+A = LinearMapAA(forward,
+    (prod(odim), prod(idim)) ; prop = (name="test",), idim, odim)
+x = rand(idim..., 7, 8)
+y = A * x
+```
 
 In the spirit of such generality,
 this package overloads `*` for `LinearAlgebra.I`
