@@ -7,6 +7,8 @@ https://github.com/JeffFessler/LinearMapsAA.jl
 [![pkgeval status][pkgeval-img]][pkgeval-url]
 [![codecov.io][codecov-img]][codecov-url]
 [![license][license-img]][license-url]
+[![docs stable][docs-stable-img]][docs-stable-url]
+[![docs dev][docs-dev-img]][docs-dev-url]
 
 This package is an overlay for the package
 [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
@@ -270,6 +272,9 @@ but only for arrays,
 not linear operators defined by functions,
 so `LinearMaps` is more comprehensive.
 
+[`LazyAlgebra.jl`](https://github.com/emmt/LazyAlgebra.jl)
+also has many related features, and supports nonlinear mappings.
+
 This package provides similar functionality
 as the `Fatrix` / `fatrix` object in the
 [Matlab version of MIRT](https://github.com/JeffFessler/mirt).
@@ -379,6 +384,10 @@ without "separate" installation.
 [pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LinearMapsAA.html
 [codecov-img]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master
 [codecov-url]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://JeffFessler.github.io/LinearMapsAA.jl/stable
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://JeffFessler.github.io/LinearMapsAA.jl/dev
 [license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat
 [license-url]: LICENSE
 <!--
