@@ -27,6 +27,14 @@ Base.kron(A::LinearMapAM, M::AbstractMatrix) =
 Base.kron(M::AbstractMatrix, A::LinearMapAM) =
     LinearMapAA(kron(M, A._lmap), A._prop)
 
+
+Base.kron(A::LinearMapAM, D::Diagonal{<: Number}) =
+    LinearMapAA(kron(A._lmap, D), A._prop)
+
+Base.kron(D::Diagonal{<: Number}, A::LinearMapAM) =
+    LinearMapAA(kron(D, A._lmap), A._prop)
+
+
 Base.kron(A::LinearMapAM, B::LinearMapAM) =
     LinearMapAA(kron(A._lmap, B._lmap) ;
         prop = (kron=nothing, props=(A._prop, B._prop)),
@@ -38,6 +46,7 @@ Base.kron(A::LinearMapAO, B::LinearMapAO) =
         odim = (B._odim..., A._odim...),
         idim = (B._idim..., A._idim...),
     )
+
 
 Base.kron(M::AbstractMatrix, A::LinearMapAO) =
     LinearMapAA(kron(M, A._lmap) ; prop = A._prop,
