@@ -6,6 +6,7 @@ using Test: @test, @testset, detect_ambiguities
 include("multiply.jl")
 
 list = [
+"ambiguity"
 "identity"
 "kron"
 "cat"
