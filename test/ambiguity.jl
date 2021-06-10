@@ -2,8 +2,9 @@
 # tests needed only because of code added to resolve method ambiguities
 
 using LinearAlgebra: Diagonal, UpperTriangular
-using LinearAlgebra: Adjoint, Transpose #, symmetric
+using LinearAlgebra: Adjoint, Transpose, Symmetric
 using LinearAlgebra: TransposeAbsVec, AdjointAbsVec
+import LinearAlgebra
 using LinearMapsAA
 using Test: @test, @testset
 
@@ -34,17 +35,23 @@ end
     @test r * M == r * A
 end
 
-#=
+@testset "Transpose" begin
+# work-around per
+# https://github.com/Jutho/LinearMaps.jl/issues/147
+    LinearAlgebra.isposdef(A::Transpose{Float64, Symmetric{Float64, Matrix{Float64}}}) = false
+    S = LinearAlgebra.Symmetric(M)
+    T = LinearAlgebra.Transpose(S)
+    @test Matrix(A * T) == M * T # failed prior to isposdef overload
+    @test Matrix(T * A) == T * M
+end
+
+@testset "Adjoint" begin
     C = rand(ComplexF32, 3, 3)
     H = LinearAlgebra.Hermitian(C)
     J = Adjoint(H)
+    T = typeof(J) # Adjoint{ComplexF32, LinearAlgebra.Hermitian{ComplexF32, Matrix{ComplexF32}}}
+    LinearAlgebra.isposdef(A::T) = false # kludge
 
-#   @test Matrix(A * J) == M * J # todo
-#   @test Matrix(J * A) == J * M
-
-    S = LinearAlgebra.Symmetric(M)
-    T = LinearAlgebra.Transpose(S)
-    M * T
-#   A * T # fails - todo
-# https://github.com/Jutho/LinearMaps.jl/issues/147
-=#
+    @test Matrix(A * J) == M * J
+    @test Matrix(J * A) == J * M
+end
