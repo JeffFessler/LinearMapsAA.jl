@@ -38,7 +38,7 @@ end
 @testset "Transpose" begin
 # work-around per
 # https://github.com/Jutho/LinearMaps.jl/issues/147
-    LinearAlgebra.isposdef(A::Transpose{Float64, Symmetric{Float64, Matrix{Float64}}}) = false
+    LinearAlgebra.isposdef(A::Transpose) = LinearAlgebra.isposdef(parent(A))
     S = LinearAlgebra.Symmetric(M)
     T = LinearAlgebra.Transpose(S)
     @test Matrix(A * T) == M * T # failed prior to isposdef overload
@@ -49,9 +49,7 @@ end
     C = rand(ComplexF32, 3, 3)
     H = LinearAlgebra.Hermitian(C)
     J = Adjoint(H)
-    T = typeof(J) # Adjoint{ComplexF32, LinearAlgebra.Hermitian{ComplexF32, Matrix{ComplexF32}}}
-    LinearAlgebra.isposdef(A::T) = false # kludge
-
+    LinearAlgebra.isposdef(A::Adjoint) = LinearAlgebra.isposdef(parent(A))
     @test Matrix(A * J) == M * J
     @test Matrix(J * A) == J * M
 end
