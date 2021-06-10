@@ -25,5 +25,6 @@ Base.:(*)(A::Adjoi, B::LinearMapAM) = M_AM(A, B)
 Base.:(*)(A::LinearMapAM, B::Given) = AM_M(A, B)
 Base.:(*)(A::Given, B::LinearMapAM) = M_AM(A, B)
 
-Base.:(*)(x::LinearAlgebra.AdjointAbsVec, A::LinearMapAM) = (A'*x')'
-Base.:(*)(x::LinearAlgebra.TransposeAbsVec, A::LinearMapAM) = transpose(transpose(A)*transpose(x))
+Base.:(*)(x::LinearAlgebra.AdjointAbsVec, A::LinearMapAM) = (A' * x')'
+Base.:(*)(x::LinearAlgebra.TransposeAbsVec, A::LinearMapAM) =
+    transpose(transpose(A) * transpose(x))
