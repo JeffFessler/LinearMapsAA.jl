@@ -8,7 +8,6 @@ import LinearAlgebra
 
 const Trans = LinearAlgebra.Transpose{<: Any, <: LinearAlgebra.RealHermSymComplexSym}
 const Adjoi = LinearAlgebra.Adjoint{<: Any, <: LinearAlgebra.RealHermSymComplexHerm}
-const Given = LinearAlgebra.Adjoint{<: Any, <: LinearAlgebra.AbstractRotation}
 
 Base.:(*)(A::LinearMapAM, D::LinearAlgebra.Diagonal) = AM_M(A, D)
 Base.:(*)(D::LinearAlgebra.Diagonal, B::LinearMapAM,) = M_AM(D, B)
@@ -22,8 +21,11 @@ Base.:(*)(A::Trans, B::LinearMapAM) = M_AM(A, B)
 Base.:(*)(A::LinearMapAM, B::Adjoi) = AM_M(A, B)
 Base.:(*)(A::Adjoi, B::LinearMapAM) = M_AM(A, B)
 
-Base.:(*)(A::LinearMapAM, B::Given) = AM_M(A, B)
-Base.:(*)(A::Given, B::LinearMapAM) = M_AM(A, B)
+# see https://github.com/Jutho/LinearMaps.jl/issues/118
+Base.:(*)(A::LinearMapAM,
+   B::LinearAlgebra.Adjoint{<: Any, <: LinearAlgebra.AbstractRotation}) =
+   throw("AbstractRotation lacks size so * is unsupported")
+#Base.:(*)(A::Given, B::LinearMapAM) = M_AM(A, B)
 
 Base.:(*)(x::LinearAlgebra.AdjointAbsVec, A::LinearMapAM) = (A' * x')'
 Base.:(*)(x::LinearAlgebra.TransposeAbsVec, A::LinearMapAM) =

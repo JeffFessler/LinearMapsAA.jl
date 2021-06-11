@@ -17,11 +17,11 @@ list = [
 ]
 
 for file in list
-	@testset "$file" begin
-		include("$file.jl")
-	end
+    @testset "$file" begin
+        include("$file.jl")
+    end
 end
 
-if VERSION <= v"1.5.3" # todo: errors in "nightly"
-	@test length(detect_ambiguities(LinearMapsAA)) == 0
+@testset "ambiguities" begin
+    @test length(detect_ambiguities(LinearMapsAA)) == 0
 end
