@@ -4,8 +4,13 @@ on:
   create:
     tags:
   push:
-    branches:
-      - master
+    paths-ignore:
+      - '*/*.md'
+      - 'docs/**'
+  pull_request:
+    paths-ignore:
+      - '*/*.md'
+      - 'docs/**'
   workflow_dispatch:
 
 jobs:
@@ -14,8 +19,6 @@ jobs:
     continue-on-error: ${{ matrix.version == 'nightly' }}
     strategy:
       matrix:
-      # jf: reduce testing for lower carbon footprint
-      # version: ['1.4', '1', 'nightly']
         version: ['1.6', 'nightly']
         os: [ubuntu-latest, windows-latest, macOS-latest]
       # fail-fast: true
