@@ -350,12 +350,12 @@ from the `LinearMaps` package.
 
 
 
-## Compatability
+## Compatibility
 
 * Version 0.2.0 tested with Julia 1.1 and 1.2
 * Version 0.3.0 requires Julia 1.3
 * Version 0.6.0 assumes Julia 1.4
-* master assumes Julia 1.5
+* Version 0.7.0 assumes Julia 1.6
 
 
 ## Getting started
