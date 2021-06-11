@@ -50,14 +50,16 @@ end
 # multiply with a matrix
 # subtle: AM * Matrix and Matrix * AM yield a new AM
 # whereas AO * M and M * AO yield a matrix of numbers!
-function Base.:(*)(A::LinearMapAM, B::AbstractMatrix)
+function AM_M(A::LinearMapAM, B::AbstractMatrix)
     (A._idim == (size(B,1),)) || throw("$(A._idim) * $(size(B,1)) mismatch")
     LinearMapAA(A._lmap * LinearMap(B) ; prop=A._prop, odim=A._odim)
 end
-function Base.:(*)(A::AbstractMatrix, B::LinearMapAM)
+function M_AM(A::AbstractMatrix, B::LinearMapAM)
     (B._odim == (size(A,2),)) || throw("$(B._odim) * $(size(A,1)) mismatch")
     LinearMapAA(LinearMap(A) * B._lmap ; prop=B._prop, idim=B._idim)
 end
+Base.:(*)(A::LinearMapAM, B::AbstractMatrix) = AM_M(A, B)
+Base.:(*)(A::AbstractMatrix, B::LinearMapAM) = M_AM(A, B)
 
 
 # LMAM case is easy!

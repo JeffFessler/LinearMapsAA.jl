@@ -12,6 +12,7 @@ Indexer = AbstractVector{Int}
 
 include("types.jl")
 include("multiply.jl")
+include("ambiguity.jl")
 include("kron.jl")
 include("cat.jl")
 include("getindex.jl")
