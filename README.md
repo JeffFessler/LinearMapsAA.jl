@@ -69,7 +69,7 @@ A = LinearMapAA(fft, y -> N*ifft(y), (N, N), (name="fft",), T=ComplexF32)
 @show A[:,2]
 ```
 For more details see
-[example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/master/example/fft.jl)
+[example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/main/example/fft.jl)
 
 
 ## Features shared with `LinearMap` objects
@@ -171,7 +171,7 @@ z = A' * (A * x) # result is a 2D array!
 typeof(A) # LinearMapAO{ComplexF32, 1, 2}
 ```
 For more details see
-[example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/master/example/fft.jl)
+[example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/main/example/fft.jl)
 
 The adjoint of this `LinearMapAO` object
 maps a 1D vector of k-space samples
@@ -365,7 +365,7 @@ This package is registered in the
 so you can install it at the REPL with `] add LinearMapAA`.
 
 Here are
-[detailed installation instructions](https://github.com/JeffFessler/MIRT.jl/blob/master/doc/start.md)
+[detailed installation instructions](https://github.com/JeffFessler/MIRT.jl/blob/main/doc/start.md)
 
 This package is included in the
 Michigan Image Reconstruction Toolbox
@@ -378,12 +378,12 @@ without "separate" installation.
 <!-- URLs -->
 [action-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/Unit%20test/badge.svg
 [action-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions
-[build-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/CI/badge.svg?branch=master
-[build-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions?query=workflow%3ACI+branch%3Amaster
+[build-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/CI/badge.svg?branch=main
+[build-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions?query=workflow%3ACI+branch%3Amain
 [pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LinearMapsAA.svg
 [pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LinearMapsAA.html
-[codecov-img]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=master
-[codecov-url]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=master
+[codecov-img]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=main
+[codecov-url]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=main
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://JeffFessler.github.io/LinearMapsAA.jl/stable
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
@@ -393,5 +393,5 @@ without "separate" installation.
 <!--
 [![coveralls][coveralls-img]][coveralls-url]
 [coveralls-img]: https://coveralls.io/repos/JeffFessler/LinearMapsAA.jl/badge.svg?branch
-[coveralls-url]: https://coveralls.io/github/JeffFessler/LinearMapsAA.jl?branch=master
+[coveralls-url]: https://coveralls.io/github/JeffFessler/LinearMapsAA.jl?branch=main
 -->
