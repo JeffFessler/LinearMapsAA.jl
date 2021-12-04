@@ -12,6 +12,10 @@ using Test: @test, @testset, @test_throws
 B = reshape(1:6, 6, 1)
 @test Matrix(LinearMapAA(B)) == B
 
+# ensure that "show" is concise even for big `prop`
+L = LinearMapAA(LinearMap(ones(3,4)), (a=1:3, b=ones(99,99)))
+show(isinteractive() ? stdout : devnull, L)
+
 N = 6; M = N+1 # non-square to stress test
 forw = x -> [cumsum(x); 0]
 back = y -> reverse(cumsum(reverse(y[1:N])))
