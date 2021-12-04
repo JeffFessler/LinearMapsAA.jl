@@ -31,21 +31,17 @@ Base.ndims(A::LinearMapAO) = ndims(A._lmap) # 2
 Pretty printing for `display`
 """
 function Base.show(io::IO, A::LinearMapAX) # short version
-	print(io, isa(A, LinearMapAM) ? "LinearMapAM" : "LinearMapAO")
-	print(io, ": $(size(A,1)) × $(size(A,2))")
+    print(io, isa(A, LinearMapAM) ? "LinearMapAM" : "LinearMapAO",
+        ": $(size(A,1)) × $(size(A,2))")
 end
 
 # multi-line version:
-Base.show(io::IO, ::MIME"text/plain", A::LinearMapAX{T,Do,Di}) where {T,Do,Di} =
-	begin
-		show(io, A)
-		(A._prop != NamedTuple()) && print(io, "\n$(A._prop)")
-		print(io, "\nodim=$(A._odim) idim=$(A._idim) T=$T Do=$Do Di=$Di")
-	#	print(io, "\n$(A._lmap)\n") # todo: hide until "show" fixed for LM
-		print(io, "\n$(typeof(A._lmap)) ...\n")
-	#	tmp = "$(A._lmap)"[1:77]
-	#	print(io, " $tmp ..")
-	end
+function Base.show(io::IO, ::MIME"text/plain", A::LinearMapAX{T,Do,Di}) where {T,Do,Di}
+    show(io, A)
+    print(io, " odim=$(A._odim) idim=$(A._idim) T=$T Do=$Do Di=$Di")
+    (A._prop != NamedTuple()) && (print(io, "\nprop = "); show(io, A._prop))
+    print(io, "\nmap = $(A._lmap)\n")
+end
 
 # size
 Base.size(A::LinearMapAX) = size(A._lmap)
