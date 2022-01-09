@@ -8,8 +8,9 @@ forw! = cumsum!
 back! = (x, y) -> reverse!(cumsum!(x, reverse!(copyto!(x, y))))
 
 N = 9
-L = LinearOperator(Float32, N, N, false, false, forw!,
-     nothing, # will be inferred
+T = Float32
+L = LinearOperator(T, N, N, false, false, forw!,
+     nothing, # transpose mul!
      back!,
 )
 
@@ -28,3 +29,10 @@ A = LinearMapAA(L)
 
 
 # todo: test the other way
+
+B = LinearMapAA(forw!, back!, (N, N); T)
+L = LinearOperator(B)
+@test L isa LinearOperator
+@test Matrix(L)' == Matrix(L')
+
+@test L * x == cumsum(x)
