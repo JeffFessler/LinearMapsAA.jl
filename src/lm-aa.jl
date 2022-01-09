@@ -15,7 +15,7 @@ export redim, undim
 
 # copy
 Base.copy(A::LinearMapAX{T,Do,Di}) where {T,Do,Di} =
-	LinearMapAA(A._lmap ; prop=A._prop, T=T, idim=A._idim, odim=A._odim)
+    LinearMapAA(A._lmap ; prop=A._prop, T=T, idim=A._idim, odim=A._odim)
 
 # Matrix
 Base.Matrix(A::LinearMapAX) = Matrix(A._lmap)
@@ -53,11 +53,11 @@ Base.size(A::LinearMapAX, d::Int) = size(A._lmap, d)
 "Reinterpret" the `idim` and `odim` of `A`
 """
 function redim(A::LinearMapAX{T} ;
-	idim::Dims=A._idim, odim::Dims=A._odim) where {T}
+    idim::Dims=A._idim, odim::Dims=A._odim) where {T}
 
-	prod(idim) == prod(A._idim) || throw("incompatible idim")
-	prod(odim) == prod(A._odim) || throw("incompatible odim")
-	return LinearMapAA(A._lmap ; prop=A._prop, T=T, idim=idim, odim=odim)
+    prod(idim) == prod(A._idim) || throw("incompatible idim")
+    prod(odim) == prod(A._odim) || throw("incompatible odim")
+    return LinearMapAA(A._lmap ; prop=A._prop, T=T, idim=idim, odim=odim)
 end
 
 """
@@ -66,7 +66,7 @@ end
 "Reinterpret" the `idim` and `odim` of `A` to be of AM type
 """
 undim(A::LinearMapAX{T}) where {T} =
-	LinearMapAA(A._lmap ; prop=A._prop, T=T)
+    LinearMapAA(A._lmap ; prop=A._prop, T=T)
 
 
 # adjoint
@@ -88,9 +88,9 @@ isposdef(A::LinearMapAX) = isposdef(A._lmap)
 
 # comparison of LinearMapAX objects, sufficient but not necessary
 Base.:(==)(A::LinearMapAX, B::LinearMapAX) =
-	eltype(A) == eltype(B) &&
-		A._lmap == B._lmap && A._prop == B._prop &&
-		A._idim == B._idim && A._odim == B._odim
+    eltype(A) == eltype(B) &&
+        A._lmap == B._lmap && A._prop == B._prop &&
+        A._idim == B._idim && A._odim == B._odim
 
 
 # convert to sparse
@@ -99,13 +99,13 @@ sparse(A::LinearMapAX) = sparse(A._lmap)
 
 # add or subtract objects (with compatible idim,odim)
 function Base.:(+)(A::LinearMapAX, B::LinearMapAX)
-	(A._idim != B._idim) && throw("idim mismatch in +")
-	(A._odim != B._odim) && throw("odim mismatch in +")
-	LinearMapAA(A._lmap + B._lmap ;
-		idim=A._idim, odim=A._odim,
-		prop = (sum=nothing,props=(A._prop,B._prop)),
-		operator = isa(A, LinearMapAO) & isa(B, LinearMapAO),
-	)
+    (A._idim != B._idim) && throw("idim mismatch in +")
+    (A._odim != B._odim) && throw("odim mismatch in +")
+    LinearMapAA(A._lmap + B._lmap ;
+        idim=A._idim, odim=A._odim,
+        prop = (sum=nothing,props=(A._prop,B._prop)),
+        operator = isa(A, LinearMapAO) & isa(B, LinearMapAO),
+    )
 end
 
 # Allow LMAA + AM only if Do=Di=1
@@ -133,9 +133,9 @@ Base.:(-)(A::AbstractMatrix, B::LinearMapAX) = A + (-1)*B
 
 # A.?
 Base.getproperty(A::LinearMapAX, s::Symbol) =
-	(s in LMAAkeys) ? getfield(A, s) :
-#	s == :m ? size(A._lmap, 1) :
-	haskey(A._prop, s) ? getfield(A._prop, s) :
-		throw("unknown key $s")
+    (s in LMAAkeys) ? getfield(A, s) :
+#    s == :m ? size(A._lmap, 1) :
+    haskey(A._prop, s) ? getfield(A._prop, s) :
+        throw("unknown key $s")
 
 Base.propertynames(A::LinearMapAX) = (propertynames(A._prop)..., LMAAkeys...)

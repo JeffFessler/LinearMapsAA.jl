@@ -14,6 +14,7 @@ list = [
 "setindex"
 "block_diag"
 "tests"
+"wrap-linop"
 ]
 
 for file in list
