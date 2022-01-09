@@ -7,39 +7,13 @@ using .LinearOperators: LinearOperator
 
 
 """
-    A = LinearMapAA(L::LinearOperator ; ...)
+    A = LinearMapAA(L::LinearOperator ; kwargs...)
 
-Wrap a `LinearOperator` in a `LinearMapAX`
-
-# options
-- `prop::NamedTuple = NamedTuple()`
-- `T = eltype(L)`
-- `idim::Dims = (size(L,2),)`
-- `odim::Dims = (size(L,1),)`
-- `operator::Bool` by default: `false` if both `idim` & `odim` are 1D.
-
-`prop` cannot include the fields `_lmap`, `_prop`, `_idim`, `_odim`
-
-Output `A` is `LinearMapAO` if `operator` is `true`, else `LinearMapAM`.
+Wrap a `LinearOperator` in a `LinearMapAX`.
+Options are passed to `LinearMapAA` constructor.
 """
-function LinearMapAA(L::LinearOperator ;
-    prop::NamedTuple = NamedTuple(),
-    T::Type = eltype(L),
-    idim::Dims{Di} = (size(L,2),),
-    odim::Dims{Do} = (size(L,1),),
-    operator::Bool = length(idim) > 1 || length(odim) > 1,
-) where {Di,Do}
-
-    size(L,2) == prod(idim) ||
-        throw(DimensionMismatch("size2=$(size(L,2)) vs idim=$idim"))
-    size(L,1) == prod(odim) ||
-        throw(DimensionMismatch("size1=$(size(L,1)) vs odim=$odim"))
-    length(intersect(propertynames(prop), LMAAkeys)) > 0 &&
-        throw("invalid property field among $(propertynames(prop))")
-
+function LinearMapAA(L::LinearOperator ; kwargs...)
     forw!(y, x) = mul!(y, L, x)
     back!(x, y) = mul!(x, L', y)
-    return operator ?
-         LinearMapAO{T,Do,Di}(forw!, back!, prop, idim, odim) :
-         LinearMapAM{T,Do,Di}(forw!, back!, prop, idim, odim)
+    return LinearMapAA(forw!, back!, size(L); kwargs...)
 end
