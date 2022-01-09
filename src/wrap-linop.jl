@@ -1,9 +1,9 @@
-# linop.jl
-# Wrap a LinearOperator in a LinearMapAA
+# wrap-linop.jl
+# Wrap a LinearMapAA around a LinearOperator
 
 export LinearMapAA
 
-using LinearOperators
+using .LinearOperators: LinearOperator
 
 
 """
