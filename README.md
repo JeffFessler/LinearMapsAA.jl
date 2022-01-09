@@ -292,6 +292,25 @@ such as using the nice
 package.
 
 
+## Inter-operability
+
+To promote inter-operability of different linear mapping packages,
+this package provides methods
+for wrapping other operator types into `LinearMapAX` types.
+The syntax is simply
+`LinearMapAA(L; kwargs...)`
+where `L` can be any of the following types currently
+* `AbstractMatrix` (including `Matrix`, `SparseMatrixCSC`, `Diagonal`, among many others)
+* `LinearMap` from
+  [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
+* `LinearOperator` from
+  [`LinearOperators.jl`](https://github.com/JuliaSmoothOptimizers/LinearOperators.jl)
+Submit and issue or make a PR if there are other operator types
+that one would like to have supported.
+To minimize package dependencies,
+the wrapping code for a `LinearOperator` is based on
+[Requires.jl](https://github.com/JuliaPackaging/Requires.jl).
+
 
 ## Multiplication properties
 
