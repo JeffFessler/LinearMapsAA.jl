@@ -68,7 +68,7 @@ end
 @testset "deepcopy" begin
     B = deepcopy(A)
     @test B == A
-    @test !(B === A)
+#   @test !(B === A) # irrelevant now that struct is immutable
 end
 
 @testset "throw" begin
