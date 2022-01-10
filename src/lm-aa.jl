@@ -134,7 +134,7 @@ Base.:(-)(A::AbstractMatrix, B::LinearMapAX) = A + (-1)*B
 # A.?
 Base.getproperty(A::LinearMapAX, s::Symbol) =
     (s in LMAAkeys) ? getfield(A, s) :
-#    s == :m ? size(A._lmap, 1) :
+#   s == :m ? size(A._lmap, 1) :
     haskey(A._prop, s) ? getfield(A._prop, s) :
         throw("unknown key $s")
 

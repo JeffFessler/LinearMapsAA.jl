@@ -71,11 +71,11 @@ Base.:(*)(A::AbstractMatrix, B::LinearMapAM) = M_AM(A, B)
 
 mul!(y::AbstractVector, A::LinearMapAM, x::AbstractVector) =
     lm_mul!(y, A._lmap, x, 1, 0)
-#    mul!(y, A._lmap, x)
+#   mul!(y, A._lmap, x)
 
 mul!(y::AbstractVector, A::LinearMapAM, x::AbstractVector, α::Number, β::Number) =
     lm_mul!(y, A._lmap, x, α, β)
-#    mul!(y, A._lmap, x, α, β)
+#   mul!(y, A._lmap, x, α, β)
 
 # treat LinearMaps.CompositeMap as special case for in-place operations
 function lm_mul!(y::AbstractVector, Lm::LinearMaps.CompositeMap,
@@ -190,14 +190,14 @@ Base.:(*)(A::LinearMapAO{T,Do,1}, v::AbstractVector) where {T,Do} =
     reshape(A._lmap * v, A._odim)
 # u'*O (no, use general X*O above because unclear what this would mean)
 #Base.:(*)(u::LinearAlgebra.AdjointAbsVec, A::LinearMapAO) =
-#    reshape(A._lmap' * u', A._idim)
+#   reshape(A._lmap' * u', A._idim)
 
 # A*v
 Base.:(*)(A::LinearMapAM, v::AbstractVector) =
     A._lmap * v
 # u'*A (nah, not worth it)
 #Base.:(*)(u::LinearAlgebra.AdjointAbsVec, A::LinearMapAM) =
-#    (A._lmap' * u')'
+#   (A._lmap' * u')'
 
 #= bad kludge
 LMAAmanyFromOne = Union{

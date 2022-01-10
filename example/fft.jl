@@ -36,27 +36,27 @@ y = rand(Float32, N) + 1im * rand(Float32, N)
 y2 = rand(Float32, N) + 1im * rand(Float32, N)
 
 if true
-	mul!(y, L, x)
-	mul!(y2, A, x)
-	@test isapprox(y, y2)
+    mul!(y, L, x)
+    mul!(y2, A, x)
+    @test isapprox(y, y2)
 end
 
 if true # essentially identical
-	println("adjoint:")
-	@btime x = ($L)' * $y
-	@btime x = ($A)' * $y
+    println("adjoint:")
+    @btime x = ($L)' * $y
+    @btime x = ($A)' * $y
 end
 
 if true # essentially identical
-	println("forward:")
-	@btime y = $L * $x
-	@btime y = $A * $x
+    println("forward:")
+    @btime y = $L * $x
+    @btime y = $A * $x
 end
 
 if true # essentially identical
-	println("mul!:")
-	@btime mul!($y, $L, $x)
-	@btime mul!($y, $A, $x)
+    println("mul!:")
+    @btime mul!($y, $L, $x)
+    @btime mul!($y, $A, $x)
 end
 
 nothing

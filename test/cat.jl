@@ -73,9 +73,9 @@ function LinearMapAA_test_cat(A::LinearMapAM)
     Lm = LinearMap{eltype(A)}(x -> A*x, y -> A'*y, size(A,1), size(A,2))
     M = Matrix(A)
 
-#    LinearMaps supports *cat of LM and UniformScaling only in v2.6.1
-#    but see: https://github.com/Jutho/LinearMaps.jl/pull/71
-#    B0 = [M Lm] # fails!
+#   LinearMaps supports *cat of LM and UniformScaling only in v2.6.1
+#   but see: https://github.com/Jutho/LinearMaps.jl/pull/71
+#   B0 = [M Lm] # fails!
 
 #=
     # cannot get cat with AbstractMatrix to work
