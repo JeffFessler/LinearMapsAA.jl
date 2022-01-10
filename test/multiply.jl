@@ -91,11 +91,11 @@ function LinearMapAA_test_vmul(A::LinearMapAM)
 
 #=
     s = 4.2
-    C = copy(A)
+    C = deepcopy(A)
     lmul!(s, C)
     @test isapprox(s * B * v, C * v)
 
-    C = copy(A)
+    C = deepcopy(A)
     rmul!(C, s)
     @test isapprox(s * B * v, C * v)
 =#

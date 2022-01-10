@@ -65,8 +65,8 @@ end
     @test redim(A) isa LinearMapAX
 end
 
-@testset "copy" begin
-    B = copy(A)
+@testset "deepcopy" begin
+    B = deepcopy(A)
     @test B == A
     @test !(B === A)
 end

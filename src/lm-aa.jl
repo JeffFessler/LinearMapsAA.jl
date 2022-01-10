@@ -13,10 +13,6 @@ import SparseArrays: sparse
 export redim, undim
 
 
-# copy
-Base.copy(A::LinearMapAX{T,Do,Di}) where {T,Do,Di} =
-    LinearMapAA(A._lmap ; prop=A._prop, T=T, idim=A._idim, odim=A._odim)
-
 # Matrix
 Base.Matrix(A::LinearMapAX) = Matrix(A._lmap)
 
