@@ -26,7 +26,7 @@ and then later replace it with a `LinearMapAX` object.
 The extra `AA` in the package name here has two meanings.
 
 - `LinearMapAM` is a subtype of `AbstractArray{T,2}`, i.e.,
-[conforms to the requirements of an `AbstractMatrix`](https://docs.julialang.org/en/latest/manual/interfaces/#man-interface-array-1)
+[conforms to the requirements of an `AbstractMatrix`](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array)
 type.
 
 - The package was developed in Ann Arbor, Michigan :)
@@ -40,11 +40,11 @@ so this package adds that feature
 
 As of `v0.6`,
 the package produces objects of two types:
-* `LinearMapAM` (think "Matrix") that is a subtype of `AbstractMatrix`
-* `LinearMapAO` (think "Operator") that is not a subtype of `AbstractMatrix`
+* `LinearMapAM` (think "Matrix") that is a subtype of `AbstractMatrix`.
+* `LinearMapAO` (think "Operator") that is not a subtype of `AbstractMatrix`.
 * The general type `LinearMapAX` is a `Union` of both.
 * To convert a `LinearMapAM` to a `LinearMapAO`,
-use `redim` or `LinearMapAO(A)`
+  use `redim` or `LinearMapAO(A)`
 * To convert a `LinearMapAO` to a `LinearMapAM`, use `undim`.
 
 
@@ -81,7 +81,7 @@ In particular, if `A` and `B` are both `LinearMapAX` objects
 of appropriate sizes,
 then the following each make new `LinearMapAX` objects:
 - Multiplication: `A * B`
-- Linear combination: `A + B`, `A - B`, `3A - 7B`,
+- Linear combination: `A + B`, `A - B`, `3A - 7B`
 - Kronecker products: `kron(A, B)`
 
 - Concatenation: `[A B]` `[A; B]` `[I A I]` `[A B; 2A 3I]` etc.
@@ -96,7 +96,7 @@ like `[I I A]`, though one can accomplish that one using
 Conversion to other data types
 (may require lots of memory if `A` is big):
 - Convert to sparse: `sparse(A)`
-- Convert to dense matrix: `Matrix(A)`
+- Convert to dense matrix: `Matrix(A)`.
 
 
 #### Avoiding memory allocations
@@ -112,7 +112,7 @@ To make the code look more like the math,
 use the `InplaceOps` package:
 ```julia
 using InplaceOps
-@! y = A * x
+@! y = A * x # shorthand for mul!(y, A, x)
 ```
 
 
@@ -144,7 +144,7 @@ due to its `getindex` support:
 - Portions: `A[4:6,5:8]` (returns a dense matrix)
 - Linear indexing: `A[2:9]` (returns a 1D vector)
 - Convert to matrix: `A[:,:]` (if memory permits)
-- Convert to vector: `A[:]` (if memory permits)
+- Convert to vector: `A[:]` (if memory permits).
 
 
 ## Operator support
@@ -228,25 +228,28 @@ or all
 rather than trying to mix and match.
 
 
-## Caution
+## Historical note about `setindex!`
 
-An `AbstractArray` also must support a `setindex!` operation
-and this package provides that capability,
+The
+[Julia manual section on the `AbstractArray` interface](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array)
+implies that an `AbstractArray`
+should support a `setindex!` operation.
+Versions of this package prior to v0.8.0
+provided that capability,
 mainly for completeness
 and as a proof of principle,
 solely for the `LinearMapAM` type.
-Examples:
-- `A[2,3] = 7`
-- `A[:,4] = ones(size(A,1))`
-- `A[end] = 0`
-
-A single `setindex!` call is reasonably fast,
-but multiple calls add layers of complexity
-that are likely to slow things down.
-In particular, trying to do something like the Gram-Schmidt procedure
-"in place" with an `AbstractArray` would be insane.
-In fact, `LinearAlgebra.qr!` works only with a `StridedMatrix`
-not a general `AbstractMatrix`.
+However,
+the reality is that many sub-types of `AbstractArray`
+in the Julia ecosystem,
+such as `LinearAlgebra.Diagonal`,
+understandably do *not* support `setindex!`,
+and it there seems to be no use
+for it here either.
+Supporting `setindex!` seems impossible with a concrete type
+for a function map,
+so it is no longer supported.
+The key code is relegated to the `archive` directory.
 
 
 ## Related packages
@@ -299,16 +302,17 @@ this package provides methods
 for wrapping other operator types into `LinearMapAX` types.
 The syntax is simply
 `LinearMapAA(L; kwargs...)`
-where `L` can be any of the following types currently
+where `L` can be any of the following types currently:
 * `AbstractMatrix` (including `Matrix`, `SparseMatrixCSC`, `Diagonal`, among many others)
 * `LinearMap` from
   [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
 * `LinearOperator` from
-  [`LinearOperators.jl`](https://github.com/JuliaSmoothOptimizers/LinearOperators.jl)
-Submit and issue or make a PR if there are other operator types
+  [`LinearOperators.jl`](https://github.com/JuliaSmoothOptimizers/LinearOperators.jl).
+
+Submit an issue or make a PR if there are other operator types
 that one would like to have supported.
 To minimize package dependencies,
-the wrapping code for a `LinearOperator` is based on
+the wrapping code for a `LinearOperator` uses
 [Requires.jl](https://github.com/JuliaPackaging/Requires.jl).
 
 
@@ -384,7 +388,7 @@ This package is registered in the
 so you can install it at the REPL with `] add LinearMapAA`.
 
 Here are
-[detailed installation instructions](https://github.com/JeffFessler/MIRT.jl/blob/main/doc/start.md)
+[detailed installation instructions](https://github.com/JeffFessler/MIRT.jl/blob/main/doc/start.md).
 
 This package is included in the
 Michigan Image Reconstruction Toolbox

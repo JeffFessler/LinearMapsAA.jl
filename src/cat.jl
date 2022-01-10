@@ -26,13 +26,13 @@ LMcat{T} = Union{LinearMapAX{T}, LinearMap{T}, UniformScaling{T}} # settle
 
 # convert to something suitable for LinearMap.*cat
 function lm_promote(A::LMcat)
-#    @show typeof(A)
+#   @show typeof(A)
     A isa LinearMapAX ? A._lmap :
     A isa UniformScaling ? A : # leave unchanged - ok for LinearMaps.*cat
     A # otherwise it is this
-#    throw("bug") # should only be only of LMcat types
-#    A isa AbstractMatrix ? LinearMap(A) :
-#    A isa LinearMap ?
+#   throw("bug") # should only be only of LMcat types
+#   A isa AbstractMatrix ? LinearMap(A) :
+#   A isa LinearMap ?
 end
 
 # single-letter codes for cat objects, e.g., [A I A] becomes "AIA"

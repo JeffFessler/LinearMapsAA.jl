@@ -9,87 +9,84 @@ using LinearMaps: LinearMap
 LMAAkeys = (:_lmap, :_prop, :_idim, :_odim) # reserved
 
 
-#=
-Note: this old way may not properly allow `setindex!` to work as desired
-because it may change the type of the lmap and of the prop:
-`struct LinearMapAA{T, M <: LinearMap, P <: NamedTuple} <: AbstractMatrix{T}`
-{T, M <: LinearMap, P <: NamedTuple}
-    _lmap::M
-    _prop::P
-    function LinearMapAA{T}(L::M, p::P) where {T, M <: LinearMap, P <: NamedTuple}
-    function LinearMapAA(L::LinearMap, p::NamedTuple) # where {T, M <: LinearMap, P <: NamedTuple}
-   #    new{T,M,P}(L, p)
-        new(L, p)
-    end
-=#
-
-
 """
-    mutable struct LinearMapAM{T,Do,Di} <: AbstractMatrix{T}
+    struct LinearMapAM{T,Do,Di,LM,P} <: AbstractMatrix{T}
 "matrix" version that is quite akin to a matrix in its behavior
 """
-mutable struct LinearMapAM{T,Do,Di} <: AbstractMatrix{T}
-    _lmap::LinearMap # "L"
-    _prop::NamedTuple # user-defined "named properties" accessible via A.name
+struct LinearMapAM{T,Do,Di,LM,P} <: AbstractMatrix{T}
+    _lmap::LM # "L"
+    _prop::P # user-defined "named properties" accessible via A.name
     _idim::Dims{Di} # "input" dimensions, always (size(L,2),)
     _odim::Dims{Do} # "output" dimensions, always (size(L,1),)
 end
 
 
 """
-    struct LinearMapAO{T,Do,Di}
-"tensor" version that can map from arrays to arrays
-(it is not a subtype of `AbstractArray` and `setindex` is unsupported)
+    struct LinearMapAO{T,Do,Di,LM,P}
+"Tensor" version that can map from arrays to arrays.
+(It is not a subtype of `AbstractArray`.)
 """
-struct LinearMapAO{T,Do,Di}
-    _lmap::LinearMap # "L"
-    _prop::NamedTuple # user-defined "named properties" accessible via A.name
+struct LinearMapAO{T,Do,Di,LM,P} # LM <: LinearMap, P <: NamedTuple
+    _lmap::LM # "L"
+    _prop::P # user-defined "named properties" accessible via A.name
     _idim::Dims{Di} # "input" dimensions, often (size(L,2),)
     _odim::Dims{Do} # "output" dimensions, often (size(L,1),)
 end
 
 
-# most operations apply to both AM and AO types:
-LinearMapAX{T,Do,Di} =
-    Union{ LinearMapAM{T,Do,Di}, LinearMapAO{T,Do,Di} } where {T,Do,Di}
+"""
+    struct LinearMapAX{T,Do,Di,LM,P}
+Union of `LinearMapAM` and `LinearMapAO`
+because most operations apply to both AM and AO types.
+* `T` : `eltype`
+* `Do` : output dimensionality
+* `Di` : input dimensionality
+* `LM` : `LinearMap` type
+* `P` : `NamedTuple` type
+"""
+LinearMapAX{T,Do,Di,LM,P} =
+    Union{
+        LinearMapAM{T,Do,Di,LM,P},
+        LinearMapAO{T,Do,Di,LM,P},
+    } where {T,Do,Di,LM,P}
 
 
 # constructors
 
 
 """
-    B = LinearMapAO{T,Do,Di}(A::LinearMapAX)
+    B = LinearMapAO(A::LinearMapAX)
 Make an AO from an AM, despite `idim` and `odim` being 1D,
 for expert users who want `B*X` to be an `Array`.
 Somewhat an opposite of `undim`.
 """
-LinearMapAO(A::LinearMapAX{T,Do,Di}) where {T,Do,Di} =
-    LinearMapAO{T,Do,Di}(A._lmap, A._prop, A._idim, A._odim)
+LinearMapAO(A::LinearMapAX{T,Do,Di,LM,P}) where {T,Do,Di,LM,P} =
+    LinearMapAO{T,Do,Di,LM,P}(A._lmap, A._prop, A._idim, A._odim)
 
 
 """
     A = LinearMapAA(L::LinearMap ; ...)
 
-Constructor
+Constructor for `LinearMapAM`  or `LinearMapAO` given a `LinearMap`.
 
-options
-- `prop::NamedTuple = NamedTuple()`
+# Options
+- `prop::NamedTuple = NamedTuple()`;
+  cannot include the fields `_lmap`, `_prop`, `_idim`, `_odim`
 - `T = eltype(L)`
 - `idim::Dims = (size(L,2),)`
 - `odim::Dims = (size(L,1),)`
 - `operator::Bool` by default: `false` if both `idim` & `odim` are 1D.
 
-`prop` cannot include the fields `_lmap`, `_prop`, `_idim`, `_odim`
-
 Output `A` is `LinearMapAO` if `operator` is `true`, else `LinearMapAM`.
 """
-function LinearMapAA(L::LinearMap ;
-    prop::NamedTuple = NamedTuple(),
+function LinearMapAA(
+    L::LM ;
+    prop::P = NamedTuple(),
     T::Type = eltype(L),
     idim::Dims{Di} = (size(L,2),),
     odim::Dims{Do} = (size(L,1),),
     operator::Bool = length(idim) > 1 || length(odim) > 1,
-) where {Di,Do}
+) where {Di, Do, LM <: LinearMap, P <: NamedTuple}
 
     size(L,2) == prod(idim) ||
         throw(DimensionMismatch("size2=$(size(L,2)) vs idim=$idim"))
@@ -99,19 +96,19 @@ function LinearMapAA(L::LinearMap ;
         throw("invalid property field among $(propertynames(prop))")
 
     return operator ?
-         LinearMapAO{T,Do,Di}(L, prop, idim, odim) :
-         LinearMapAM{T,Do,Di}(L, prop, idim, odim)
+         LinearMapAO{T,Do,Di,LM,P}(L, prop, idim, odim) :
+         LinearMapAM{T,Do,Di,LM,P}(L, prop, idim, odim)
 end
 
 
 # for backwards compatibility:
 LinearMapAA(L, prop::NamedTuple ; kwargs...) =
-    LinearMapAA(L::LinearMap ; prop=prop, kwargs...)
+    LinearMapAA(L::LinearMap ; prop, kwargs...)
 
 
 """
     A = LinearMapAA(L::AbstractMatrix ; ...)
-Constructor
+Constructor given an `AbstractMatrix`.
 """
 LinearMapAA(L::AbstractMatrix ; kwargs...) =
     LinearMapAA(LinearMap(L) ; kwargs...)
@@ -123,9 +120,12 @@ _ismutating(f) = first(methods(f)).nargs == 3
 """
     A = LinearMapAA(f::Function, fc::Function, D::Dims{2} [, prop::NamedTuple)]
     ; T::DataType = Float32, idim::Dims, odim::Dims)
-Constructor
+Constructor given forward `f` and adjoint function `fc`.
 """
-function LinearMapAA(f::Function, fc::Function, D::Dims{2} ;
+function LinearMapAA(
+    f::Function,
+    fc::Function,
+    D::Dims{2} ;
     T::DataType = Float32,
     idim::Dims = (D[2],),
     odim::Dims = (D[1],),
@@ -153,7 +153,7 @@ LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ; kwargs...)
 
 """
     A = LinearMapAA(f::Function, D::Dims{2} [, prop::NamedTuple]; kwargs...)
-Constructor
+Constructor given just forward function `f`.
 """
 function LinearMapAA(f::Function, D::Dims{2} ;
     T::DataType = Float32,

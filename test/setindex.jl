@@ -20,7 +20,7 @@ function LinearMapAA_test_setindex(A::LinearMapAM)
     # test all [?,?] combinations with array "X"
     for i2 in ii2
         for i1 in ii1
-            B = copy(A)
+            B = deepcopy(A)
             X = 2 .+ A[i1,i2].^2 # values must differ from A[ii,jj]
             B[i1,i2] = X
             Am = Matrix(A)
@@ -33,7 +33,7 @@ function LinearMapAA_test_setindex(A::LinearMapAM)
     # test all [?,?] combinations with scalar "s"
     for i2 in ii2
         for i1 in ii1
-            B = copy(A)
+            B = deepcopy(A)
             s = maximum(abs.(A[:])) + 2
             B[i1,i2] = s
             Am = Matrix(A)
@@ -50,7 +50,7 @@ function LinearMapAA_test_setindex(A::LinearMapAM)
     # others not supported for now
     set1 = (3, ) # [3], [2,4], 2:4, (1:length(A)) .== 2), end # todo
     for s1 in set1
-        B = copy(A)
+        B = deepcopy(A)
         X = 2 .+ A[s1].^2 # values must differ from A[ii,jj]
         B[s1] = X
         Am = Matrix(A)
@@ -62,7 +62,7 @@ function LinearMapAA_test_setindex(A::LinearMapAM)
     # insanity below here
 
     # A[:] = s
-    B = copy(A)
+    B = deepcopy(A)
     B[:] = 5
     Am = Matrix(A)
     Am[:] .= 5
@@ -70,7 +70,7 @@ function LinearMapAA_test_setindex(A::LinearMapAM)
     @test Bm == Am
 
     # A[:] = v
-    B = copy(A)
+    B = deepcopy(A)
     v = 1:length(A)
     B[:] = v
     Am = Matrix(A)
@@ -79,7 +79,7 @@ function LinearMapAA_test_setindex(A::LinearMapAM)
     @test Bm == Am
 
     # A[:,:]
-    B = copy(A)
+    B = deepcopy(A)
     B[:,:] = 6
     Am = Matrix(A)
     Am[:,:] .= 6

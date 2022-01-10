@@ -11,7 +11,7 @@ list = [
 "kron"
 "cat"
 "getindex"
-"setindex"
+#"setindex"
 "block_diag"
 "tests"
 "wrap-linop"

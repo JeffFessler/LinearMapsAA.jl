@@ -13,10 +13,6 @@ import SparseArrays: sparse
 export redim, undim
 
 
-# copy
-Base.copy(A::LinearMapAX{T,Do,Di}) where {T,Do,Di} =
-    LinearMapAA(A._lmap ; prop=A._prop, T=T, idim=A._idim, odim=A._odim)
-
 # Matrix
 Base.Matrix(A::LinearMapAX) = Matrix(A._lmap)
 
@@ -134,7 +130,7 @@ Base.:(-)(A::AbstractMatrix, B::LinearMapAX) = A + (-1)*B
 # A.?
 Base.getproperty(A::LinearMapAX, s::Symbol) =
     (s in LMAAkeys) ? getfield(A, s) :
-#    s == :m ? size(A._lmap, 1) :
+#   s == :m ? size(A._lmap, 1) :
     haskey(A._prop, s) ? getfield(A._prop, s) :
         throw("unknown key $s")
 
