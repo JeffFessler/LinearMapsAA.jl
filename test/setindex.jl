@@ -1,5 +1,5 @@
 # setindex.jl
-# test
+# test setindex! (deprecated)
 
 using LinearMapsAA
 using Test: @test
@@ -48,7 +48,7 @@ function LinearMapAA_test_setindex(A::LinearMapAM)
     end
 
     # others not supported for now
-    set1 = (3, ) # [3], [2,4], 2:4, (1:length(A)) .== 2), end # todo
+    set1 = (3, ) # [3], [2,4], 2:4, (1:length(A)) .== 2), end
     for s1 in set1
         B = deepcopy(A)
         X = 2 .+ A[s1].^2 # values must differ from A[ii,jj]
