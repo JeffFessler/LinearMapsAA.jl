@@ -228,25 +228,28 @@ or all
 rather than trying to mix and match.
 
 
-## Caution
+## Historical note about `setindex!`
 
-An `AbstractArray` also must support a `setindex!` operation
-and this package provides that capability,
+The
+[Julia manual section on the `AbstractArray` interface](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array)
+implies that an `AbstractArray`.
+should support a `setindex!` operation.
+Versions of this package prior to v0.8.0
+provided that capability,
 mainly for completeness
 and as a proof of principle,
 solely for the `LinearMapAM` type.
-Examples:
-- `A[2,3] = 7`
-- `A[:,4] = ones(size(A,1))`
-- `A[end] = 0`
-
-A single `setindex!` call is reasonably fast,
-but multiple calls add layers of complexity
-that are likely to slow things down.
-In particular, trying to do something like the Gram-Schmidt procedure
-"in place" with an `AbstractArray` would be insane.
-In fact, `LinearAlgebra.qr!` works only with a `StridedMatrix`
-not a general `AbstractMatrix`.
+However,
+the reality is that many sub-types of `AbstractArray`
+in the Julia ecosystem,
+such as `LinearAlgebra.Diagonal`,
+understandably do *not* support `setindex!`,
+and it there seems to be no use
+for it here either.
+Supporting `setindex!` seems impossible with a concrete type
+for a function map,
+so it is no longer supported.
+The key code is relegated to the `archive` directory.
 
 
 ## Related packages
