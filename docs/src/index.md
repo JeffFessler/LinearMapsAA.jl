@@ -19,13 +19,4 @@ See also the documentation for the underlying
 [(LinearMaps)](https://github.com/Jutho/LinearMaps.jl)
 package.
 
-## Index
-
-```@index
-```
-
-## Functions
-
-```@autodocs
-Modules = [LinearMapsAA]
-```
+See the Example(s) tab for one non-trivial example.
