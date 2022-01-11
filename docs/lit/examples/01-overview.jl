@@ -3,7 +3,7 @@
 #---------------------------------------------------------
 
 #=
-This page explains the Julia package
+This page illustrates the Julia package
 [`LinearMapsAA`](https://github.com/JeffFessler/LinearMapsAA.jl).
 
 This page was generated from a single Julia file:
@@ -56,11 +56,22 @@ The `LinearMapsAA` package
 can represent both "matrix" versions
 and "operator" versions
 of linear mappings.
+This page illustrates both versions
+in the context of single-image
+[super-resolution](https://en.wikipedia.org/wiki/Super-resolution_imaging)
+imaging,
+where the operator `A` maps a `M × N` image
+into a coarser sampled image of size `M÷2 × N÷2`.
+
+Here the operator `A` is akin to down-sampling,
+but rather than simple decimation
+each coarse-resolution pixel
+is the average of a 2 × 2 block of pixels in the fine-resolution image.
 =#
 
 nx, ny = 200, 256
 image = shepp_logan(ny, SheppLoganToft())[(ny-nx)÷2 .+ (1:nx),:]
-jim(image, "SheppLogan")#, yflip=false)
+jim(image, "SheppLogan")
 
 
 # ### Down-sampling linear mapping
