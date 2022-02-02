@@ -169,7 +169,7 @@ back!(y2, x)
 @assert y1 == y2
 
 # time forward fft:
-timer(t) = btime(t; scale=10^3)
+timer(t) = btime(t; unit=:μs)
 t = @benchmark forw!($y2, $x)       # 19.1 us (31 alloc, 2K)
 timer(t)
 
