@@ -4,6 +4,8 @@ on:
   create:
     tags:
   push:
+    branches:
+      - main
     paths-ignore:
       - '*/*.md'
       - 'docs/**'
