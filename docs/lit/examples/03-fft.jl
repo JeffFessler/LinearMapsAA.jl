@@ -31,7 +31,6 @@ This page was generated from a single Julia file:
 using LinearMapsAA
 using FFTW: fft, bfft, fft!, bfft!
 using MIRTjim: jim, prompt
-using Plots: gui
 using LazyGrids: btime
 using BenchmarkTools: @benchmark
 using InteractiveUtils: versioninfo
