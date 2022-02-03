@@ -68,8 +68,9 @@ N = 8
 A = LinearMapAA(fft, y -> N*ifft(y), (N, N), (name="fft",), T=ComplexF32)
 @show A[:,2]
 ```
-For more details see
-[example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/main/example/fft.jl)
+For more details see the examples
+in the
+[documentation](https://jefffessler.github.io/LinearMapsAA.jl/dev/).
 
 
 ## Features shared with `LinearMap` objects
