@@ -171,8 +171,8 @@ x = rand(N...)
 z = A' * (A * x) # result is a 2D array!
 typeof(A) # LinearMapAO{ComplexF32, 1, 2}
 ```
-For more details see
-[example/fft.jl](https://github.com/JeffFessler/LinearMapsAA.jl/blob/main/example/fft.jl)
+For more details see FFT example in the
+[documentation](https://jefffessler.github.io/LinearMapsAA.jl/dev/).
 
 The adjoint of this `LinearMapAO` object
 maps a 1D vector of k-space samples
