@@ -7,10 +7,12 @@ using Test: @test, @testset
 
 
 """
-    LinearMapAA_test_vmul(A::LinearMapAM)
-    LinearMapAA_test_vmul(A::LinearMapAO)
-tests for multiply by vector, scalar, and Matrix
+    LinearMapAA_test_vmul(A::LinearMapAX)
+Tests for multiply by vector, scalar, and Matrix
 """
+LinearMapAA_test_vmul
+
+
 function LinearMapAA_test_vmul(A::LinearMapAM)
     B = Matrix(A)
     (M,N) = size(A)
@@ -222,4 +224,25 @@ function LinearMapAA_test_mul( ;
     end
 
     true
+end
+
+
+# Test multiplication of an AO by a Vector of Arrays (v0.9.0)
+@testset "mul! Vector{Array}" begin
+    M = randn(6,4)
+    O = LinearMapAA(M ; odim=(2,3), idim=(1,4))
+
+    x1 = randn(O._idim)
+    x2 = randn(O._idim)
+    x3 = cat(dims=3, x1, x2)
+    xv = [x1, x3]
+    yv1 = map(x -> O * x, xv)
+    yv2 = [O * x1, cat(dims=3, O*x1, O*x2)]
+    @test yv1 == yv2
+    mul!(yv2, O, xv, 1, 0)
+    @test yv1 == yv2
+    mul!(yv2, O, xv)
+    @test yv1 == yv2
+    yv2 = O * xv
+    @test yv1 == yv2
 end
