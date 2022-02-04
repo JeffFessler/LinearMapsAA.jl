@@ -361,6 +361,20 @@ for the in-place version `mul!(result, left, right)`:
 | `A` | `O` | `A` |
 
 
+There is one more special multiplication property.
+If `O` is a `LinearMapAO` and `xv` is `Vector` of `AbstractArrays`,
+then `O * xv` is equivalent to `[O * x for x in xv]`.
+This is useful, for example,
+in dynamic imaging
+where one might store a video sequence
+as a vector of 2D images,
+rather than as a 3D array.
+There is also a corresponding
+[5-argument `mul!`](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.mul!).
+Each array in the `Vector` `xv`
+must be compatible with multiplication on the left by `O`.
+
+
 ## Credits
 
 This software was developed at the
