@@ -50,16 +50,16 @@ end
 # multiply with a matrix
 # subtle: AM * Matrix and Matrix * AM yield a new AM
 # whereas AO * M and M * AO yield a matrix of numbers!
-function AM_M(A::LinearMapAM, B::AbstractMatrix)
+function AM_M(A::LinearMapAM, B::AbstractMatrix{<:Number})
     (A._idim == (size(B,1),)) || throw("$(A._idim) * $(size(B,1)) mismatch")
     LinearMapAA(A._lmap * LinearMap(B) ; prop=A._prop, odim=A._odim)
 end
-function M_AM(A::AbstractMatrix, B::LinearMapAM)
+function M_AM(A::AbstractMatrix{<:Number}, B::LinearMapAM)
     (B._odim == (size(A,2),)) || throw("$(B._odim) * $(size(A,1)) mismatch")
     LinearMapAA(LinearMap(A) * B._lmap ; prop=B._prop, idim=B._idim)
 end
-Base.:(*)(A::LinearMapAM, B::AbstractMatrix) = AM_M(A, B)
-Base.:(*)(A::AbstractMatrix, B::LinearMapAM) = M_AM(A, B)
+Base.:(*)(A::LinearMapAM, B::AbstractMatrix{<:Number}) = AM_M(A, B)
+Base.:(*)(A::AbstractMatrix{<:Number}, B::LinearMapAM) = M_AM(A, B)
 
 
 # LMAM case is easy!
@@ -78,14 +78,14 @@ mul!(y::AbstractVector, A::LinearMapAM, x::AbstractVector, α::Number, β::Numbe
 #   mul!(y, A._lmap, x, α, β)
 
 # treat LinearMaps.CompositeMap as special case for in-place operations
-function lm_mul!(y::AbstractVector, Lm::LinearMaps.CompositeMap,
-    x::AbstractVector, α::Number, β::Number)
+function lm_mul!(y::AbstractVector{<:Number}, Lm::LinearMaps.CompositeMap,
+    x::AbstractVector{<:Number}, α::Number, β::Number)
     LinearMaps.mul!(y, Lm, x, α, β) # todo: composite buffer
 end
 
 # 5-arg mul! for any other type
-lm_mul!(y::AbstractVector, Lm::LinearMap,
-    x::AbstractVector, α::Number, β::Number) =
+lm_mul!(y::AbstractVector{<:Number}, Lm::LinearMap,
+    x::AbstractVector{<:Number}, α::Number, β::Number) =
     LinearMaps.mul!(y, Lm, x, α, β)
 
 # with array
@@ -156,6 +156,36 @@ function lmao_mul!(Y::AbstractArray, Lm::LinearMap, X::AbstractArray,
 end
 
 
+"""
+     mul!(yv, AO::LinearMapAO, xv, α, β)
+
+Fancy 5-arg multiply when `yv` and `xv` are each a `Vector` of AbstractArrays.
+Basically does `mul!(yv[i], A, xv[i], α, β)` for `i in 1:length(xv)`.
+"""
+Base.@propagate_inbounds function mul!(
+    yv::AbstractVector{<:AbstractArray},
+    A::LinearMapAO,
+    xv::AbstractVector{<:AbstractArray},
+    α::Number, β::Number
+)
+
+    @boundscheck (length(xv) == length(yv) ||
+        throw("vector length mismatch $(length(xv)) $(length(yv))"))
+    for i in 1:length(xv)
+        @inbounds mul!(yv[i], A, xv[i], α, β)
+    end
+
+    return yv
+end
+
+
+"""
+    *(A::LinearMapAO, xv::AbstractVector{<:AbstractArray}) = [A * x for x in xv]
+Fancy multiply when `xv` is a `Vector` of `AbstractArray`s of appropriate size.
+"""
+Base.:(*)(A::LinearMapAO, xv::AbstractVector{<:AbstractArray}) = [A * x for x in xv]
+
+
 # multiply by array, with allocation
 
 Base.:(*)(A::LinearMapAO, X::AbstractArray) = lmax_mul(A, X)
@@ -171,7 +201,7 @@ Base.:(*)(A::LinearMapAM, X::AbstractArray{T,4}) where {T} = lmax_mul(A, X)
 nah, too difficult, so revert to the AM*M returning an object, per above
 =#
 
-function lmax_mul(A::LinearMapAX{T}, X::AbstractArray) where {T}
+function lmax_mul(A::LinearMapAX{T}, X::AbstractArray{<:Number}) where {T}
     Di = length(A._idim)
     Do = length(A._odim)
     (Di > ndims(X) || (A._idim != size(X)[1:Di])) &&
@@ -186,14 +216,14 @@ end
 # multiply with vector
 
 # O*v
-Base.:(*)(A::LinearMapAO{T,Do,1}, v::AbstractVector) where {T,Do} =
+Base.:(*)(A::LinearMapAO{T,Do,1}, v::AbstractVector{<:Number}) where {T,Do} =
     reshape(A._lmap * v, A._odim)
 # u'*O (no, use general X*O above because unclear what this would mean)
 #Base.:(*)(u::LinearAlgebra.AdjointAbsVec, A::LinearMapAO) =
 #   reshape(A._lmap' * u', A._idim)
 
 # A*v
-Base.:(*)(A::LinearMapAM, v::AbstractVector) =
+Base.:(*)(A::LinearMapAM, v::AbstractVector{<:Number}) =
     A._lmap * v
 # u'*A (nah, not worth it)
 #Base.:(*)(u::LinearAlgebra.AdjointAbsVec, A::LinearMapAM) =
