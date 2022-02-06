@@ -30,9 +30,10 @@ jobs:
       - name: InstallDependencies
         run: |
           julia --project=docs/ -e '
-          using Pkg
-          Pkg.develop(PackageSpec(path=pwd()))
-          Pkg.instantiate()'
+            ENV["JULIA_PKG_SERVER"] = ""
+            using Pkg
+            Pkg.develop(PackageSpec(path=pwd()))
+            Pkg.instantiate()'
       - name: BuildAndDeploy
         env:
 # https://juliadocs.github.io/Documenter.jl/stable/man/hosting/#Authentication:-GITHUB_TOKEN

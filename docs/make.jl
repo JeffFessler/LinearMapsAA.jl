@@ -63,13 +63,12 @@ makedocs(;
 
 if isci
     deploydocs(;
-        repo = "github.com/JeffFessler/LinearMapsAA.jl.git",
+        repo = "github.com/$base",
         devbranch = "main",
         devurl = "dev",
         versions = ["stable" => "v^", "dev" => "dev"],
         forcepush = true,
 #       push_preview = true,
+        # see https://JeffFessler.github.io/LinearMapsAA.jl/previews/PR##
     )
-else
-    @warn "may need to: rm -r src/generated/"
 end
