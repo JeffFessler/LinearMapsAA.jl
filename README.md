@@ -63,9 +63,10 @@ A.name # returns "cumsum" here
 
 Here is a more interesting example for signal processing.
 ```julia
-using FFTW
+using LinearMapsAA
+using FFTW: fft, bfft
 N = 8
-A = LinearMapAA(fft, y -> N*ifft(y), (N, N), (name="fft",), T=ComplexF32)
+A = LinearMapAA(fft, bfft, (N, N), (name="fft",), T=ComplexF32)
 @show A[:,2]
 ```
 For more details see the examples
