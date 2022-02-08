@@ -46,7 +46,7 @@ format = Documenter.HTML(;
     prettyurls = isci,
     edit_link = "main",
     canonical = "https://JeffFessler.github.io/LinearMapsAA.jl/stable",
-#   assets = String[],
+    assets = ["assets/custom.css"],
 )
 
 makedocs(;
