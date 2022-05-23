@@ -208,7 +208,7 @@ function lmax_mul(A::LinearMapAX{T}, X::AbstractArray{<:Number}) where {T}
          throw("idim=$(A._idim) vs size(RHS)=$(size(X))")
     extra = size(X)[(Di+1):end]
     Ty = promote_type(T, eltype(X))
-    Y = Array{T}(undef, A._odim..., extra...) # allocate
+    Y = similar(X, Ty, A._odim..., extra...) # allocate
     lmao_mul!(Y, A._lmap, X, 1, 0; idim=A._idim, odim=A._odim)
 end
 
