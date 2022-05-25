@@ -48,8 +48,8 @@ if CUDA.functional()
     @test ya == vec(yo)
 
     xo = O' * yo
-    xl = L' * vec(xg)
-    xa = A' * vec(xg)
+    xl = L' * vec(yo)
+    xa = A' * vec(yo)
     @test xl == vec(xo)
     @test xa == vec(xo)
 end
