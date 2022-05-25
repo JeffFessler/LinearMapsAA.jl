@@ -15,6 +15,7 @@ list = [
 "block_diag"
 "tests"
 "wrap-linop"
+"cuda"
 ]
 
 for file in list
