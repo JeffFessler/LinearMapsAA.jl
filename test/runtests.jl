@@ -6,7 +6,6 @@ using Test: @test, @testset, detect_ambiguities
 include("multiply.jl")
 
 list = [
-"cuda" # todo end
 "ambiguity"
 "identity"
 "kron"
@@ -16,6 +15,7 @@ list = [
 "block_diag"
 "tests"
 "wrap-linop"
+"cuda"
 ]
 
 for file in list

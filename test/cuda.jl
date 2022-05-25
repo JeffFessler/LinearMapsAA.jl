@@ -1,5 +1,5 @@
 # cuda.jl
-# Test that CUDA arrays are supported
+# Test that CUDA arrays work properly.
 
 using LinearMaps: LinearMap
 using LinearMapsAA: LinearMapAA
@@ -40,6 +40,7 @@ if CUDA.functional()
     @test L' * vec(y) ≈ vec(O' * y)
     @test A' * vec(y) ≈ vec(O' * y)
 
+    # finally with CUDA arrays
     xg = CuArray(x)
     yo = O * xg
     yl = L * vec(xg)
