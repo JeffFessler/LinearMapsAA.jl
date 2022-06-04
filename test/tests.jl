@@ -160,12 +160,14 @@ end
 end
 
 # non-adjoint version
+#= todo: probably not worth supporting anymore
 @testset "non-adjoint" begin
     Af = LinearMapAA(forw, (M, N))
     @test Matrix(Af) == Lm
     @test LinearMapAA_test_getindex(Af)
 #   @test LinearMapAA_test_setindex(Af)
 end
+=#
 
 @testset "AO for 1D" begin
     B = LinearMapAO(A)

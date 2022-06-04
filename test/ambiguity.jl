@@ -44,7 +44,7 @@ end
     S = LinearAlgebra.Symmetric(M)
     T = LinearAlgebra.Transpose(S)
     @test Matrix(A * T) == M * T # failed prior to isposdef overload
-    @test Matrix(T * A) == T * M
+    @test Matrix(T * A) ≈ T * M
 end
 
 @testset "Adjoint" begin
