@@ -4,6 +4,9 @@ Indexing support for LinearMapAX
 2018-01-19, Jeff Fessler, University of Michigan
 =#
 
+Base.getindex(A::LinearMapAX, args...) = Base.getindex(A._lmap, args...)
+
+#=
 
 # [end]
 function Base.lastindex(A::LinearMapAX)
@@ -50,7 +53,7 @@ Base.getindex(A::LinearMapAX, ::Colon, jj::Indexer) =
 # trick: cannot use A' for a FunctionMap with no fc
 function Base.getindex(A::LinearMapAX, ii::Indexer, ::Colon)
     if (:fc in propertynames(A._lmap)) && isnothing(A._lmap.fc)
-        return hcat([A[ii,j] for j in 1:size(A,2)]...)
+        return hcat([A[ii,j] for j in 1:size(A,2)]...) # very slow!
     else
         return A'[:,ii]'
     end
@@ -78,3 +81,5 @@ Base.getindex(A::LinearMapAX, ::Colon, ::Colon) = Matrix(A._lmap)
 
 # A[:]
 Base.getindex(A::LinearMapAX, ::Colon) = A[:,:][:]
+
+=#
