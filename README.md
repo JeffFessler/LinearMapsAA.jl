@@ -26,7 +26,7 @@ and then later replace it with a `LinearMapAX` object.
 The extra `AA` in the package name here has two meanings.
 
 - `LinearMapAM` is a subtype of `AbstractArray{T,2}`, i.e.,
-[conforms to the requirements of an `AbstractMatrix`](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array)
+[conforms to (some of) the requirements of an `AbstractMatrix`](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array)
 type.
 
 - The package was developed in Ann Arbor, Michigan :)
