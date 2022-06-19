@@ -2,13 +2,11 @@
 # test
 
 using LinearMapsAA: LinearMapAA, LinearMapAX
-using Test: @test, @testset
+using Test: @test, @test_throws, @testset
 
-# only slicing supported as of LM 3.7 !
-_slice(a::Colon, b::Int) = true
-_slice(a::Int, b::Colon) = true
-_slice(a::Colon, b::Colon) = true
-_slice(a::Any, b::Any) = false
+
+_slice(a, b) = (a == :) || (b == :) # only slicing supported as of LM 3.7 !
+
 
 """
     LinearMapAA_test_getindex(A::LinearMapAX)
@@ -25,6 +23,8 @@ function LinearMapAA_test_getindex(A::LinearMapAX)
     for i2 in ii2, i1 in ii1
         if _slice(i1, i2)
             @test B[i1,i2] == A[i1,i2]
+        else
+            @test_throws ErrorException B[i1,i2] == A[i1,i2]
         end
     end
 
@@ -34,6 +34,8 @@ function LinearMapAA_test_getindex(A::LinearMapAX)
         for i1 in ii2, i2 in ii1
             if _slice(i1, i2)
                 @test B'[i1,i2] == A'[i1,i2]
+            else
+                @test_throws ErrorException B'[i1,i2] == A'[i1,i2]
             end
         end
     end
