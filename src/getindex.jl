@@ -4,6 +4,7 @@ Indexing support for LinearMapAX
 2018-01-19, Jeff Fessler, University of Michigan
 =#
 
+# As of v0.11, rely on getindex of LM, including its restrictions to slicing
 Base.getindex(A::LinearMapAX, args...) = Base.getindex(A._lmap, args...)
 
 #=

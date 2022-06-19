@@ -237,6 +237,12 @@ partial `getindex` support,
 was added in
 [v3.7](https://github.com/JuliaLinearAlgebra/LinearMaps.jl/releases/tag/v3.7.0)
 there.
+As of v0.11,
+this package uses that `getindex` implementation
+and also supports only slicing.
+This is a breaking change that could be easily reverted,
+so please submit an issue if you have a use case
+for more general use of `getindex`.
 
 
 ## Historical note about `setindex!`

@@ -160,7 +160,7 @@ end
 end
 
 # non-adjoint version
-#= todo: probably not worth supporting anymore
+#= no longer supported, for consistency with LM
 @testset "non-adjoint" begin
     Af = LinearMapAA(forw, (M, N))
     @test Matrix(Af) == Lm
