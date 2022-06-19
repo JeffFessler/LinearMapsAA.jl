@@ -21,20 +21,20 @@ end
 
 @testset "UpperTri" begin
     U = UpperTriangular(M)
-    @test Matrix(A * U) == M * U
-    @test Matrix(U * A) == U * M
+    @test Matrix(A * U) ≈ M * U
+    @test Matrix(U * A) ≈ U * M
 end
 
 @testset "TransposeVec" begin
     xt = Transpose(1:2)
     @test xt isa TransposeAbsVec
-    @test xt * M == xt * A
+    @test xt * M ≈ xt * A
 end
 
 @testset "AdjointVec" begin
     r = Adjoint(1:2)
     @test r isa AdjointAbsVec
-    @test r * M == r * A
+    @test r * M ≈ r * A
 end
 
 @testset "Transpose" begin
@@ -43,8 +43,8 @@ end
     LinearAlgebra.isposdef(A::Transpose) = LinearAlgebra.isposdef(parent(A))
     S = LinearAlgebra.Symmetric(M)
     T = LinearAlgebra.Transpose(S)
-    @test Matrix(A * T) == M * T # failed prior to isposdef overload
-    @test Matrix(T * A) == T * M
+    @test Matrix(A * T) ≈ M * T # failed prior to isposdef overload
+    @test Matrix(T * A) ≈ T * M
 end
 
 @testset "Adjoint" begin
@@ -52,8 +52,8 @@ end
     H = LinearAlgebra.Hermitian(C)
     J = Adjoint(H)
     LinearAlgebra.isposdef(A::Adjoint) = LinearAlgebra.isposdef(parent(A))
-    @test Matrix(A * J) == M * J
-    @test Matrix(J * A) == J * M
+    @test Matrix(A * J) ≈ M * J
+    @test Matrix(J * A) ≈ J * M
 end
 
 @testset "AbsRot" begin
