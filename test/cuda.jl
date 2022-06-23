@@ -8,7 +8,7 @@ import CUDA
 using Test: @test
 
 if CUDA.functional()
-    isinteractive() && @info "testing CUDA"
+    @info "testing CUDA"
     CUDA.allowscalar(false)
 
     nx, ny, nz = 5, 7, 6
@@ -53,4 +53,7 @@ if CUDA.functional()
     xa = A' * vec(yo)
     @test xl == vec(xo)
     @test xa == vec(xo)
+else
+    @warn "no CUDA test"
+    @info "One must test CUDA separately"
 end
