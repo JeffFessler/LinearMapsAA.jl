@@ -55,4 +55,5 @@ if CUDA.functional()
     @test xa == vec(xo)
 else
     @warn "no CUDA test"
+    @info "One must test CUDA separately"
 end
