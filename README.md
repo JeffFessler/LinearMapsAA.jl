@@ -295,6 +295,10 @@ so `LinearMaps` is more comprehensive.
 [`LazyAlgebra.jl`](https://github.com/emmt/LazyAlgebra.jl)
 also has many related features, and supports nonlinear mappings.
 
+[`SciML/SciMLOperators.jl`](https://github.com/SciML/SciMLOperators.jl)
+seems to be designed for "matrix-free" operators
+that are functions of some possibly changing parameters.
+
 This package provides similar functionality
 as the `Fatrix` / `fatrix` object in the
 [Matlab version of MIRT](https://github.com/JeffFessler/mirt).
@@ -310,6 +314,10 @@ for other purposes,
 such as using the nice
 [Kronecker.jl](https://github.com/MichielStock/Kronecker.jl)
 package.
+
+Will this list keep growing,
+or will the community settle
+on some common `AbstractLinearMap` base?
 
 
 ## Inter-operability
