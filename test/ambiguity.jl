@@ -63,5 +63,9 @@ end
     # size(AR) # fails because AR is size-less and not an AbstractMatrix
     AR isa Adjoint{<:Any,<:LinearAlgebra.AbstractRotation} # true
     # ones(4,4) * AR # works
+@static if VERSION < v"1.9"
     @test_throws String A * AR
+else
+    @test_throws DimensionMismatch A * AR
+end
 end
