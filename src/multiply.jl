@@ -22,10 +22,13 @@ Base.:(*)(B::UniformScaling, A::LinearMapAX) = (B.λ == 1) ? A : (B.λ * A)
 
 
 # multiply with scalars
+# todo: handle type with units!
 Base.:(*)(s::Number, A::LinearMapAX) =
     LinearMapAA((s*I) * A._lmap ; prop=A._prop, idim=A._idim, odim=A._odim,
         operator = isa(A, LinearMapAO))
+#Base.:(*)(A::LinearMapAX, s::Union{Real,Complex}) = s * A
 Base.:(*)(A::LinearMapAX, s::Number) =
+#   throw("LinearMapAX * Number is unsupported; use Number * LinearMapAX")
     LinearMapAA(A._lmap * (s*I) ; prop=A._prop, idim=A._idim, odim=A._odim,
         operator = isa(A, LinearMapAO))
 
