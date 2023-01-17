@@ -404,9 +404,9 @@ must be compatible with multiplication on the left by `O`.
 This software was developed at the
 [University of Michigan](https://umich.edu/)
 by
-[Jeff Fessler](http://web.eecs.umich.edu/~fessler)
+[Jeff Fessler](https://web.eecs.umich.edu/~fessler)
 and his
-[group](http://web.eecs.umich.edu/~fessler/group),
+[group](https://web.eecs.umich.edu/~fessler/group),
 with substantial inspiration drawn
 from the `LinearMaps` package.
 
@@ -450,7 +450,7 @@ without "separate" installation.
 [docs-stable-url]: https://JeffFessler.github.io/LinearMapsAA.jl/stable
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: https://JeffFessler.github.io/LinearMapsAA.jl/dev
-[license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat
+[license-img]: https://img.shields.io/badge/license-MIT-brightgreen.svg
 [license-url]: LICENSE
 <!--
 [![coveralls][coveralls-img]][coveralls-url]

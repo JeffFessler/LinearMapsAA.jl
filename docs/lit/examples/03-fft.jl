@@ -1,8 +1,6 @@
-#---------------------------------------------------------
-# # [Operator example: FFT](@id 03-fft)
-#---------------------------------------------------------
-
 #=
+# [Operator example: FFT](@id 03-fft)
+
 This page illustrates
 the "linear operator" feature
 of the Julia package
@@ -18,13 +16,13 @@ This page was generated from a single Julia file:
 #md # using the "Edit on GitHub" link in the top right.
 
 #md # The corresponding notebook can be viewed in
-#md # [nbviewer](http://nbviewer.jupyter.org/) here:
+#md # [nbviewer](https://nbviewer.org/) here:
 #md # [`03-fft.ipynb`](@__NBVIEWER_ROOT_URL__/03-fft.ipynb),
 #md # and opened in [binder](https://mybinder.org/) here:
 #md # [`03-fft.ipynb`](@__BINDER_ROOT_URL__/03-fft.ipynb).
 
 
-# ### Setup
+# ## Setup
 
 # Packages needed here.
 
@@ -42,7 +40,7 @@ using InteractiveUtils: versioninfo
 isinteractive() ? jim(:prompt, true) : prompt(:draw);
 
 
-# ### Overview
+# ## Overview
 
 #=
 A 1D N-point discrete Fourier transform (DFT)
