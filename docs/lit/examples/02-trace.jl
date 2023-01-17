@@ -1,8 +1,6 @@
-#---------------------------------------------------------
-# # [Operator example: trace](@id 02-trace)
-#---------------------------------------------------------
-
 #=
+# [Operator example: trace](@id 02-trace)
+
 This page illustrates
 the "linear operator" feature
 of the Julia package
@@ -17,7 +15,7 @@ This page was generated from a single Julia file:
 #md # using the "Edit on GitHub" link in the top right.
 
 #md # The corresponding notebook can be viewed in
-#md # [nbviewer](http://nbviewer.jupyter.org/) here:
+#md # [nbviewer](https://nbviewer.org/) here:
 #md # [`02-trace.ipynb`](@__NBVIEWER_ROOT_URL__/02-trace.ipynb),
 #md # and opened in [binder](https://mybinder.org/) here:
 #md # [`02-trace.ipynb`](@__BINDER_ROOT_URL__/02-trace.ipynb).
@@ -32,9 +30,9 @@ using LinearAlgebra: tr, I
 using InteractiveUtils: versioninfo
 
 
-# ### Overview
-
 #=
+## Overview
+
 The "operator" aspect of this package
 may seem unfamiliar
 to some readers
@@ -71,7 +69,6 @@ in practical code we usually just use `A`.)
 The `LinearMapsAA` package
 can represent such an operator easily.
 Here is the definition for ``N = 5``:
-
 =#
 
 N = 5
@@ -139,7 +136,7 @@ reshape(A, N, N)
 Although this is largely a didactic example,
 there are optimization problems
 with
-[trace constraints](http://www.optimization-online.org/DB_HTML/2018/08/6765.html)
+[trace constraints](https://www.optimization-online.org/DB_HTML/2018/08/6765.html)
 of the form
 ``𝒜 X = b``.
 To solve such problems,

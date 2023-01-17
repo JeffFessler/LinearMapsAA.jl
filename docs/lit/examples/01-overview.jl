@@ -1,8 +1,6 @@
-#---------------------------------------------------------
-# # [LinearMapsAA overview](@id 01-overview)
-#---------------------------------------------------------
-
 #=
+# [LinearMapsAA overview](@id 01-overview)
+
 This page illustrates the Julia package
 [`LinearMapsAA`](https://github.com/JeffFessler/LinearMapsAA.jl).
 
@@ -15,7 +13,7 @@ This page was generated from a single Julia file:
 #md # using the "Edit on GitHub" link in the top right.
 
 #md # The corresponding notebook can be viewed in
-#md # [nbviewer](http://nbviewer.jupyter.org/) here:
+#md # [nbviewer](https://nbviewer.org/) here:
 #md # [`01-overview.ipynb`](@__NBVIEWER_ROOT_URL__/01-overview.ipynb),
 #md # and opened in [binder](https://mybinder.org/) here:
 #md # [`01-overview.ipynb`](@__BINDER_ROOT_URL__/01-overview.ipynb).
@@ -37,9 +35,9 @@ using InteractiveUtils: versioninfo
 isinteractive() ? jim(:prompt, true) : prompt(:draw);
 
 
-# ### Overview
-
 #=
+## Overview
+
 Many computational imaging methods use system models
 that are too large to store explicitly
 as dense matrices,
@@ -69,7 +67,7 @@ each coarse-resolution pixel
 is the average of a 2 × 2 block of pixels in the fine-resolution image.
 =#
 
-# ### System operator (linear mapping) for down-sampling
+# ## System operator (linear mapping) for down-sampling
 
 # Here is the "forward" function needed to model 2× down-sampling:
 
@@ -101,7 +99,7 @@ on the space of `M × N` images.
 =#
 
 
-# ### LinearMap as an operator for super-resolution
+# ## LinearMap as an operator for super-resolution
 
 #=
 We now pick a specific image size
@@ -153,9 +151,9 @@ jim(up, title="Adjoint: A' * y")
 # as the original image because `A'` is an adjoint, not an inverse!
 
 
-# ### AbstractMatrix version
-
 #=
+## AbstractMatrix version
+
 Some users may prefer that the operator `A` behave more like a matrix.
 We can implement approach from the same ingredients
 by using `vec` and `reshape` judiciously.
