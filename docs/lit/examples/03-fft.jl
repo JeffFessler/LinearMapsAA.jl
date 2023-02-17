@@ -6,23 +6,12 @@ the "linear operator" feature
 of the Julia package
 [`LinearMapsAA`](https://github.com/JeffFessler/LinearMapsAA.jl)
 for the case of a multi-dimensional FFT operation.
-
-This page was generated from a single Julia file:
-[03-fft.jl](@__REPO_ROOT_URL__/03-fft.jl).
 =#
 
-#md # In any such Julia documentation,
-#md # you can access the source code
-#md # using the "Edit on GitHub" link in the top right.
-
-#md # The corresponding notebook can be viewed in
-#md # [nbviewer](https://nbviewer.org/) here:
-#md # [`03-fft.ipynb`](@__NBVIEWER_ROOT_URL__/03-fft.ipynb),
-#md # and opened in [binder](https://mybinder.org/) here:
-#md # [`03-fft.ipynb`](@__BINDER_ROOT_URL__/03-fft.ipynb).
+#srcURL
 
 
-# ## Setup
+# ### Setup
 
 # Packages needed here.
 
@@ -40,9 +29,9 @@ using InteractiveUtils: versioninfo
 isinteractive() ? jim(:prompt, true) : prompt(:draw);
 
 
-# ## Overview
-
 #=
+## Overview
+
 A 1D N-point discrete Fourier transform (DFT)
 is a linear operation
 that is naturally represented as a `N × N` matrix.
@@ -183,16 +172,4 @@ t = @benchmark mul!($y1, $(A'), $x) # 17.855 μs (44 allocations: 4.00 KiB)
 timer(t)
 
 
-
-# ### Reproducibility
-
-# This page was generated with the following version of Julia:
-
-io = IOBuffer()
-versioninfo(io)
-split(String(take!(io)), '\n')
-
-
-# And with the following package versions
-
-import Pkg; Pkg.status()
+include("../../../inc/reproduce.jl")
