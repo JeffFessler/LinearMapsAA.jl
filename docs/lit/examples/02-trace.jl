@@ -5,20 +5,9 @@ This page illustrates
 the "linear operator" feature
 of the Julia package
 [`LinearMapsAA`](https://github.com/JeffFessler/LinearMapsAA.jl).
-
-This page was generated from a single Julia file:
-[02-trace.jl](@__REPO_ROOT_URL__/02-trace.jl).
 =#
 
-#md # In any such Julia documentation,
-#md # you can access the source code
-#md # using the "Edit on GitHub" link in the top right.
-
-#md # The corresponding notebook can be viewed in
-#md # [nbviewer](https://nbviewer.org/) here:
-#md # [`02-trace.ipynb`](@__NBVIEWER_ROOT_URL__/02-trace.ipynb),
-#md # and opened in [binder](https://mybinder.org/) here:
-#md # [`02-trace.ipynb`](@__BINDER_ROOT_URL__/02-trace.ipynb).
+#srcURL
 
 
 # ### Setup
@@ -193,15 +182,4 @@ back(y) = y[1] * I(N) # remember `y` is a 1-vector
 Int8.(Matrix(𝒜'))
 
 
-# ### Reproducibility
-
-# This page was generated with the following version of Julia:
-
-io = IOBuffer()
-versioninfo(io)
-split(String(take!(io)), '\n')
-
-
-# And with the following package versions
-
-import Pkg; Pkg.status()
+include("../../../inc/reproduce.jl")

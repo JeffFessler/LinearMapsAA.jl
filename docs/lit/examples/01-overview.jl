@@ -3,21 +3,9 @@
 
 This page illustrates the Julia package
 [`LinearMapsAA`](https://github.com/JeffFessler/LinearMapsAA.jl).
-
-This page was generated from a single Julia file:
-[01-overview.jl](@__REPO_ROOT_URL__/01-overview.jl).
 =#
 
-#md # In any such Julia documentation,
-#md # you can access the source code
-#md # using the "Edit on GitHub" link in the top right.
-
-#md # The corresponding notebook can be viewed in
-#md # [nbviewer](https://nbviewer.org/) here:
-#md # [`01-overview.ipynb`](@__NBVIEWER_ROOT_URL__/01-overview.ipynb),
-#md # and opened in [binder](https://mybinder.org/) here:
-#md # [`01-overview.ipynb`](@__BINDER_ROOT_URL__/01-overview.ipynb).
-
+#srcURL
 
 # ### Setup
 
@@ -99,9 +87,9 @@ on the space of `M × N` images.
 =#
 
 
-# ## LinearMap as an operator for super-resolution
-
 #=
+## LinearMap as an operator for super-resolution
+
 We now pick a specific image size
 and define the linear mapping
 using the two functions above:
@@ -231,15 +219,4 @@ y = randn(T, odim)
 @assert sum((A*x) .* y) ≈ sum(x .* (A'*y)) # <Ax,y> = <x,A'y>
 
 
-# ### Reproducibility
-
-# This page was generated with the following version of Julia:
-
-io = IOBuffer()
-versioninfo(io)
-split(String(take!(io)), '\n')
-
-
-# And with the following package versions
-
-import Pkg; Pkg.status()
+include("../../../inc/reproduce.jl")
