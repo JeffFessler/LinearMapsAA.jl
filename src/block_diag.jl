@@ -9,7 +9,7 @@ where each frame has different k-space sampling
 =#
 
 export block_diag
-import LinearMaps
+import LinearMaps # BlockDiagonalMap
 using SparseArrays: blockdiag, sparse
 
 same_idim(As::LinearMapAX...) = all(map(A -> A._idim == As[1]._idim, As))
@@ -28,7 +28,7 @@ block_diag(As::LinearMapAO... ; tryop::Bool = true) = block_diag(tryop, As...)
 block_diag(As::LinearMapAX... ; tryop::Bool = false) = block_diag(tryop, As...)
 
 function block_diag(tryop::Bool, As::LinearMapAX...)
-    B = LinearMaps.blockdiag(map(A -> A._lmap, As)...)
+    B = LinearMaps.BlockDiagonalMap(map(A -> A._lmap, As)...)
     nblock = length(As)
     prop = (nblock = nblock,)
     if (tryop && nblock > 1 && same_idim(As...) && same_odim(As...)) # operator version
