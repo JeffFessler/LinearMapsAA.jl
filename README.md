@@ -309,6 +309,8 @@ are similar to those here.
 [`FunctionOperators.jl`](https://github.com/hakkelt/FunctionOperators.jl)
 supports `inDims` and `outDims` features.
 
+[`JOLI.jl`](https://github.com/slimgroup/JOLI.jl)
+
 Being a sub-type of `AbstractArray` can be useful
 for other purposes,
 such as using the nice
