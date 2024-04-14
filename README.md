@@ -455,8 +455,3 @@ without "separate" installation.
 [docs-dev-url]: https://JeffFessler.github.io/LinearMapsAA.jl/dev
 [license-img]: https://img.shields.io/badge/license-MIT-brightgreen.svg
 [license-url]: LICENSE
-<!--
-[![coveralls][coveralls-img]][coveralls-url]
-[coveralls-img]: https://coveralls.io/repos/JeffFessler/LinearMapsAA.jl/badge.svg?branch
-[coveralls-url]: https://coveralls.io/github/JeffFessler/LinearMapsAA.jl?branch=main
--->

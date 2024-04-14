@@ -72,7 +72,7 @@ Constructor for `LinearMapAM`  or `LinearMapAO` given a `LinearMap`.
 # Options
 - `prop::NamedTuple = NamedTuple()`;
   cannot include the fields `_lmap`, `_prop`, `_idim`, `_odim`
-- `T = eltype(L)`
+- `T::Type = eltype(L)`
 - `idim::Dims = (size(L,2),)`
 - `odim::Dims = (size(L,1),)`
 - `operator::Bool` by default: `false` if both `idim` & `odim` are 1D.
@@ -82,7 +82,7 @@ Output `A` is `LinearMapAO` if `operator` is `true`, else `LinearMapAM`.
 function LinearMapAA(
     L::LM ;
     prop::P = NamedTuple(),
-    T::Type = eltype(L),
+    T::Type{<:Number} = eltype(L),
     idim::Dims{Di} = (size(L,2),),
     odim::Dims{Do} = (size(L,1),),
     operator::Bool = length(idim) > 1 || length(odim) > 1,
@@ -119,14 +119,14 @@ _ismutating(f) = first(methods(f)).nargs == 3
 
 """
     A = LinearMapAA(f::Function, fc::Function, D::Dims{2} [, prop::NamedTuple)]
-    ; T::DataType = Float32, idim::Dims, odim::Dims)
+    ; T::Type = Float32, idim::Dims, odim::Dims)
 Constructor given forward `f` and adjoint function `fc`.
 """
 function LinearMapAA(
     f::Function,
     fc::Function,
     D::Dims{2} ;
-    T::DataType = Float32,
+    T::Type{<:Number} = Float32,
     idim::Dims = (D[2],),
     odim::Dims = (D[1],),
     kwargs...,
@@ -156,7 +156,7 @@ LinearMapAA(f::Function, fc::Function, D::Dims{2}, prop::NamedTuple ; kwargs...)
 Constructor given just forward function `f`.
 """
 function LinearMapAA(f::Function, D::Dims{2} ;
-    T::DataType = Float32,
+    T::Type{<:Number} = Float32,
     idim::Dims = (D[2],),
     odim::Dims = (D[1],),
     kwargs...,
