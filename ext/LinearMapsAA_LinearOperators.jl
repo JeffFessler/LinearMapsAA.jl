@@ -1,11 +1,13 @@
-# wrap-linop.jl
+# LinearMapsAA_LinearOperators.jl
 # Wrap a LinearMapAA around a LinearOperator or vice-versa
 
-using .LinearOperators: LinearOperator
-import .LinearOperators: LinearOperator
+module LinearMapsAA_LinearOperators
 
-export LinearMapAA
-export LinearOperator
+# extended here
+import LinearMapsAA: LinearMapAA, LinearOperator_from_AA
+
+using LinearMapsAA: LinearMapAX, mul!
+using LinearOperators: LinearOperator
 
 
 """
@@ -22,12 +24,12 @@ end
 
 
 """
-    L = LinearOperator(A::LinearMapAX; symmetric, hermitian)
+    L = LinearOperator_from_AA(A::LinearMapAX; symmetric, Hermitian)
 
 Wrap a `LinearOperator` around a `LinearMapAX`.
 The options `symmetric` and `hermitian` are `false` by default.
 """
-function LinearOperator(
+function LinearOperator_from_AA(
     A::LinearMapAX;
     symmetric::Bool = false,
     hermitian::Bool = false,
@@ -43,3 +45,5 @@ function LinearOperator(
         back!,
     )
 end
+
+end # module

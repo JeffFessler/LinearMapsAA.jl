@@ -1,7 +1,7 @@
 # setindex.jl
 # test setindex! (deprecated)
 
-using LinearMapsAA
+using LinearMapsAA: LinearMapAA, LinearMapAM
 using Test: @test
 
 
