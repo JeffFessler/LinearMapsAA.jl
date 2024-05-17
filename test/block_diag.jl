@@ -1,7 +1,7 @@
 # block_diag.jl
 # test
 
-using LinearMapsAA: LinearMapAA, LinearMapAM, LinearMapAO
+using LinearMapsAA: LinearMapAA, LinearMapAM, LinearMapAO, block_diag
 using SparseArrays: blockdiag, sparse
 using Test: @test, @testset
 

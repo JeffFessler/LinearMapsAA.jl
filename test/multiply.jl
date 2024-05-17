@@ -2,7 +2,7 @@
 
 #export LinearMapAA_test_vmul # testing
 #export LinearMapAA_test_mul # testing
-using LinearMapsAA
+using LinearMapsAA: LinearMapAA, LinearMapAM, LinearMapAO, mul!
 using Test: @test, @testset
 
 

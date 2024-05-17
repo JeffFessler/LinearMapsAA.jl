@@ -6,7 +6,7 @@ using LinearAlgebra: Adjoint, Transpose, Symmetric
 using LinearAlgebra: TransposeAbsVec, AdjointAbsVec
 using LinearAlgebra: givens
 import LinearAlgebra
-using LinearMapsAA
+using LinearMapsAA: LinearMapAA
 using Test: @test, @testset, @test_throws
 
 

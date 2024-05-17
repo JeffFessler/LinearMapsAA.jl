@@ -340,7 +340,7 @@ Submit an issue or make a PR if there are other operator types
 that one would like to have supported.
 To minimize package dependencies,
 the wrapping code for a `LinearOperator` uses
-[Requires.jl](https://github.com/JuliaPackaging/Requires.jl).
+[package extensions](https://docs.julialang.org/en/v1/manual/code-loading/#man-extensions).
 
 
 ## Multiplication properties
