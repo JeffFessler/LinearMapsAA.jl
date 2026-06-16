@@ -447,6 +447,9 @@ without "separate" installation.
 [action-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/CI/badge.svg
 [action-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions
 
+[aqua-img]: https://juliatesting.github.io/Aqua.jl/dev/assets/badge.svg
+[aqua-url]: https://github.com/JuliaTesting/Aqua.jl
+
 [codecov-img]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg
 [codecov-url]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl
 
