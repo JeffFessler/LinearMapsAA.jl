@@ -2,13 +2,15 @@
 
 https://github.com/JeffFessler/LinearMapsAA.jl
 
-[![action status][action-img]][action-url]
-[![build status][build-img]][build-url]
-[![pkgeval status][pkgeval-img]][pkgeval-url]
-[![codecov.io][codecov-img]][codecov-url]
+[![docs-stable][docs-stable-img]][docs-stable-url]
+[![docs-dev][docs-dev-img]][docs-dev-url]
+[![action][action-img]][action-url]
+[![Aqua QA][aqua-img]][aqua-url]
+[![codecov][codecov-img]][codecov-url]
+[![deps][deps-img]][deps-url]
 [![license][license-img]][license-url]
-[![docs stable][docs-stable-img]][docs-stable-url]
-[![docs dev][docs-dev-img]][docs-dev-url]
+[![pkgeval][pkgeval-img]][pkgeval-url]
+[![version][ver-img]][ver-url]
 
 This package is an overlay for the package
 [`LinearMaps.jl`](https://github.com/Jutho/LinearMaps.jl)
@@ -421,6 +423,7 @@ from the `LinearMaps` package.
 * Version 0.6.0 assumes Julia 1.4
 * Version 0.7.0 assumes Julia 1.6
 * Version 0.11.0 assumes Julia 1.9
+* Tested with Julia 1.12
 
 
 ## Getting started
@@ -441,17 +444,25 @@ without "separate" installation.
 
 
 <!-- URLs -->
-[action-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/Unit%20test/badge.svg
+[action-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/CI/badge.svg
 [action-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions
-[build-img]: https://github.com/JeffFessler/LinearMapsAA.jl/workflows/CI/badge.svg?branch=main
-[build-url]: https://github.com/JeffFessler/LinearMapsAA.jl/actions?query=workflow%3ACI+branch%3Amain
-[pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LinearMapsAA.svg
-[pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LinearMapsAA.html
-[codecov-img]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg?branch=main
-[codecov-url]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl?branch=main
-[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://JeffFessler.github.io/LinearMapsAA.jl/stable
+
+[codecov-img]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl/coverage.svg
+[codecov-url]: https://codecov.io/github/JeffFessler/LinearMapsAA.jl
+
+[deps-img]: https://juliahub.com/docs/LinearMapsAA/deps.svg
+[deps-url]: https://juliahub.com/ui/Packages/LinearMapsAA
+
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: https://JeffFessler.github.io/LinearMapsAA.jl/dev
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://JeffFessler.github.io/LinearMapsAA.jl/stable
+
 [license-img]: https://img.shields.io/badge/license-MIT-brightgreen.svg
 [license-url]: LICENSE
+
+[pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LinearMapsAA.svg
+[pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/L/LinearMapsAA.html
+
+[ver-img]: https://juliahub.com/docs/LinearMapsAA/version.svg
+[ver-url]: https://juliahub.com/ui/Packages/LinearMapsAA
