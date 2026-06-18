@@ -206,12 +206,15 @@ In the spirit of such generality,
 this package overloads `*` for `LinearAlgebra.I`
 (and for `UniformScaling` objects more generally)
 such that
-`I * X == X`
+`I * X === X`
 even when `X` is an array of more than two dimensions.
 (The original `LinearAlgebra.I` can only multiply
 vectors and matrices,
 which suffices for matrix algebra,
 but not for general linear algebra.)
+This extension is "type piracy"
+and is necessary until `LinearAlgebra` itself is generalized.
+See [LinAlg issue](https://github.com/JuliaLang/LinearAlgebra.jl/issues/1656).
 
 Caution:
 The `LinearMapAM` type should be quite stable now,
@@ -374,7 +377,7 @@ For `left * right` multiplication the results are as follows.
 | `O` | `A` | `A` |
 | `A` | `O` | `A` |
 | `O` | `O` | `O` |
-| `I` | `A` | `A` |
+| `I` | `A` | `A` | See [LinAlg issue](https://github.com/JuliaLang/LinearAlgebra.jl/issues/1656)
 
 The following subset of the above operations also work
 for the in-place version `mul!(result, left, right)`:
