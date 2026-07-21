@@ -11,3 +11,4 @@ Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
 MIRTjim = "170b2178-6dee-4cb0-8729-b3e8b57834cc"
 
 [compat]
+LazyGrids = "1.1.0"
